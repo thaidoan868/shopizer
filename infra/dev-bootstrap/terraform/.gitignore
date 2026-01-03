@@ -1,0 +1,12 @@
+# Terraform working directory
+.terraform/
+
+# Terraform state
+*.tfstate
+*.tfstate.*
+
+# Terraform variable files (often contain secrets)
+*.tfvars
+
+# Terraform plan files
+*.tfplan

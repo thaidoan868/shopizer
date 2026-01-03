@@ -1,0 +1,58 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.5
+    command: ["start-dev"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "curl -fsS http://localhost:8080/health/ready >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  minio:
+    image: minio/minio:latest
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio12345
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "curl -fsS http://localhost:9000/minio/health/ready >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # ... postgres/kafka/elasticsearch/jaeger/prometheus here ...
+
+  bootstrap:
+    profiles: ["bootstrap"]
+    build:
+      context: ./infra/dev-bootstrap
+    environment:
+      # Keycloak
+      TF_VAR_KEYCLOAK_URL: http://keycloak:8080
+      TF_VAR_KEYCLOAK_ADMIN: admin
+      TF_VAR_KEYCLOAK_ADMIN_PASSWORD: admin
+      TF_VAR_BACKEND_CLIENT_SECRET: backendclientsecret
+      TF_VAR_DEFAULT_ADMIN_USERNAME: admin
+      TF_VAR_DEFAULT_ADMIN_PASSWORD: admin
+
+      # MinIO
+      TF_VAR_MINIO_ENDPOINT: http://minio:9000
+      TF_VAR_MINIO_ROOT_USER: minio
+      TF_VAR_MINIO_ROOT_PASSWORD: minio12345
+
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - /infra/dev-bootstrap/terraform:/work/terraform
+    working_dir: /work/terraform
