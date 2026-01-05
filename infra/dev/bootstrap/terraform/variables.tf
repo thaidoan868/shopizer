@@ -1,51 +1,49 @@
-variable "keycloak_url" {
+variable "KEYCLOAK_URL" {
   description = "Keycloak base URL, e.g. http://keycloak:8080"
   type        = string
 }
 
-variable "keycloak_admin_username" {
+variable "KEYCLOAK_ADMIN_USERNAME" {
   description = "Keycloak admin username (master realm)"
   type        = string
 }
 
-variable "keycloak_admin_password" {
+variable "KEYCLOAK_ADMIN_PASSWORD" {
   description = "Keycloak admin password (master realm)"
   type        = string
   sensitive   = true
 }
 
-variable "backend_client_secret" {
+variable "BACKEND_CLIENT_SECRET" {
   description = "Client secret for the backend confidential client"
   type        = string
   sensitive   = true
 }
 
-variable "default_admin_username" {
-  type    = string
+variable "DEFAULT_ADMIN_USERNAME" {
+  type = string
 }
 
-variable "default_admin_password" {
+variable "DEFAULT_ADMIN_PASSWORD" {
   type      = string
   sensitive = true
 }
 
-variable "minio_endpoint" {
+variable "MINIO_ENDPOINT" {
   description = "MinIO endpoint, e.g. http://minio:9000"
   type        = string
 }
 
-variable "minio_root_user" {
+variable "MINIO_ROOT_USER" {
   type    = string
-  default = "minio"
 }
 
-variable "minio_root_password" {
+variable "MINIO_ROOT_PASSWORD" {
   type      = string
   sensitive = true
-  default   = "minio12345"
 }
 
-variable "minio_bucket" {
+variable "MINIO_BUCKET" {
   description = "Default bucket to create"
   type        = string
   default     = "shopizer"

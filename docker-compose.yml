@@ -1,52 +1,226 @@
 services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.0.5
-    command: ["start-dev"]
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      POSTGRES_DB: shopizer
+      POSTGRES_USER: postgresadmin
+      POSTGRES_PASSWORD: adminpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "8080:8080"
+      - "5432:5432"
     healthcheck:
-      test: ["CMD", "bash", "-lc", "curl -fsS http://localhost:8080/health/ready >/dev/null"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [appnet]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: keycloak
+    command:
+      - start-dev
+      - --http-port=8081
+      - --http-management-port=8082
+      - --hostname-strict=false
+      - --proxy-headers=xforwarded
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/shopizer
+      KC_DB_USERNAME: postgresadmin
+      KC_DB_PASSWORD: adminpassword
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: adminpassword
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 2 bash -lc 'cat < /dev/null > /dev/tcp/127.0.0.1/8082'"]
+      interval: 10s
+      timeout: 5s
       retries: 30
+    networks: [appnet]
 
   minio:
     image: minio/minio:latest
-    command: ["server", "/data", "--console-address", ":9001"]
+    container_name: minio
+    command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: minio12345
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: adminpassword
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Console
+    volumes:
+      - minio_data:/data
     healthcheck:
-      test: ["CMD", "bash", "-lc", "curl -fsS http://localhost:9000/minio/health/ready >/dev/null"]
-      interval: 5s
-      timeout: 3s
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
       retries: 30
+    restart: unless-stopped
+    networks: [appnet]
 
-  # ... postgres/kafka/elasticsearch/jaeger/prometheus here ...
+  redpanda:
+    image: redpandadata/redpanda:v25.3.4
+    container_name: redpanda
+    command: >
+      redpanda start
+      --overprovisioned
+      --smp 1
+      --memory 1G
+      --reserve-memory 0M
+      --node-id 0
+      --check=false
+      --kafka-addr PLAINTEXT://0.0.0.0:9092
+      --advertise-kafka-addr PLAINTEXT://redpanda:9092
+    ports:
+      - "9092:9092"   # Kafka API
+      - "9644:9644"   # Admin / metrics
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    networks:
+      - appnet
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:9644/v1/status/ready || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
+#   Motoring
+
+
+  jaeger: # traces
+    image: jaegertracing/all-in-one:1.76.0
+    container_name: jaeger
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317"   # OTLP gRPC
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:16686/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    networks: [appnet]
+
+  prometheus: # metrics
+    image: prom/prometheus:v2.54.1
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/dev/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom_data:/prometheus
+    depends_on:
+      jaeger:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/-/ready >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    networks: [appnet]
+
+  # Logging
+  fluent-bit:
+    image: fluent/fluent-bit:3.1
+    container_name: fluent-bit
+    command: [ "-c", "/fluent-bit/etc/fluent-bit.conf" ]
+    volumes:
+      # Read Docker container logs (stdout/stderr)
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+
+      # Fluent Bit config
+      - ./infra/dev/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./infra/dev/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - fluentbit_tail_data:/fluent-bit/tail-db
+    environment:
+      - ES_HOST=elasticsearch
+      - ES_PORT=9200
+    restart: unless-stopped
+    networks: [appnet]
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    container_name: elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s" ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    networks: [ appnet ]
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.1
+    container_name: kibana
+
+    environment:
+      # Elasticsearch connection
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      # allow Kibana to safely store sensitive data inside Elasticsearch.
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: "b0b8f4c6e8c24b8f9f3d3f7d9a1c2e3f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d"
+
+      # Disable security for dev (REMOVE in prod)
+      XPACK_SECURITY_ENABLED: "false"
+
+      SERVER_NAME: kibana
+      SERVER_HOST: 0.0.0.0
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:5601/api/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+    ports:
+      - "5601:5601"
+    restart: unless-stopped
+
+    networks: [appnet]
+
+  # Boostrap
   bootstrap:
-    profiles: ["bootstrap"]
     build:
-      context: ./infra/dev-bootstrap
+      context: ./infra/dev/bootstrap
     environment:
       # Keycloak
-      TF_VAR_KEYCLOAK_URL: http://keycloak:8080
-      TF_VAR_KEYCLOAK_ADMIN: admin
-      TF_VAR_KEYCLOAK_ADMIN_PASSWORD: admin
+      TF_VAR_KEYCLOAK_URL: http://keycloak:8081
+      TF_VAR_KEYCLOAK_ADMIN_USERNAME: admin
+      TF_VAR_KEYCLOAK_ADMIN_PASSWORD: adminpassword
       TF_VAR_BACKEND_CLIENT_SECRET: backendclientsecret
       TF_VAR_DEFAULT_ADMIN_USERNAME: admin
       TF_VAR_DEFAULT_ADMIN_PASSWORD: admin
 
       # MinIO
       TF_VAR_MINIO_ENDPOINT: http://minio:9000
-      TF_VAR_MINIO_ROOT_USER: minio
-      TF_VAR_MINIO_ROOT_PASSWORD: minio12345
+      TF_VAR_MINIO_ROOT_USER: admin
+      TF_VAR_MINIO_ROOT_PASSWORD: adminpassword
 
     depends_on:
       keycloak:
@@ -54,5 +228,23 @@ services:
       minio:
         condition: service_healthy
     volumes:
-      - /infra/dev-bootstrap/terraform:/work/terraform
+      - terraform_data:/work/terraform
+      - ./infra/dev/bootstrap/terraform/main.tf:/work/terraform/main.tf:ro
+      - ./infra/dev/bootstrap/terraform/variables.tf:/work/terraform/variables.tf:ro
+
     working_dir: /work/terraform
+    networks: [appnet]
+
+
+networks:
+  appnet:
+
+volumes:
+  postgres_data:
+  minio_data:
+  redpanda_data:
+  es_data:
+  prom_data:
+  fluentbit_tail_data:
+  terraform_data:
+

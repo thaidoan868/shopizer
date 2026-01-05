@@ -11,11 +11,11 @@ terraform {
 
 # keycloak configuration
 provider "keycloak" {
-  url       = var.keycloak_url
+  url       = var.KEYCLOAK_URL
   realm     = "master"
   client_id = "admin-cli"
-  username  = var.keycloak_admin_username
-  password  = var.keycloak_admin_password
+  username  = var.KEYCLOAK_ADMIN_USERNAME
+  password  = var.KEYCLOAK_ADMIN_PASSWORD
 }
 
 resource "keycloak_realm" "shopizer" {
@@ -23,6 +23,7 @@ resource "keycloak_realm" "shopizer" {
   enabled = true
 }
 
+# user roles
 resource "keycloak_role" "customer" {
   realm_id = keycloak_realm.shopizer.id
   name     = "customer"
@@ -38,7 +39,7 @@ resource "keycloak_role" "admin" {
   name     = "admin"
 }
 
-
+# clients
 resource "keycloak_openid_client" "frontend" {
   realm_id  = keycloak_realm.shopizer.id
   client_id = "frontend"
@@ -46,7 +47,7 @@ resource "keycloak_openid_client" "frontend" {
 
   enabled                  = true
   access_type              = "PUBLIC"
-  standard_flow_enabled    = true
+  standard_flow_enabled    = false
   direct_access_grants_enabled = true
 }
 
@@ -57,21 +58,21 @@ resource "keycloak_openid_client" "backend" {
 
   enabled                  = true
   access_type              = "CONFIDENTIAL"
-  client_secret            = var.backend_client_secret
+  client_secret            = var.BACKEND_CLIENT_SECRET
   service_accounts_enabled = true
 
   standard_flow_enabled        = false
   direct_access_grants_enabled = false
 }
 
-
+# default user
 resource "keycloak_user" "default_admin" {
   realm_id  = keycloak_realm.shopizer.id
-  username  = var.default_admin_username
+  username  = var.DEFAULT_ADMIN_USERNAME
   enabled   = true
 
   initial_password {
-    value     = var.default_admin_password
+    value     = var.DEFAULT_ADMIN_USERNAME
     temporary = false
   }
 }
@@ -103,12 +104,12 @@ resource "keycloak_openid_client_service_account_role" "backend_service_account_
   service_account_user_id = keycloak_openid_client.backend.service_account_user_id
   role                    = local.backend_user_mgmt_roles[count.index]
 }
-
-# MinIO bootstrap via `mc`
+#
+# # MinIO bootstrap via `mc`
 resource "null_resource" "minio_bootstrap" {
   triggers = {
-    endpoint = var.minio_endpoint
-    bucket   = var.minio_bucket
+    endpoint = var.MINIO_ENDPOINT
+    bucket   = var.MINIO_BUCKET
   }
 
   provisioner "local-exec" {
@@ -117,10 +118,10 @@ resource "null_resource" "minio_bootstrap" {
       set -e
 
       # Expect `mc` to be available in the runtime (recommended: run terraform inside a bootstrap container that includes mc)
-      mc alias set local "${var.minio_endpoint}" "${var.minio_root_user}" "${var.minio_root_password}"
+      mc alias set local "${var.MINIO_ENDPOINT}" "${var.MINIO_ROOT_USER}" "${var.MINIO_ROOT_PASSWORD}"
 
       # Create bucket if not exists
-      mc mb -p "local/${var.minio_bucket}" || true
+      mc mb -p "local/${var.MINIO_BUCKET}" || true
     EOT
   }
 }
