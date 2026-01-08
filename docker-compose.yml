@@ -8,8 +8,6 @@ services:
       POSTGRES_PASSWORD: adminpassword
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -23,8 +21,8 @@ services:
     container_name: keycloak
     command:
       - start-dev
-      - --http-port=8081
-      - --http-management-port=8082
+      - --http-port=8080
+      - --http-management-port=9000
       - --hostname-strict=false
       - --proxy-headers=xforwarded
     environment:
@@ -37,14 +35,13 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
     ports:
-      - "8081:8081"
-      - "8082:8082"
+      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "timeout 2 bash -lc 'cat < /dev/null > /dev/tcp/127.0.0.1/8082'"]
+      test: ["CMD-SHELL", "timeout 2 bash -lc 'cat < /dev/null > /dev/tcp/127.0.0.1/9000'"]
       interval: 10s
       timeout: 5s
       retries: 30
@@ -59,7 +56,6 @@ services:
       MINIO_ROOT_PASSWORD: adminpassword
     ports:
       - "9000:9000"   # S3 API
-      - "9001:9001"   # Console
     volumes:
       - minio_data:/data
     healthcheck:
@@ -83,9 +79,6 @@ services:
       --check=false
       --kafka-addr PLAINTEXT://0.0.0.0:9092
       --advertise-kafka-addr PLAINTEXT://redpanda:9092
-    ports:
-      - "9092:9092"   # Kafka API
-      - "9644:9644"   # Admin / metrics
     volumes:
       - redpanda_data:/var/lib/redpanda/data
     networks:
@@ -104,8 +97,7 @@ services:
     image: jaegertracing/all-in-one:1.76.0
     container_name: jaeger
     ports:
-      - "16686:16686" # UI
-      - "4317:4317"   # OTLP gRPC
+      - "127.0.0.1:16686:16686" # UI
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
     healthcheck:
@@ -120,7 +112,7 @@ services:
     image: prom/prometheus:v2.54.1
     container_name: prometheus
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
     volumes:
       - ./infra/dev/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prom_data:/prometheus
@@ -199,7 +191,7 @@ services:
       start_period: 30s
 
     ports:
-      - "5601:5601"
+      - "127.0.0.1:5601:5601"
     restart: unless-stopped
 
     networks: [appnet]
@@ -210,7 +202,7 @@ services:
       context: ./infra/dev/bootstrap
     environment:
       # Keycloak
-      TF_VAR_KEYCLOAK_URL: http://keycloak:8081
+      TF_VAR_KEYCLOAK_URL: http://keycloak:8080
       TF_VAR_KEYCLOAK_ADMIN_USERNAME: admin
       TF_VAR_KEYCLOAK_ADMIN_PASSWORD: adminpassword
       TF_VAR_BACKEND_CLIENT_SECRET: backendclientsecret
