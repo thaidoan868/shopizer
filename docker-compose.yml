@@ -48,7 +48,7 @@ services:
     networks: [appnet]
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2025-07-23T15-54-02Z
     container_name: minio
     command: server /data --console-address ":9001"
     environment:
@@ -227,6 +227,24 @@ services:
     working_dir: /work/terraform
     networks: [appnet]
 
+# Microservices
+  config-server:
+    container_name: config-server
+    build:
+      context: .
+      dockerfile: shopizer-config-server/Dockerfile
+
+    image: shopizer/config-server:1.0.0
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+    restart: unless-stopped
+    networks:
+      - appnet
 
 networks:
   appnet:

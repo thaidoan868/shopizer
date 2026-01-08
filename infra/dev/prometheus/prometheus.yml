@@ -19,3 +19,9 @@ scrape_configs:
     static_configs:
       - targets:
           - jaeger:14269
+
+  - job_name: config-server
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - config-server:9000

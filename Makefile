@@ -11,3 +11,5 @@ restart:
 reset: # delete all volumes
 	docker compose down -v
 	docker compose up -d
+rebuild:
+	docker compose up -d --build
