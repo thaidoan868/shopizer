@@ -1,4 +1,4 @@
-# Ecommerce Shopizer 
+# E-commerce Shopizer 
 ## Overview
 Shopizer is a multi-tenant e-commerce platform allows merchants manage and sell their products. The application follows the microservices architecture designed for scalability and extensibility.
 
@@ -8,3 +8,12 @@ Shopizer is a multi-tenant e-commerce platform allows merchants manage and sell 
 - **Motoring:** Elasticsearch, jaeger, prometheus
 - **Messaging:** Kafka
 - **Services** Spring-based microservices
+
+## Run the project
+pre-required: Java 21 and docker
+
+```bash
+# infrastructure setup
+docker compose up -d    # bring all services up. It may take 15 minutes to build and run docker images
+docker compose --profile bootstrap run --rm bootstrap # boostrap configuration for the app
+```
