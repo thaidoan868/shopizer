@@ -98,6 +98,7 @@ services:
     container_name: jaeger
     ports:
       - "127.0.0.1:16686:16686" # UI
+      - "4318:4318"
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
     healthcheck:

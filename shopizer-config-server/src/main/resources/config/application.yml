@@ -10,4 +10,21 @@ management:
         include: health, prometheus
   endpoint:
     health:
-      show-details: always
+      show-details: never
+
+otel:
+  # send traces only
+  exporter:
+    otlp:
+      endpoint: http://jaeger:4317
+      protocol: grpc
+  metrics:
+    exporter: none
+  logs:
+    exporter: none
+  resource:
+    attributes:
+      service.name: shopizer
+  traces:
+    sampler: always_on
+    exporter: otlp

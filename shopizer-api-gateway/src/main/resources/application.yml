@@ -1,5 +1,30 @@
+server:
+  port: 8080
+
 spring:
   application:
-    name: gateway
-  config:
-    import: optional:configserver:http://config-server:80
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://user-service:8080
+          predicates:
+            - Path=/api/v*/users/**
+        - id: product-service
+          uri: http://product-service:8080
+          predicates:
+            - Path=/api/v*/products/**
+
+management:
+  server:
+    port: 9000
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health, prometheus
+  endpoint:
+    health:
+      show-details: always
