@@ -1,0 +1,46 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+  flyway:
+    enabled: false
+  # Security Configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/shopizer
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  server:
+    port: 9000
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health, prometheus
+  endpoint:
+    health:
+      show-details: always
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+
+# Documentation
+springdoc:
+  api-docs:
+    enabled: true

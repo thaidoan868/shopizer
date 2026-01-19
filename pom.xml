@@ -16,30 +16,31 @@
     </properties>
 
     <modules>
-        <module>shopizer-config-server</module>
         <module>shopizer-api-gateway</module>
 
         <module>shopizer-user-service</module>
-        <module>shopizer-email-service</module>
-        <module>shopizer-profile-service</module>
 
         <module>shopizer-common</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
-            <!-- OpenTelemetry BOM for consistent versions -->
-            <dependency>
-                <groupId>io.opentelemetry.instrumentation</groupId>
-                <artifactId>opentelemetry-instrumentation-bom</artifactId>
-                <version>2.22.0</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+
+            <!-- Spring Boot BOM (REAL VERSION) -->
+            <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>4.0.1</version>
+                <version>3.5.9</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Spring Cloud BOM compatible with Boot 3.2 -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2025.0.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
