@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.bussiness.constant;
+package vn.io.oldmoon.shopizer.user.infra.constant;
 
 import lombok.NoArgsConstructor;
 

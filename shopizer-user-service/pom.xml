@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>vn.io.oldmoon</groupId>
@@ -10,13 +10,14 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-	<artifactId>shopizer-user-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>shopizer-user-service</name>
-	<description>Demo project for Spring Boot</description>
+    <artifactId>shopizer-user-service</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>shopizer-user-service</name>
+    <description>Demo project for Spring Boot</description>
 
 
     <dependencies>
+        <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -26,13 +27,35 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-<!--        DATABASE -->
+        <!-- Security-->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
+            <version>26.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <!-- OAuth2 Resource Server (JWT validation) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+        <!-- Keycloak Client -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+
+
+        <!-- DATABASE -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!--        postgres-->
+        <!-- postgres-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -70,8 +93,8 @@
         </dependency>
 
 
-        <!--        MOTORING -->
-        <!--        Health and Metrics -->
+        <!-- MOTORING -->
+        <!-- Health and Metrics -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -88,7 +111,7 @@
             <version>9.0</version>
         </dependency>
 
-        <!--        Distributed tracing-->
+        <!-- Distributed tracing-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
@@ -106,8 +129,7 @@
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
-        <!--        Documentation-->
-        <!-- Source: https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
+        <!-- Documentation-->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -115,7 +137,7 @@
             <scope>compile</scope>
         </dependency>
 
-<!--        TESTING -->
+        <!-- TESTING -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

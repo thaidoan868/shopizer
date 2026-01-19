@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
 
 cloud:
   gateway:
@@ -8,10 +8,12 @@ cloud:
         uri: http://user-service:8080
         predicates:
           - Path=/api/v*/users/**
-      - id: product-service
-        uri: http://product-service:8080
+      - id: access-token
+        uri: http://keycloak:8080
         predicates:
-          - Path=/api/v*/products/**
+          - Path=/api/access-token
+        filters:
+          - SetPath=/realms/shopizer/protocol/openid-connect/token
 management:
   server:
-    port: 9001
+    port: 9000

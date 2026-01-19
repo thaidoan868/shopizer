@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import vn.io.oldmoon.shopizer.user.bussiness.constant.Header;
+import vn.io.oldmoon.shopizer.user.infra.constant.Header;
 
 import java.io.IOException;
 

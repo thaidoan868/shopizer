@@ -45,9 +45,9 @@ resource "keycloak_openid_client" "frontend" {
   client_id = "frontend"
   name      = "Frontend"
 
-  enabled                  = true
-  access_type              = "PUBLIC"
-  standard_flow_enabled    = false
+  enabled                      = true
+  access_type                  = "PUBLIC"
+  standard_flow_enabled        = false
   direct_access_grants_enabled = true
 }
 
@@ -67,9 +67,11 @@ resource "keycloak_openid_client" "backend" {
 
 # default user
 resource "keycloak_user" "default_admin" {
-  realm_id  = keycloak_realm.shopizer.id
-  username  = var.DEFAULT_ADMIN_USERNAME
-  enabled   = true
+  realm_id   = keycloak_realm.shopizer.id
+  username   = var.DEFAULT_ADMIN_USERNAME
+  first_name = "Alice"
+  last_name  = "Queen"
+  enabled    = true
 
   initial_password {
     value     = var.DEFAULT_ADMIN_USERNAME
@@ -114,7 +116,7 @@ resource "null_resource" "minio_bootstrap" {
 
   provisioner "local-exec" {
     interpreter = ["/bin/sh", "-lc"]
-    command = <<-EOT
+    command     = <<-EOT
       set -e
 
       # Expect `mc` to be available in the runtime (recommended: run terraform inside a bootstrap container that includes mc)

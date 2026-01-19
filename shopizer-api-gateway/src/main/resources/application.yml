@@ -9,13 +9,16 @@ spring:
     gateway:
       routes:
         - id: user-service
-          uri: http://localhost:8080
+          uri: http://localhost:8082
           predicates:
             - Path=/api/v*/users/**
-        - id: product-service
-          uri: http://product-service:8080
+        - id: access-token
+          uri: http://localhost:8080
           predicates:
-            - Path=/api/v*/products/**
+            - Path=/api/access-token
+          filters:
+            - SetPath=/realms/shopizer/protocol/openid-connect/token
+
 
 management:
   server:
