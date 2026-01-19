@@ -72,6 +72,7 @@ resource "keycloak_user" "default_admin" {
   first_name = "Alice"
   last_name  = "Queen"
   enabled    = true
+  email      = "alice@gmail.com"
 
   initial_password {
     value     = var.DEFAULT_ADMIN_USERNAME

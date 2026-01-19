@@ -15,6 +15,8 @@ services:
       retries: 20
     restart: unless-stopped
     networks: [ appnet ]
+    ports:
+      - "5432:5432"
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
@@ -35,7 +37,7 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
     ports:
-      - "8080:8080"
+      - "8888:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -228,7 +230,57 @@ services:
     working_dir: /work/terraform
     networks: [ appnet ]
 
-# Microservices
+  # Microservices
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: .
+      dockerfile: shopizer-api-gateway/Dockerfile
+
+    image: shopizer/api-gateway:1.0.0
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - appnet
+
+  user-service:
+    container_name: user-service
+    build:
+      context: .
+      dockerfile: shopizer-user-service/Dockerfile
+
+    image: shopizer/user-service:1.0.0
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+
+    restart: unless-stopped
+    networks:
+      - appnet
 
 networks:
   appnet:

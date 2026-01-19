@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>vn.io.oldmoon</groupId>
@@ -10,20 +10,18 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-	<artifactId>shopizer-api-gateway</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>shopizer-api-gateway</name>
-	<description>Demo project for Spring Boot</description>
+    <artifactId>shopizer-api-gateway</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>shopizer-api-gateway</name>
+    <description>Demo project for Spring Boot</description>
     <packaging>jar</packaging>
 
-	<dependencies>
+    <dependencies>
         <!-- Spring Cloud Gateway -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
+            <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
         </dependency>
-        <!--        Monitoring-->
-
         <!--        Health and Metrics -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -33,13 +31,13 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
-	</dependencies>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
@@ -47,8 +45,8 @@
                         </goals>
                     </execution>
                 </executions>
-			</plugin>
-		</plugins>
-	</build>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

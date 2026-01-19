@@ -5,7 +5,7 @@ WORKDIR /workspace
 
 COPY . /workspace
 
-RUN mvn -q -DskipTests -pl shopizer-api-gateway -am clean package
+RUN mvn -q -DskipTests -pl shopizer-user-service -am clean package
 
 # ---- run ----
 FROM eclipse-temurin:21-jre-jammy
@@ -18,7 +18,7 @@ RUN apt-get update \
 RUN useradd -r -u 10001 appuser
 USER appuser
 
-COPY --from=build /workspace/shopizer-api-gateway/target/*.jar /app/app.jar
+COPY --from=build /workspace/shopizer-user-service/target/*.jar /app/app.jar
 
 EXPOSE 8080 9000
 ENTRYPOINT ["java","-jar","/app/app.jar"]

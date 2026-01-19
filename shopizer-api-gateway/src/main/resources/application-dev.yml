@@ -1,19 +1,23 @@
 server:
   port: 8080
 
-cloud:
-  gateway:
-    routes:
-      - id: user-service
-        uri: http://user-service:8080
-        predicates:
-          - Path=/api/v*/users/**
-      - id: access-token
-        uri: http://keycloak:8080
-        predicates:
-          - Path=/api/access-token
-        filters:
-          - SetPath=/realms/shopizer/protocol/openid-connect/token
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: http://user-service:8080
+              predicates:
+                - Path=/api/v*/users/**
+
+            - id: access-token
+              uri: http://keycloak:8080
+              predicates:
+                - Path=/api/access-token
+              filters:
+                - SetPath=/realms/shopizer/protocol/openid-connect/token
 management:
   server:
     port: 9000
