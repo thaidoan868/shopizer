@@ -14,12 +14,13 @@ import reactor.core.publisher.Mono;
 @Component
 public class CorrelationIdFilter implements GlobalFilter, Ordered {
 
-    private static final String HEADER = "X-Correlation-ID";
+    private static final String HEADER = "X-Correlation-Id";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         String cid = UUID.randomUUID().toString();
+        System.out.println("CorrelationId: " + cid);
 
         return chain.filter(exchange.mutate()
                 .request(r -> r.headers(h -> h.set(HEADER, cid)))
