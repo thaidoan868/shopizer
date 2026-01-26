@@ -44,3 +44,8 @@ management:
 springdoc:
   api-docs:
     enabled: true
+
+logging:
+  level:
+    root: INFO
+    vn.io.oldmoon.shopizer: TRACE
