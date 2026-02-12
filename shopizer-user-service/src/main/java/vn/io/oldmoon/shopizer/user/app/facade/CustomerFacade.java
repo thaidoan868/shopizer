@@ -31,7 +31,7 @@ public class CustomerFacade {
         keycloakService.resetPassword(userId, persistableCustomer.getPassword());
 
         // tokenService.generateCode()
-        // token(userId, email, code, expiresAt, type=EMAIL_VERIFICATION)
+        // tokenService.create(userId, email, code, expiresAt, type=EMAIL_VERIFICATION)
         // async
         //      customerService.create(profile)
         //      tokenService.create(token)
