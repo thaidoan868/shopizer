@@ -28,7 +28,7 @@ public class CustomerFacade {
 
         String userId = keycloakService.create(userRep);
         userRep.setId(userId);
-        // ketcloakService.resetPassword(persistableCustomer.getPassword())
+        keycloakService.resetPassword(userId, persistableCustomer.getPassword());
 
         // tokenService.generateCode()
         // token(userId, email, code, expiresAt, type=EMAIL_VERIFICATION)
