@@ -9,13 +9,18 @@ spring:
     password: adminpassword
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    open-in-view: false
     hibernate:
       ddl-auto: validate
-    show-sql: false
     properties:
-      hibernate:
-        format_sql: true
+      hibernate.jdbc.time_zone: UTC
+      hibernate.format_sql: true
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      javax:
+        persistence:
+          validation:
+            mode: auto
 
   flyway:
     enabled: true
@@ -36,3 +41,10 @@ management:
   otlp:
     tracing:
       endpoint: http://jaeger:4318/v1/traces
+
+keycloak:
+  server-url: http://localhost:8080
+
+  realm: shopizer
+  client-id: backend
+  client-secret: APYtOv32HuVupfco6m0ltbf0RcXp1atx

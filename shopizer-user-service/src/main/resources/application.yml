@@ -12,7 +12,12 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: none
+      ddl-auto: auto
+    properties:
+      javax:
+        persistence:
+          validation:
+            mode: auto
   flyway:
     enabled: false
   # Security Configuration
@@ -20,7 +25,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/shopizer
+          jwk-set-uri: http://localhost:8080/realms/shopizer/protocol/openid-connect/certs
 
 management:
   tracing:
@@ -44,8 +49,16 @@ management:
 springdoc:
   api-docs:
     enabled: true
+    path: /v3/api-docs
 
 logging:
   level:
     root: INFO
     vn.io.oldmoon.shopizer: TRACE
+
+keycloak:
+  server-url: http://localhost:8080
+
+  realm: shopizer
+  client-id: backend
+  client-secret: APYtOv32HuVupfco6m0ltbf0RcXp1atx
