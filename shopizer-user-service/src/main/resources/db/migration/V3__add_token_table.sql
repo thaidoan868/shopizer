@@ -3,6 +3,7 @@ CREATE TABLE token(
     UUID        userId,
     email       VARCHAR(100) NOT NULL,
     code        VARCHAR(20) NOT NULL,
+    type        VARCHAR(20) NOT NULL,
     expires_at  TIMESTAMPTZ NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL
 );

@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
-import vn.io.oldmoon.shopizer.user.infra.constant.Gender;
-import vn.io.oldmoon.shopizer.user.infra.constant.Language;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
 
 import java.time.LocalDate;
 

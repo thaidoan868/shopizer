@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.infra.constant;
+package vn.io.oldmoon.shopizer.user.infra.data.constant;
 
 public enum KeycloakRequiredAction {
     VERIFY_EMAIL

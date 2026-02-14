@@ -6,8 +6,10 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUser;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.PersistableCustomer;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.KeycloakRequiredAction;
 import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -18,12 +20,16 @@ public class CustomerPopulator {
     private final CustomerMapper customerMapper;
 
     public UserRepresentation toUserRep(PersistableCustomer persistableCustomer) {
+        List<String> requiredActions = List.of(KeycloakRequiredAction.VERIFY_EMAIL.toString());
         UserRepresentation userRep = customerMapper.toUserRep(persistableCustomer);
         userRep.setEnabled(true);
         userRep.setEmailVerified(false);
+        userRep.setRequiredActions(requiredActions);
+
         log.debug(
-                "Converted PersistableCustomer to UserRepresentation, username={}",
-                persistableCustomer.getUsername()
+                "Converted PersistableCustomer to UserRepresentation, username={}, required actions: {}",
+                userRep.getUsername(),
+                requiredActions
         );
         return userRep;
     }

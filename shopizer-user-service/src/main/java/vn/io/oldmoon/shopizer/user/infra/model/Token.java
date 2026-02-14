@@ -1,6 +1,8 @@
 package vn.io.oldmoon.shopizer.user.infra.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.TokenType;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -32,6 +35,10 @@ public class Token {
 
     @NotNull
     private String code;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private TokenType type;
 
     @NotNull
     private Instant expiresAt;

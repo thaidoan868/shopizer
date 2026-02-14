@@ -26,15 +26,19 @@ public class TokenService {
 
     @Transactional
     public Token create(Token token) {
-        return tokenRepo.save(token);
+        Token createdToken = tokenRepo.save(token);
+        log.info("Token created: tokenId={}", createdToken.getId());
+        return createdToken;
     }
 
     public Token get(String email, String code) {
-        return tokenRepo.findFirstByEmailAndCodeAndExpiresAtAfter(email, code, Instant.now()).orElseThrow(() ->
+        Token token = tokenRepo.findFirstByEmailAndCodeAndExpiresAtAfter(email, code, Instant.now()).orElseThrow(() ->
                 new BusinessException(
                         ErrorCode.NOT_FOUND,
                         "Token with email '%s' and code '%s' not found'".formatted(email, code)
                 )
         );
+        log.info("Token fetched: tokenId={}", token.getId());
+        return token;
     }
 }

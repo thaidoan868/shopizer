@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
-import vn.io.oldmoon.shopizer.user.infra.constant.Gender;
-import vn.io.oldmoon.shopizer.user.infra.constant.Language;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -69,4 +69,8 @@ public class CustomerProfile {
 
     @UpdateTimestamp
     private Instant updatedAt;
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 }
