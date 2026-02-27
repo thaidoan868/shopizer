@@ -1,9 +1,10 @@
 CREATE TABLE token(
     id          UUID PRIMARY KEY,
-    UUID        userId,
+    user_id     UUID,
+    username    VARCHAR(200) NOT NULL,
     email       VARCHAR(100) NOT NULL,
     code        VARCHAR(20) NOT NULL,
-    type        VARCHAR(20) NOT NULL,
+    type        VARCHAR(30) NOT NULL,
     expires_at  TIMESTAMPTZ NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL
 );

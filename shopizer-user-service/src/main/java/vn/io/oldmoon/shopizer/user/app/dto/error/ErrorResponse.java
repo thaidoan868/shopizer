@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.app.dto;
+package vn.io.oldmoon.shopizer.user.app.dto.error;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

@@ -3,7 +3,7 @@ package vn.io.oldmoon.shopizer.user.app.populator.customer;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUser;
+import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUserResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.PersistableCustomer;
 import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
 
@@ -14,6 +14,6 @@ public interface CustomerMapper {
     CustomerProfile toProfile(PersistableCustomer persistableCustomer);
 
     @Mapping(target = "id", ignore = true)
-    CreatedUser toCreatedUser(UserRepresentation userRep);
+    CreatedUserResponse toCreatedUser(UserRepresentation userRep);
 }
 

@@ -3,7 +3,7 @@ package vn.io.oldmoon.shopizer.user.app.populator.user;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUser;
+import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUserResponse;
 
 import java.util.UUID;
 
@@ -12,12 +12,12 @@ import java.util.UUID;
 public class UserPopulator {
     private final UserMapper userMapper;
 
-    public CreatedUser toCreatedUser(UserRepresentation user) {
-        CreatedUser createdUser = userMapper.toCreatedUser(user);
+    public CreatedUserResponse toCreatedUser(UserRepresentation user) {
+        CreatedUserResponse createdUserResponse = userMapper.toCreatedUser(user);
         String id = user.getId();
         if (id != null && !id.isBlank()) {
-            createdUser.setId(UUID.fromString(user.getId()));
+            createdUserResponse.setId(UUID.fromString(user.getId()));
         }
-        return createdUser;
+        return createdUserResponse;
     }
 }

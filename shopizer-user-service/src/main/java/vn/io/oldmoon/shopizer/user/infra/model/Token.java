@@ -6,8 +6,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,16 +17,17 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class Token {
+
     @Id
     @UuidGenerator
     private UUID id;
 
-    @NotNull
     private UUID userId;
+
+    @NotBlank
+    private String username;
 
     @NotBlank
     private String email;
@@ -45,4 +44,11 @@ public class Token {
 
     @CreationTimestamp
     private Instant createdAt;
+
+    public Token(String username, String email, String code, TokenType type) {
+        this.username = username;
+        this.email = email;
+        this.code = code;
+        this.type = type;
+    }
 }

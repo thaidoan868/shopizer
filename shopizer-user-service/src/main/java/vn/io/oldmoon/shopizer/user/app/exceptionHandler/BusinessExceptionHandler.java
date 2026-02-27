@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import vn.io.oldmoon.shopizer.user.app.dto.ErrorResponse;
+import vn.io.oldmoon.shopizer.user.app.dto.error.ErrorResponse;
 import vn.io.oldmoon.shopizer.user.bussiness.exception.BusinessException;
 import vn.io.oldmoon.shopizer.user.bussiness.exception.ErrorCode;
 

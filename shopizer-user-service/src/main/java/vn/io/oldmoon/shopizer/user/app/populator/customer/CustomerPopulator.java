@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUser;
+import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUserResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.PersistableCustomer;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.KeycloakRequiredAction;
 import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
@@ -43,14 +43,14 @@ public class CustomerPopulator {
         return result;
     }
 
-    public CreatedUser toCreatedUser(UserRepresentation userRep) {
-        CreatedUser createdUser = customerMapper.toCreatedUser(userRep);
-        createdUser.setId(UUID.fromString(userRep.getId()));
+    public CreatedUserResponse toCreatedUser(UserRepresentation userRep) {
+        CreatedUserResponse createdUserResponse = customerMapper.toCreatedUser(userRep);
+        createdUserResponse.setId(UUID.fromString(userRep.getId()));
         log.debug(
                 "Converted UserRepresentation to CreatedUser, userid={}",
                 userRep.getId()
         );
-        return createdUser;
+        return createdUserResponse;
     }
 
 

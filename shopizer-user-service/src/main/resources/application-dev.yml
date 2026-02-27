@@ -1,9 +1,9 @@
 server:
-  port: 8080
+  port: 8082
 
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/shopizer
+    url: jdbc:postgresql://localhost:5432/shopizer_user_service
     driver-class-name: org.postgresql.Driver
     username: postgresadmin
     password: adminpassword
@@ -34,17 +34,10 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/shopizer
+          issuer-uri: http://localhost:8080/realms/shopizer
 management:
   server:
-    port: 9000
-  otlp:
-    tracing:
-      endpoint: http://jaeger:4318/v1/traces
-
-keycloak:
-  server-url: http://localhost:8080
-
-  realm: shopizer
-  client-id: backend
-  client-secret: APYtOv32HuVupfco6m0ltbf0RcXp1atx
+    port: 9100
+#  otlp:
+#    tracing:
+#      endpoint: http://jaeger:4318/v1/traces

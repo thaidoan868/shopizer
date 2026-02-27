@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import vn.io.oldmoon.shopizer.user.app.config.SecurityConfig;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.PersistableCustomer;
+import vn.io.oldmoon.shopizer.user.app.facade.CustomerFacade;
+import vn.io.oldmoon.shopizer.user.app.facade.UserFacade;
 import vn.io.oldmoon.shopizer.user.bussiness.exception.ErrorCode;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -18,11 +21,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest
 @Import(SecurityConfig.class) // <-- your class name
-class UserManagementControllerTest {
+class CustomerManagementControllerTest {
     @Autowired
     MockMvc mockMvc;
+
     @Autowired
     ObjectMapper objectMapper;
+
+    @MockitoBean
+    CustomerFacade customerFacade;
+
+    @MockitoBean
+    UserFacade userFacade;
 
     @Test
     void shouldReturnProperErrorResponse() throws Exception {

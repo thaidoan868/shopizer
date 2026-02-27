@@ -12,7 +12,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: auto
+      ddl-auto: create-drop
     properties:
       javax:
         persistence:
@@ -32,16 +32,16 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: "your-email@gmail.com"
-    from-display-name: "Hogwarts Forum"
+    from-display-name: "Shopizer Agent"
     password: "app-password"
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
 management:
-  tracing:
-    sampling:
-      probability: 1.0
+  #  tracing:
+  #    sampling:
+  #      probability: 1.0
   server:
     port: 9000
   endpoints:
@@ -52,9 +52,9 @@ management:
   endpoint:
     health:
       show-details: always
-  otlp:
-    tracing:
-      endpoint: http://localhost:4318/v1/traces
+#  otlp:
+#    tracing:
+#      endpoint: http://localhost:4318/v1/traces
 
 # Documentation
 springdoc:
@@ -69,7 +69,10 @@ logging:
 
 keycloak:
   server-url: http://localhost:8080
-
   realm: shopizer
   client-id: backend
-  client-secret: APYtOv32HuVupfco6m0ltbf0RcXp1atx
+  client-secret: backendclientsecret
+
+# application setting
+application:
+  token-expiration: 15m

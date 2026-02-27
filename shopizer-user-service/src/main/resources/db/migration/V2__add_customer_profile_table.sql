@@ -13,9 +13,7 @@ CREATE TABLE customer_profile(
     language VARCHAR(5) NOT NULL,
     phone_number VARCHAR(20) NOT NULL,
     address VARCHAR(300) NOT NULL,
-    avatar_original_url  VARCHAR(300),
-    avatar_medium_url    VARCHAR(300),
-    avatar_thumbnail_url    VARCHAR(300),
+    avatar_meta JSONB,
 
     CONSTRAINT uq_profile_user_id UNIQUE (user_id)
 );

@@ -6,12 +6,12 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class CreatedUser {
+public class CreatedUserResponse {
     @Schema(example = "550e8400-e29b-41d4-a716-446655440000")
     private UUID id;
 
     @Schema(example = "aliceambrason1782")
-    private String userName;
+    private String username;
 
     @Schema(example = "alice1782@domain.com")
     private String email;

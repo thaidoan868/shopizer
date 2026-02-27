@@ -9,7 +9,7 @@ import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import vn.io.oldmoon.shopizer.user.app.dto.ErrorResponse;
+import vn.io.oldmoon.shopizer.user.app.dto.error.ErrorResponse;
 import vn.io.oldmoon.shopizer.user.bussiness.exception.ErrorCode;
 
 @RestControllerAdvice

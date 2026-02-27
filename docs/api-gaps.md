@@ -6,3 +6,8 @@
   If the email doesn't exist, it will cause many problems.
 - A user can create a weak password
 - There is no log in attempt limit
+
+## reliability
+
+- No audit
+- No capcha
