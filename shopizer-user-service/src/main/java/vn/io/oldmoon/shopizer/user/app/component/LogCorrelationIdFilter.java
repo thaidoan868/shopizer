@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import vn.io.oldmoon.shopizer.user.infra.constant.Header;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.Header;
 
 import java.io.IOException;
 

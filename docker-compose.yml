@@ -37,7 +37,7 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
     ports:
-      - "8888:8080"
+      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -68,136 +68,136 @@ services:
     restart: unless-stopped
     networks: [ appnet ]
 
-  redpanda:
-    image: redpandadata/redpanda:v25.3.4
-    container_name: redpanda
-    command: >
-      redpanda start
-      --overprovisioned
-      --smp 1
-      --memory 1G
-      --reserve-memory 0M
-      --node-id 0
-      --check=false
-      --kafka-addr PLAINTEXT://0.0.0.0:9092
-      --advertise-kafka-addr PLAINTEXT://redpanda:9092
-    volumes:
-      - redpanda_data:/var/lib/redpanda/data
-    networks:
-      - appnet
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:9644/v1/status/ready || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-
-  #   Motoring
-
-
-  jaeger: # traces
-    image: jaegertracing/all-in-one:1.76.0
-    container_name: jaeger
-    ports:
-      - "127.0.0.1:16686:16686" # UI
-      - "4318:4318"
-    environment:
-      COLLECTOR_OTLP_ENABLED: "true"
-    healthcheck:
-      test: [ "CMD-SHELL", "wget -qO- http://localhost:16686/ >/dev/null 2>&1 || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-    restart: unless-stopped
-    networks: [ appnet ]
-
-  prometheus: # metrics
-    image: prom/prometheus:v2.54.1
-    container_name: prometheus
-    ports:
-      - "127.0.0.1:9090:9090"
-    volumes:
-      - ./infra/dev/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prom_data:/prometheus
-    depends_on:
-      jaeger:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "wget -qO- http://localhost:9090/-/ready >/dev/null 2>&1 || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-    restart: unless-stopped
-    networks: [ appnet ]
-
-  # Logging
-  fluent-bit:
-    image: fluent/fluent-bit:3.1
-    container_name: fluent-bit
-    command: [ "-c", "/fluent-bit/etc/fluent-bit.conf" ]
-    volumes:
-      # Read Docker container logs (stdout/stderr)
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-
-      # Fluent Bit config
-      - ./infra/dev/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
-      - ./infra/dev/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
-      - fluentbit_tail_data:/fluent-bit/tail-db
-    environment:
-      - ES_HOST=elasticsearch
-      - ES_PORT=9200
-    restart: unless-stopped
-    networks: [ appnet ]
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
-    container_name: elasticsearch
-    environment:
-      discovery.type: single-node
-      xpack.security.enabled: "false"
-      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s" ]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-    restart: unless-stopped
-    networks: [ appnet ]
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.11.1
-    container_name: kibana
-
-    environment:
-      # Elasticsearch connection
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-      # allow Kibana to safely store sensitive data inside Elasticsearch.
-      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: "b0b8f4c6e8c24b8f9f3d3f7d9a1c2e3f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d"
-
-      # Disable security for dev (REMOVE in prod)
-      XPACK_SECURITY_ENABLED: "false"
-
-      SERVER_NAME: kibana
-      SERVER_HOST: 0.0.0.0
-
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -fs http://localhost:5601/api/status" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-
-    ports:
-      - "127.0.0.1:5601:5601"
-    restart: unless-stopped
-
-    networks: [ appnet ]
+  #  redpanda:
+  #    image: redpandadata/redpanda:v25.3.4
+  #    container_name: redpanda
+  #    command: >
+  #      redpanda start
+  #      --overprovisioned
+  #      --smp 1
+  #      --memory 1G
+  #      --reserve-memory 0M
+  #      --node-id 0
+  #      --check=false
+  #      --kafka-addr PLAINTEXT://0.0.0.0:9092
+  #      --advertise-kafka-addr PLAINTEXT://redpanda:9092
+  #    volumes:
+  #      - redpanda_data:/var/lib/redpanda/data
+  #    networks:
+  #      - appnet
+  #    restart: unless-stopped
+  #    healthcheck:
+  #      test: [ "CMD-SHELL", "curl -fsS http://localhost:9644/v1/status/ready || exit 1" ]
+  #      interval: 10s
+  #      timeout: 5s
+  #      retries: 12
+  #
+  #  #   Motoring
+  #
+  #
+  #  jaeger: # traces
+  #    image: jaegertracing/all-in-one:1.76.0
+  #    container_name: jaeger
+  #    ports:
+  #      - "127.0.0.1:16686:16686" # UI
+  #      - "4318:4318"
+  #    environment:
+  #      COLLECTOR_OTLP_ENABLED: "true"
+  #    healthcheck:
+  #      test: [ "CMD-SHELL", "wget -qO- http://localhost:16686/ >/dev/null 2>&1 || exit 1" ]
+  #      interval: 10s
+  #      timeout: 5s
+  #      retries: 30
+  #    restart: unless-stopped
+  #    networks: [ appnet ]
+  #
+  #  prometheus: # metrics
+  #    image: prom/prometheus:v2.54.1
+  #    container_name: prometheus
+  #    ports:
+  #      - "127.0.0.1:9090:9090"
+  #    volumes:
+  #      - ./infra/dev/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  #      - prom_data:/prometheus
+  #    depends_on:
+  #      jaeger:
+  #        condition: service_healthy
+  #    healthcheck:
+  #      test: [ "CMD-SHELL", "wget -qO- http://localhost:9090/-/ready >/dev/null 2>&1 || exit 1" ]
+  #      interval: 10s
+  #      timeout: 5s
+  #      retries: 30
+  #    restart: unless-stopped
+  #    networks: [ appnet ]
+  #
+  #  # Logging
+  #  fluent-bit:
+  #    image: fluent/fluent-bit:3.1
+  #    container_name: fluent-bit
+  #    command: [ "-c", "/fluent-bit/etc/fluent-bit.conf" ]
+  #    volumes:
+  #      # Read Docker container logs (stdout/stderr)
+  #      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  #
+  #      # Fluent Bit config
+  #      - ./infra/dev/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+  #      - ./infra/dev/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+  #      - fluentbit_tail_data:/fluent-bit/tail-db
+  #    environment:
+  #      - ES_HOST=elasticsearch
+  #      - ES_PORT=9200
+  #    restart: unless-stopped
+  #    networks: [ appnet ]
+  #
+  #  elasticsearch:
+  #    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+  #    container_name: elasticsearch
+  #    environment:
+  #      discovery.type: single-node
+  #      xpack.security.enabled: "false"
+  #      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+  #    volumes:
+  #      - es_data:/usr/share/elasticsearch/data
+  #    ulimits:
+  #      memlock:
+  #        soft: -1
+  #        hard: -1
+  #    healthcheck:
+  #      test: [ "CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s" ]
+  #      interval: 10s
+  #      timeout: 5s
+  #      retries: 30
+  #    restart: unless-stopped
+  #    networks: [ appnet ]
+  #
+  #  kibana:
+  #    image: docker.elastic.co/kibana/kibana:8.11.1
+  #    container_name: kibana
+  #
+  #    environment:
+  #      # Elasticsearch connection
+  #      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+  #      # allow Kibana to safely store sensitive data inside Elasticsearch.
+  #      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: "b0b8f4c6e8c24b8f9f3d3f7d9a1c2e3f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d"
+  #
+  #      # Disable security for dev (REMOVE in prod)
+  #      XPACK_SECURITY_ENABLED: "false"
+  #
+  #      SERVER_NAME: kibana
+  #      SERVER_HOST: 0.0.0.0
+  #
+  #    healthcheck:
+  #      test: [ "CMD-SHELL", "curl -fs http://localhost:5601/api/status" ]
+  #      interval: 10s
+  #      timeout: 5s
+  #      retries: 10
+  #      start_period: 30s
+  #
+  #    ports:
+  #      - "127.0.0.1:5601:5601"
+  #    restart: unless-stopped
+  #
+  #    networks: [ appnet ]
 
   # Boostrap
   bootstrap:
@@ -231,56 +231,56 @@ services:
     networks: [ appnet ]
 
   # Microservices
-  api-gateway:
-    container_name: api-gateway
-    build:
-      context: .
-      dockerfile: shopizer-api-gateway/Dockerfile
+#  api-gateway:
+#    container_name: api-gateway
+#    build:
+#      context: .
+#      dockerfile: shopizer-api-gateway/Dockerfile
+#
+#    image: shopizer/api-gateway:1.0.0
+#
+#    environment:
+#      SPRING_PROFILES_ACTIVE: dev
+#
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:9000/actuator/health" ]
+#      interval: 30s
+#      timeout: 5s
+#      retries: 5
+#
+#    restart: unless-stopped
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - appnet
 
-    image: shopizer/api-gateway:1.0.0
-
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/actuator/health" ]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    networks:
-      - appnet
-
-  user-service:
-    container_name: user-service
-    build:
-      context: .
-      dockerfile: shopizer-user-service/Dockerfile
-
-    image: shopizer/user-service:1.0.0
-
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
-
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/actuator/health" ]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-
-    depends_on:
-      keycloak:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-
-
-    restart: unless-stopped
-    networks:
-      - appnet
+#  user-service:
+#    container_name: user-service
+#    build:
+#      context: .
+#      dockerfile: shopizer-user-service/Dockerfile
+#
+#    image: shopizer/user-service:1.0.0
+#
+#    environment:
+#      SPRING_PROFILES_ACTIVE: dev
+#
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:9000/actuator/health" ]
+#      interval: 30s
+#      timeout: 5s
+#      retries: 5
+#
+#    depends_on:
+#      keycloak:
+#        condition: service_healthy
+#      postgres:
+#        condition: service_healthy
+#
+#
+#    restart: unless-stopped
+#    networks:
+#      - appnet
 
 networks:
   appnet:

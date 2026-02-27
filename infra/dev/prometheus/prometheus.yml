@@ -12,7 +12,7 @@ scrape_configs:
     metrics_path: /metrics
     static_configs:
       - targets:
-            - keycloak:9000
+          - keycloak:9000
 
   - job_name: jaeger
     metrics_path: /metrics
@@ -20,8 +20,14 @@ scrape_configs:
       - targets:
           - jaeger:14269
 
-  - job_name: config-server
+  - job_name: api-gateway
     metrics_path: /actuator/prometheus
     static_configs:
       - targets:
-          - config-server:9000
+          - api-gateway:9000
+
+  - job_name: user-service
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - user-service:9000

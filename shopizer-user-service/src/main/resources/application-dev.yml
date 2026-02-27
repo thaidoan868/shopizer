@@ -1,21 +1,26 @@
 server:
-  port: 8080
+  port: 8082
 
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/shopizer
+    url: jdbc:postgresql://localhost:5432/shopizer_user_service
     driver-class-name: org.postgresql.Driver
     username: postgresadmin
     password: adminpassword
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    open-in-view: false
     hibernate:
       ddl-auto: validate
-    show-sql: false
     properties:
-      hibernate:
-        format_sql: true
+      hibernate.jdbc.time_zone: UTC
+      hibernate.format_sql: true
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      javax:
+        persistence:
+          validation:
+            mode: auto
 
   flyway:
     enabled: true
@@ -29,10 +34,10 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/shopizer
+          issuer-uri: http://localhost:8080/realms/shopizer
 management:
   server:
-    port: 9000
-  otlp:
-    tracing:
-      endpoint: http://jaeger:4318/v1/traces
+    port: 9100
+#  otlp:
+#    tracing:
+#      endpoint: http://jaeger:4318/v1/traces

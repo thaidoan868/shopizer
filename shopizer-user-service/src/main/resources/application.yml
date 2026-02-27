@@ -12,7 +12,12 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
+    properties:
+      javax:
+        persistence:
+          validation:
+            mode: auto
   flyway:
     enabled: false
   # Security Configuration
@@ -20,12 +25,23 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/shopizer
+          jwk-set-uri: http://localhost:8080/realms/shopizer/protocol/openid-connect/certs
+
+  # Email configuration
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "your-email@gmail.com"
+    from-display-name: "Shopizer Agent"
+    password: "app-password"
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 management:
-  tracing:
-    sampling:
-      probability: 1.0
+  #  tracing:
+  #    sampling:
+  #      probability: 1.0
   server:
     port: 9000
   endpoints:
@@ -36,11 +52,27 @@ management:
   endpoint:
     health:
       show-details: always
-  otlp:
-    tracing:
-      endpoint: http://localhost:4318/v1/traces
+#  otlp:
+#    tracing:
+#      endpoint: http://localhost:4318/v1/traces
 
 # Documentation
 springdoc:
   api-docs:
     enabled: true
+    path: /v3/api-docs
+
+logging:
+  level:
+    root: INFO
+    vn.io.oldmoon.shopizer: TRACE
+
+keycloak:
+  server-url: http://localhost:8080
+  realm: shopizer
+  client-id: backend
+  client-secret: backendclientsecret
+
+# application setting
+application:
+  token-expiration: 15m

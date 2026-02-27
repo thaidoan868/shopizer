@@ -1,0 +1,82 @@
+package vn.io.oldmoon.shopizer.user.app.facade;
+
+import lombok.RequiredArgsConstructor;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.stereotype.Service;
+import vn.io.oldmoon.shopizer.user.app.dto.user.EmailVerificationCodeRequest;
+import vn.io.oldmoon.shopizer.user.app.dto.user.VerifyEmailRequest;
+import vn.io.oldmoon.shopizer.user.bussiness.exception.BusinessException;
+import vn.io.oldmoon.shopizer.user.bussiness.exception.ErrorCode;
+import vn.io.oldmoon.shopizer.user.bussiness.service.EmailService;
+import vn.io.oldmoon.shopizer.user.bussiness.service.TokenService;
+import vn.io.oldmoon.shopizer.user.bussiness.service.keycloak.KeycloakService;
+import vn.io.oldmoon.shopizer.user.infra.data.EmailTemplate;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.KeycloakRequiredAction;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.TokenType;
+import vn.io.oldmoon.shopizer.user.infra.model.Token;
+
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class UserFacade {
+    private final TaskExecutor taskExecutor;
+
+    private final KeycloakService keycloakService;
+    private final TokenService tokenService;
+    private final EmailService emailService;
+
+    public void sendVerificationCode(EmailVerificationCodeRequest request) {
+        // get token
+        Optional<Token> token = tokenService.get(
+                request.getUsername(),
+                request.getEmail(),
+                TokenType.EMAIL_VERIFICATION
+        );
+
+        if (token.isPresent()) {
+            throw new BusinessException(
+                    ErrorCode.CONFLICT,
+                    "Email verification code already exists for this email: email=" + request.getEmail()
+            );
+        } else {
+            // create new token
+            Token newToken = new Token(
+                    request.getUsername(),
+                    request.getEmail(),
+                    tokenService.generateCode(),
+                    TokenType.EMAIL_VERIFICATION
+            );
+            tokenService.create(newToken);
+
+            // send an email with the created code
+            taskExecutor.execute(() ->
+                    emailService.sendMail(
+                            request.getEmail(),
+                            EmailTemplate.EMAIL_VERIFICATION_SUBJECT,
+                            EmailTemplate.verifyEmail(request.getUsername(), newToken.getCode())
+                    )
+            );
+        }
+    }
+
+    public void verifyEmail(VerifyEmailRequest request) {
+        // is there any code that matches the request
+        Token token = tokenService
+                .getTokenByCode(request.getEmail(), request.getCode(), TokenType.EMAIL_VERIFICATION)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "Not found token: email=%s, code=%s".formatted(request.getEmail(), request.getCode())));
+
+        // if yes, set email verification to true and delete the required action EMAIL_VERIFY
+        UserRepresentation userRep = token.getUserId() == null ? keycloakService.getUserByUsername(token.getUsername()) : keycloakService.get(token.getUserId());
+        userRep.setEmailVerified(true);
+        if (userRep.getRequiredActions() != null) {
+            userRep.getRequiredActions().remove(KeycloakRequiredAction.VERIFY_EMAIL.name());
+        }
+
+        keycloakService.update(userRep);
+
+        taskExecutor.execute(() -> tokenService.expireToken(token.getId()));
+
+    }
+}

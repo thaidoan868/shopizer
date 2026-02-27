@@ -2,6 +2,7 @@ package vn.io.oldmoon.shopizer.user.app.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -38,16 +39,30 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain security(HttpSecurity http, Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthConverter) throws Exception {
+    @Order(1)
+    SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher(
+                        "/api/v1/users/",
+                        "/api/v1/users/customers/register",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html",
+                        "/webjars/**",
+                        "/api/v1/users/**"
+                )
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .build();
+    }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain privateEndpoints(HttpSecurity http, Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthConverter) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v*/users/admin").hasRole("ADMIN")
-                        .requestMatchers(
-                                "/api/v*/users/details"
-                        ).authenticated()
-                        .requestMatchers(
-                                "/api/v*/users/"
-                        ).permitAll()
+                        .requestMatchers("/api/v1/users/admin").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/users/details").authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth -> oauth

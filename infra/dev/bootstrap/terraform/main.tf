@@ -31,7 +31,7 @@ resource "keycloak_role" "customer" {
 
 resource "keycloak_role" "merchantstore" {
   realm_id = keycloak_realm.shopizer.id
-  name     = "merchantstore"
+  name     = "merchant"
 }
 
 resource "keycloak_role" "admin" {
@@ -89,8 +89,9 @@ resource "keycloak_user_roles" "default_admin_roles" {
   ]
 }
 
+# client roles
 locals {
-  backend_user_mgmt_roles = ["view-users", "query-users", "manage-users"]
+  backend_user_mgmt_roles = ["view-users", "query-users", "manage-users", "view-realm"]
 }
 
 # realm-management client exists inside each realm
@@ -108,6 +109,7 @@ resource "keycloak_openid_client_service_account_role" "backend_service_account_
   role                    = local.backend_user_mgmt_roles[count.index]
 }
 #
+
 # # MinIO bootstrap via `mc`
 resource "null_resource" "minio_bootstrap" {
   triggers = {
