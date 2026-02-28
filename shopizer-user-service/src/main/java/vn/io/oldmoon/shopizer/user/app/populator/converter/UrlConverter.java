@@ -1,0 +1,18 @@
+package vn.io.oldmoon.shopizer.user.app.populator.converter;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
+
+@Service
+public class UrlConverter {
+  @Value("${minio.endpoint}")
+  private String assetBaseUrl;
+
+  public String media(String bucket, String objectName) {
+    return UriComponentsBuilder.fromHttpUrl(assetBaseUrl)
+        .pathSegment(bucket, objectName)
+        .build()
+        .toUriString();
+  }
+}

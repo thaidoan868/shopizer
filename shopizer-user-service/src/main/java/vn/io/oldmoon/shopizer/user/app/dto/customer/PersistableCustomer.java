@@ -4,12 +4,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import java.time.LocalDate;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
-
-import java.time.LocalDate;
 
 @Data
 public class PersistableCustomer {
@@ -74,7 +73,7 @@ public class PersistableCustomer {
     @NotBlank(message = "Phone number must not be blank")
     private String phoneNumber;
 
-    @Schema(example = "123 Ly Thai To, Phuong Hoa Hung, Tp HCM, VN")
+    @Schema(example = "No. 123 Ly Thai To, Phuong Hoa Hung, Tp HCM, VN")
     @Length(max = 300, message = "Address must be 300 characters or fewer")
     @NotBlank(message = "Address must not be blank")
     private String address;

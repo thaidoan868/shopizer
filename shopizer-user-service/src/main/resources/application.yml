@@ -5,7 +5,7 @@ spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
     driver-class-name: org.h2.Driver
     username: sa
     password: sa
@@ -76,3 +76,11 @@ keycloak:
 # application setting
 application:
   token-expiration: 15m
+
+# Object Storage
+minio:
+  endpoint: http://localhost:9000
+  public-bucket: "public-assets"
+  access-key: admin
+  secret-key: admin123
+  secure: false

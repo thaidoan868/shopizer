@@ -1,5 +1,7 @@
 package vn.io.oldmoon.shopizer.user.app.config;
 
+import java.util.*;
+import java.util.stream.Collectors;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -12,9 +14,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Configuration
 @EnableMethodSecurity
@@ -45,6 +44,7 @@ public class SecurityConfig {
                 .securityMatcher(
                         "/api/v1/users/",
                         "/api/v1/users/customers/register",
+                        "/api/v1/users/customers/{id}/profile",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/swagger-ui.html",
