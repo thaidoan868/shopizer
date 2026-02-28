@@ -15,6 +15,7 @@ import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUserResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.PersistableCustomer;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.CustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.PublicCustomerProfileResponse;
+import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.UpdateCustomerProfileRequest;
 import vn.io.oldmoon.shopizer.user.app.facade.CustomerFacade;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
 
@@ -61,5 +62,11 @@ public class CustomerManagementController {
     return ResponseEntity.ok(response);
   }
 
-  // @PatchMapping("/{id}/profile/avatar/update");
+  @PatchMapping("/me/profile/update")
+  @Operation(summary = "Update partly the current user's profile")
+  public ResponseEntity<CustomerProfileResponse> updateProfile(
+      @Valid @RequestBody UpdateCustomerProfileRequest request) {
+    CustomerProfileResponse response = customerFacade.updateProfile(request);
+    return ResponseEntity.ok(response);
+  }
 }

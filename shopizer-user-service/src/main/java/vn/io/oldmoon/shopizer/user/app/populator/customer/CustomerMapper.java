@@ -1,12 +1,12 @@
 package vn.io.oldmoon.shopizer.user.app.populator.customer;
 
 import org.keycloak.representations.idm.UserRepresentation;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUserResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.PersistableCustomer;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.CustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.PublicCustomerProfileResponse;
+import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.UpdateCustomerProfileRequest;
 import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
 
 @Mapper(componentModel = "spring")
@@ -15,6 +15,11 @@ public interface CustomerMapper {
   UserRepresentation toUserRep(PersistableCustomer persistableCustomer);
 
   CustomerProfile toProfile(PersistableCustomer persistableCustomer);
+
+  // Update
+  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+  CustomerProfile patchUpdate(
+      UpdateCustomerProfileRequest request, @MappingTarget CustomerProfile profile);
 
   // TO RESPONSE
   @Mapping(target = "id", ignore = true)

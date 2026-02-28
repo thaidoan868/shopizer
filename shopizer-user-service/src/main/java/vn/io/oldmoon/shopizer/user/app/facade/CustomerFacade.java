@@ -9,6 +9,7 @@ import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUserResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.PersistableCustomer;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.CustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.PublicCustomerProfileResponse;
+import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.UpdateCustomerProfileRequest;
 import vn.io.oldmoon.shopizer.user.app.populator.customer.CustomerPopulator;
 import vn.io.oldmoon.shopizer.user.bussiness.service.CustomerService;
 import vn.io.oldmoon.shopizer.user.bussiness.service.EmailService;
@@ -89,5 +90,18 @@ public class CustomerFacade {
     CustomerProfile profile = customerService.get(userId);
 
     return customerPopulator.toPublicProfileResponse(profile);
+  }
+
+  public CustomerProfileResponse updateProfile(UpdateCustomerProfileRequest request) {
+    // get the current user's profile
+    UUID userId = UserUtil.getCurrentUserId();
+    CustomerProfile profile = customerService.get(userId);
+
+    // update the profile and save the updated profile
+    customerPopulator.patchUpdate(request, profile);
+    CustomerProfile newProfile = customerService.updateProfile(profile);
+
+    // convert to response
+    return customerPopulator.toProfileResponse(newProfile);
   }
 }

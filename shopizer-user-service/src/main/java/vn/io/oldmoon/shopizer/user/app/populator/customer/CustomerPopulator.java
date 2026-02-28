@@ -5,12 +5,14 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.mapstruct.MappingTarget;
 import org.springframework.stereotype.Service;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUserResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.PersistableCustomer;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.AvatarResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.CustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.PublicCustomerProfileResponse;
+import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.UpdateCustomerProfileRequest;
 import vn.io.oldmoon.shopizer.user.app.populator.converter.UrlConverter;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.KeycloakRequiredAction;
 import vn.io.oldmoon.shopizer.user.infra.model.AvatarMeta;
@@ -44,6 +46,17 @@ public class CustomerPopulator {
         "Converted PersistableCustomer to CustomerProfile, username={}",
         persistableCustomer.getUsername());
     return result;
+  }
+
+  // UPDATE
+  public CustomerProfile patchUpdate(
+      UpdateCustomerProfileRequest request, @MappingTarget CustomerProfile profile) {
+    CustomerProfile response = customerMapper.patchUpdate(request, profile);
+
+    log.debug(
+        "Successfully mapped PATCH UpdateCustomerRequest to CustomerProfile: userId={}",
+        profile.getUserId());
+    return response;
   }
 
   // To RESPONSES

@@ -40,4 +40,17 @@ public class CustomerService {
         "Profile Created: id={}, userId={}", createdProfile.getId(), createdProfile.getUserId());
     return createdProfile;
   }
+
+  /**
+   * @throws RuntimeException if tried to update a profile without id
+   */
+  public CustomerProfile updateProfile(CustomerProfile profile) {
+    if (profile.getId() == null) {
+      throw new RuntimeException("Tried to update profile without id");
+    }
+    CustomerProfile updatedProfile = profileRepo.save(profile);
+
+    log.info("Updated profile: userId={}", updatedProfile.getUserId());
+    return updatedProfile;
+  }
 }
