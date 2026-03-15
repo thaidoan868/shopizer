@@ -6,8 +6,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class UrlConverter {
-  @Value("${minio.endpoint}")
-  private String assetBaseUrl;
+
+  private final String assetBaseUrl;
+
+  public UrlConverter(@Value("${minio.endpoint}") String assetBaseUrl) {
+    this.assetBaseUrl = assetBaseUrl;
+  }
 
   public String media(String bucket, String objectName) {
     return UriComponentsBuilder.fromHttpUrl(assetBaseUrl)

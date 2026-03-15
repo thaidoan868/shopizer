@@ -1,22 +1,21 @@
 package vn.io.oldmoon.shopizer.user.app.facade;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 import vn.io.oldmoon.shopizer.user.app.dto.user.EmailVerificationCodeRequest;
 import vn.io.oldmoon.shopizer.user.app.dto.user.VerifyEmailRequest;
-import vn.io.oldmoon.shopizer.user.bussiness.exception.BusinessException;
-import vn.io.oldmoon.shopizer.user.bussiness.exception.ErrorCode;
-import vn.io.oldmoon.shopizer.user.bussiness.service.EmailService;
-import vn.io.oldmoon.shopizer.user.bussiness.service.TokenService;
-import vn.io.oldmoon.shopizer.user.bussiness.service.keycloak.KeycloakService;
+import vn.io.oldmoon.shopizer.user.business.exception.BusinessException;
+import vn.io.oldmoon.shopizer.user.business.exception.ErrorCode;
+import vn.io.oldmoon.shopizer.user.business.service.EmailService;
+import vn.io.oldmoon.shopizer.user.business.service.TokenService;
+import vn.io.oldmoon.shopizer.user.business.service.keycloak.KeycloakService;
 import vn.io.oldmoon.shopizer.user.infra.data.EmailTemplate;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.KeycloakRequiredAction;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.TokenType;
 import vn.io.oldmoon.shopizer.user.infra.model.Token;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

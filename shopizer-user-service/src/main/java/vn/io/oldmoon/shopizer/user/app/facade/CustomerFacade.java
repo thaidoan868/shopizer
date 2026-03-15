@@ -11,11 +11,11 @@ import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.CustomerProfileRespo
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.PublicCustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.UpdateCustomerProfileRequest;
 import vn.io.oldmoon.shopizer.user.app.populator.customer.CustomerPopulator;
-import vn.io.oldmoon.shopizer.user.bussiness.service.CustomerService;
-import vn.io.oldmoon.shopizer.user.bussiness.service.EmailService;
-import vn.io.oldmoon.shopizer.user.bussiness.service.TokenService;
-import vn.io.oldmoon.shopizer.user.bussiness.service.keycloak.KeycloakService;
-import vn.io.oldmoon.shopizer.user.bussiness.util.UserUtil;
+import vn.io.oldmoon.shopizer.user.business.service.CustomerService;
+import vn.io.oldmoon.shopizer.user.business.service.EmailService;
+import vn.io.oldmoon.shopizer.user.business.service.TokenService;
+import vn.io.oldmoon.shopizer.user.business.service.keycloak.KeycloakService;
+import vn.io.oldmoon.shopizer.user.business.util.UserUtil;
 import vn.io.oldmoon.shopizer.user.infra.data.EmailTemplate;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.TokenType;
@@ -39,6 +39,7 @@ public class CustomerFacade {
 
     // create a new user
     String userId = keycloakService.create(userRep);
+
     userRep.setId(userId);
 
     // set new password
