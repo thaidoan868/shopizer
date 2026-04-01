@@ -1,9 +1,9 @@
 package vn.io.oldmoon.shopizer.user.infra.model;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record AvatarMeta(
-        String bucket,
-        String originalObjectName,
-        String mediumObjectName,
-        String thumbnailObjectName
-) {
-}
+    @NotBlank String bucket,
+    @NotBlank String originalObjectName,
+    @NotBlank String mediumObjectName,
+    @NotBlank String thumbnailObjectName) {}

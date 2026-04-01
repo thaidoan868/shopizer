@@ -5,7 +5,7 @@ spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
     driver-class-name: org.h2.Driver
     username: sa
     password: sa
@@ -66,6 +66,9 @@ logging:
   level:
     root: INFO
     vn.io.oldmoon.shopizer: TRACE
+  pattern:
+    level: "%5p"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{correlationId}] - %msg%n"
 
 keycloak:
   server-url: http://localhost:8080
@@ -76,3 +79,11 @@ keycloak:
 # application setting
 application:
   token-expiration: 15m
+
+# Object Storage
+minio:
+  endpoint: http://localhost:9000
+  public-bucket: "public-assets"
+  access-key: admin
+  secret-key: admin123
+  secure: false

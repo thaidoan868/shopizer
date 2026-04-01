@@ -3,53 +3,47 @@ package vn.io.oldmoon.shopizer.user.app.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUserResponse;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.PersistableCustomer;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import vn.io.oldmoon.shopizer.common.web.controller.AbstractController;
 import vn.io.oldmoon.shopizer.user.app.facade.CustomerFacade;
-import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
-
-import java.util.Locale;
+import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.CustomerProfileResponse;
+import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCustomerProfileResponse;
+import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.UpdateCustomerProfileRequest;
 
 @RestController
 @RequestMapping("/api/v1/users/customers")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Customer Management Endpoints")
-public class CustomerManagementController {
-    private final CustomerFacade customerFacade;
+public class CustomerManagementController extends AbstractController {
+  private final CustomerFacade customerFacade;
 
-    @PostMapping("/register")
-    @Operation(summary = "Register a new customer")
-    public ResponseEntity<CreatedUserResponse> customerRegister(
-            @Valid @RequestBody PersistableCustomer persistableCustomer,
-            Locale locale
-    ) {
-        // set default language
-        if (persistableCustomer.getLanguage() == null) {
-            Language language;
-            try {
-                language = Language.valueOf(locale.getLanguage().toLowerCase());
-            } catch (IllegalArgumentException e) {
-                language = Language.en;
-            }
-        }
+  @GetMapping("/me/profile")
+  @Operation(summary = "Get the full profile")
+  @PreAuthorize("hasRole('customer')")
+  public ResponseEntity<CustomerProfileResponse> getProfile() {
+    CustomerProfileResponse response = customerFacade.getProfile(getCurrentUserId());
+    return ResponseEntity.ok(response);
+  }
 
-        CreatedUserResponse createdUserResponse = customerFacade.registerCustomer(persistableCustomer);
+  @GetMapping("/public/{id}/profile")
+  @Operation(summary = "Get public profile information")
+  public ResponseEntity<PublicCustomerProfileResponse> getPublicProfile(
+      @PathVariable("id") UUID userId) {
+    PublicCustomerProfileResponse response = customerFacade.getPublicProfile(userId);
+    return ResponseEntity.ok(response);
+  }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUserResponse);
-    }
-
-    // @GetMapping("/{id}");
-
-    // @PatchMapping("/{id}/profile/update");
-
-    // @PatchMapping("/{id}/profile/avatar/update");
+  @PatchMapping("/me/profile/update")
+  @Operation(summary = "Update partly the current user's profile")
+  public ResponseEntity<CustomerProfileResponse> updateProfile(
+      @Valid @RequestBody UpdateCustomerProfileRequest request) {
+    CustomerProfileResponse response = customerFacade.updateProfile(getCurrentUserId(), request);
+    return ResponseEntity.ok(response);
+  }
 }

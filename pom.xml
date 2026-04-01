@@ -21,6 +21,8 @@
         <module>shopizer-user-service</module>
 
         <module>shopizer-common</module>
+
+        <module>shopizer-rabbitmq</module>
     </modules>
 
     <dependencyManagement>

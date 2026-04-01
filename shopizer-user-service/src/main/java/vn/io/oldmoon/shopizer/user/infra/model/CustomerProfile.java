@@ -1,8 +1,12 @@
 package vn.io.oldmoon.shopizer.user.infra.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,10 +18,6 @@ import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Data
@@ -65,6 +65,7 @@ public class CustomerProfile {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
+    @Valid
     private AvatarMeta avatarMeta;
 
     @CreationTimestamp
