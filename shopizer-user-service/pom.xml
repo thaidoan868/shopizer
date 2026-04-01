@@ -17,6 +17,12 @@
 
 
     <dependencies>
+        <!--        internal modules-->
+        <dependency>
+            <groupId>vn.io.oldmoon</groupId>
+            <artifactId>shopizer-common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -3,6 +3,7 @@ package vn.io.oldmoon.shopizer.user.app.populator.converter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
+import vn.io.oldmoon.shopizer.user.app.transfer.populator.url.UrlConverter;
 
 class UrlConverterTest {
   private UrlConverter urlConverter;

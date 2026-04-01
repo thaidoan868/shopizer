@@ -10,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.io.oldmoon.shopizer.user.business.exception.BusinessException;
-import vn.io.oldmoon.shopizer.user.business.exception.ErrorCode;
+import vn.io.oldmoon.shopizer.common.core.exception.ApiException;
+import vn.io.oldmoon.shopizer.common.core.exception.ErrorCode;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.TokenType;
 import vn.io.oldmoon.shopizer.user.infra.model.Token;
 import vn.io.oldmoon.shopizer.user.infra.repository.TokenRepository;
@@ -62,8 +62,7 @@ public class TokenService {
             .findById(id)
             .orElseThrow(
                 () ->
-                    new BusinessException(
-                        ErrorCode.NOT_FOUND, "Not found token: id=%s".formatted(id)));
+                    new ApiException(ErrorCode.NOT_FOUND, "Not found token: id=%s".formatted(id)));
     token.setExpiresAt(Instant.now());
     tokenRepo.save(token);
 

@@ -3,19 +3,17 @@ package vn.io.oldmoon.shopizer.user.app.facade;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.CreatedUserResponse;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.PersistableCustomer;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.CustomerProfileResponse;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.PublicCustomerProfileResponse;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.profile.UpdateCustomerProfileRequest;
-import vn.io.oldmoon.shopizer.user.app.populator.customer.CustomerPopulator;
+import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.CreatedUserResponse;
+import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.PersistableCustomer;
+import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.CustomerProfileResponse;
+import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCustomerProfileResponse;
+import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.UpdateCustomerProfileRequest;
+import vn.io.oldmoon.shopizer.user.app.transfer.populator.customer.CustomerPopulator;
 import vn.io.oldmoon.shopizer.user.business.service.CustomerService;
 import vn.io.oldmoon.shopizer.user.business.service.EmailService;
 import vn.io.oldmoon.shopizer.user.business.service.TokenService;
 import vn.io.oldmoon.shopizer.user.business.service.keycloak.KeycloakService;
-import vn.io.oldmoon.shopizer.user.business.util.UserUtil;
 import vn.io.oldmoon.shopizer.user.infra.data.EmailTemplate;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.TokenType;
@@ -25,8 +23,6 @@ import vn.io.oldmoon.shopizer.user.infra.model.Token;
 @Service
 @RequiredArgsConstructor
 public class CustomerFacade {
-  private final TaskExecutor taskExecutor;
-
   private final CustomerPopulator customerPopulator;
   private final KeycloakService keycloakService;
   private final TokenService tokenService;
@@ -60,26 +56,22 @@ public class CustomerFacade {
     // async
     // create a profile
     profile.setUserId(UUID.fromString(userId));
-    taskExecutor.execute(() -> customerService.createProfile(profile));
+    customerService.createProfile(profile);
 
     // create a token
-    taskExecutor.execute(() -> tokenService.create(token));
+    tokenService.create(token);
 
     // send a verification email
-    taskExecutor.execute(
-        () ->
-            emailService.sendMail(
-                userRep.getEmail(),
-                EmailTemplate.EMAIL_VERIFICATION_SUBJECT,
-                EmailTemplate.verifyEmail(profile.getFullName(), token.getCode())));
+
+    emailService.sendMail(
+        userRep.getEmail(),
+        EmailTemplate.EMAIL_VERIFICATION_SUBJECT,
+        EmailTemplate.verifyEmail(profile.getFullName(), token.getCode()));
 
     return customerPopulator.toCreatedUser(userRep);
   }
 
-  public CustomerProfileResponse getProfile() {
-    // get current user
-    UUID userId = UserUtil.getCurrentUserId();
-
+  public CustomerProfileResponse getProfile(UUID userId) {
     // get profile
     CustomerProfile profile = customerService.get(userId);
 
@@ -93,9 +85,8 @@ public class CustomerFacade {
     return customerPopulator.toPublicProfileResponse(profile);
   }
 
-  public CustomerProfileResponse updateProfile(UpdateCustomerProfileRequest request) {
+  public CustomerProfileResponse updateProfile(UUID userId, UpdateCustomerProfileRequest request) {
     // get the current user's profile
-    UUID userId = UserUtil.getCurrentUserId();
     CustomerProfile profile = customerService.get(userId);
 
     // update the profile and save the updated profile

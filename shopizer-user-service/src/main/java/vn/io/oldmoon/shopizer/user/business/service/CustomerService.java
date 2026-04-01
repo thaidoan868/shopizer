@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.io.oldmoon.shopizer.user.business.exception.BusinessException;
-import vn.io.oldmoon.shopizer.user.business.exception.ErrorCode;
+import vn.io.oldmoon.shopizer.common.core.exception.ApiException;
+import vn.io.oldmoon.shopizer.common.core.exception.ErrorCode;
 import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
 import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileRepository;
 
@@ -19,7 +19,7 @@ public class CustomerService {
   private final CustomerProfileRepository profileRepo;
 
   /**
-   * @throws BusinessException if no user exists with that ID
+   * @throws ApiException if no user exists with that ID
    */
   @NonNull
   public CustomerProfile get(UUID userId) {
@@ -28,7 +28,7 @@ public class CustomerService {
             .findByUserId(userId)
             .orElseThrow(
                 () ->
-                    new BusinessException(
+                    new ApiException(
                         ErrorCode.NOT_FOUND, "Not found profile with userId=" + userId));
     log.info("Fetched Customer profile: userId={}", userId);
     return profile;

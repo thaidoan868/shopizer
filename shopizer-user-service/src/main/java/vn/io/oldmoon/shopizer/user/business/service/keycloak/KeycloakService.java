@@ -19,9 +19,9 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import vn.io.oldmoon.shopizer.user.business.exception.BusinessException;
-import vn.io.oldmoon.shopizer.user.business.exception.ErrorCode;
-import vn.io.oldmoon.shopizer.user.business.exception.KeycloakException;
+import vn.io.oldmoon.shopizer.common.core.exception.ApiException;
+import vn.io.oldmoon.shopizer.common.core.exception.ErrorCode;
+import vn.io.oldmoon.shopizer.common.core.exception.ServiceException;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 
 @Service
@@ -46,13 +46,13 @@ public class KeycloakService {
     try {
       userRep = user.toRepresentation();
     } catch (NotFoundException e) {
-      throw new BusinessException(ErrorCode.NOT_FOUND, "User with id '%s' not found".formatted(id));
+      throw new ApiException(ErrorCode.NOT_FOUND, "User with id '%s' not found".formatted(id));
     }
     return userRep;
   }
 
   /**
-   * @throws BusinessException if user not found
+   * @throws ApiException if user not found
    * @throws RuntimeException if auth or network errors occur
    * @throws IllegalArgumentException if username is blank
    */
@@ -65,7 +65,7 @@ public class KeycloakService {
         keycloak.realm(realm).users().searchByUsername(username.trim(), true);
 
     if (users.isEmpty()) {
-      throw new BusinessException(ErrorCode.NOT_FOUND, "User not found with username=" + username);
+      throw new ApiException(ErrorCode.NOT_FOUND, "User not found with username=" + username);
     }
 
     if (users.size() > 1) {
@@ -76,8 +76,8 @@ public class KeycloakService {
   }
 
   /**
-   * @throws BusinessException if the user already exists (409)
-   * @throws KeycloakException if there is a general failure in the identity provider logic
+   * @throws ApiException if the user already exists (409)
+   * @throws ServiceException if there is a general failure in the identity provider logic
    * @throws WebApplicationException if keycloak client failed to authenticate or missed required
    *     roles
    * @throws ProcessingException if a network timeout or connectivity issue occurs
@@ -105,7 +105,7 @@ public class KeycloakService {
 
         KeycloakErrorResponse errorResponse =
             userResponse.readEntity(KeycloakErrorResponse.class); // parse safely
-        throw new BusinessException(ErrorCode.CONFLICT, errorResponse.getErrorMessage());
+        throw new ApiException(ErrorCode.CONFLICT, errorResponse.getErrorMessage());
       }
 
       if (status != 201) {
@@ -120,7 +120,9 @@ public class KeycloakService {
             locationPath,
             body);
 
-        throw new KeycloakException(locationPath, body, status);
+        throw new ServiceException(
+            "Failed to create a new account: locationPath=%s, body=%s, status=%s"
+                .formatted(locationPath, body, status));
       }
 
       // successful
