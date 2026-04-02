@@ -2,6 +2,25 @@ server:
   port: 8082
 
 spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    # Reliability settings
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      retry:
+        enabled: true
+        initial-interval: 1000ms
+        max-attempts: 3
+    listener:
+      simple:
+        acknowledge-mode: auto
+        concurrency: 3
+        max-concurrency: 10
   datasource:
     url: jdbc:postgresql://localhost:5432/shopizer_user_service
     driver-class-name: org.postgresql.Driver

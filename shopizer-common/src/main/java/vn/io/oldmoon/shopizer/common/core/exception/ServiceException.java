@@ -1,6 +1,6 @@
 package vn.io.oldmoon.shopizer.common.core.exception;
 
-public class ServiceException extends RuntimeException {
+public class ServiceException extends FatalException {
   public ServiceException(String message) {
     super(message);
   }
