@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.service.keycloak;
+package vn.io.oldmoon.shopizer.user.business.service;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ProcessingException;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import vn.io.oldmoon.shopizer.common.core.exception.ApiException;
 import vn.io.oldmoon.shopizer.common.core.exception.ErrorCode;
 import vn.io.oldmoon.shopizer.common.core.exception.ServiceException;
+import vn.io.oldmoon.shopizer.user.app.transfer.dto.keycloak.KeycloakErrorResponse;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 
 @Service

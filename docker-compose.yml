@@ -68,6 +68,27 @@ services:
     restart: unless-stopped
     networks: [ appnet ]
 
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq-service
+    ports:
+      # AMQP protocol port (used by your Spring app)
+      - "5672:5672"
+      # HTTP Management UI port
+      - "15672:15672"
+    environment:
+      # Set the default login credentials
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      # Persists data so queues/messages survive a container restart
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   #  redpanda:
   #    image: redpandadata/redpanda:v25.3.4
   #    container_name: redpanda
@@ -288,9 +309,6 @@ networks:
 volumes:
   postgres_data:
   minio_data:
-  redpanda_data:
-  es_data:
-  prom_data:
-  fluentbit_tail_data:
   terraform_data:
+  rabbitmq_data:
 

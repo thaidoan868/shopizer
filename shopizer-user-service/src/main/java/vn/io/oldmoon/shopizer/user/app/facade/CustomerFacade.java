@@ -12,8 +12,8 @@ import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.UpdateCusto
 import vn.io.oldmoon.shopizer.user.app.transfer.populator.customer.CustomerPopulator;
 import vn.io.oldmoon.shopizer.user.business.service.CustomerService;
 import vn.io.oldmoon.shopizer.user.business.service.EmailService;
+import vn.io.oldmoon.shopizer.user.business.service.KeycloakService;
 import vn.io.oldmoon.shopizer.user.business.service.TokenService;
-import vn.io.oldmoon.shopizer.user.business.service.keycloak.KeycloakService;
 import vn.io.oldmoon.shopizer.user.infra.data.EmailTemplate;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.TokenType;
@@ -29,6 +29,7 @@ public class CustomerFacade {
   private final CustomerService customerService;
   private final EmailService emailService;
 
+  @Deprecated
   public CreatedUserResponse registerCustomer(PersistableCustomer persistableCustomer) {
     UserRepresentation userRep = customerPopulator.toUserRep(persistableCustomer);
     CustomerProfile profile = customerPopulator.toProfile(persistableCustomer);
@@ -62,7 +63,6 @@ public class CustomerFacade {
     tokenService.create(token);
 
     // send a verification email
-
     emailService.sendMail(
         userRep.getEmail(),
         EmailTemplate.EMAIL_VERIFICATION_SUBJECT,

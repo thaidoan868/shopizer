@@ -1,10 +1,10 @@
 package vn.io.oldmoon.shopizer.common.event;
 
-public interface Listener {
+public interface EventListener<T extends ApplicationEvent> {
   /**
    * Handles incoming messages.
    *
    * @param event The event received from the queue.
    */
-  void handle(ApplicationEvent event);
+  void handle(T event);
 }

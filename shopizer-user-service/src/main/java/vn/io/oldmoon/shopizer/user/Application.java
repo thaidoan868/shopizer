@@ -5,7 +5,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"vn.io.oldmoon.shopizer.common"})
+@ComponentScan(
+    basePackages = {
+      "vn.io.oldmoon.shopizer.common",
+      "vn.io.oldmoon.shopizer.rabbitmq",
+      "vn.io.oldmoon.shopizer"
+    })
 public class Application {
 
   public static void main(String[] args) {
