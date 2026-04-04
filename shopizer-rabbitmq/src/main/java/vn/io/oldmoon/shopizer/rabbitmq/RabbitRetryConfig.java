@@ -10,16 +10,12 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLTransientConnectionException;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
-import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.client.HttpClientErrorException;
@@ -29,7 +25,7 @@ import vn.io.oldmoon.shopizer.common.core.exception.FatalException;
 @Configuration
 public class RabbitRetryConfig {
   @Bean
-  public RetryOperationsInterceptor retryInterceptor(RepublishMessageRecoverer recoverer) {
+  public SimpleRetryPolicy simpleRetryPolicy() {
     Map<Class<? extends Throwable>, Boolean> retryableExceptions = new HashMap<>();
     // --- BUSINESS LOGIC & DATA (Usually FATAL - DO NOT RETRY) ---
     retryableExceptions.put(IllegalArgumentException.class, false); // Bad method input
@@ -71,17 +67,6 @@ public class RabbitRetryConfig {
     retryableExceptions.put(QueryTimeoutException.class, true); // DB timeout
 
     retryableExceptions.put(FatalException.class, false);
-    SimpleRetryPolicy simpleRetryPolicy = new SimpleRetryPolicy(3, retryableExceptions, true, true);
-
-    ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-    backOffPolicy.setInitialInterval(1000);
-    backOffPolicy.setMultiplier(2.0);
-    backOffPolicy.setMaxInterval(10000);
-
-    return RetryInterceptorBuilder.stateless()
-        .retryPolicy(simpleRetryPolicy)
-        .backOffPolicy(backOffPolicy)
-        .recoverer(recoverer)
-        .build();
+    return new SimpleRetryPolicy(3, retryableExceptions, true, true);
   }
 }
