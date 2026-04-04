@@ -10,12 +10,15 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLTransientConnectionException;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
+import org.springframework.retry.policy.NeverRetryPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.client.HttpClientErrorException;
@@ -23,7 +26,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import vn.io.oldmoon.shopizer.common.core.exception.FatalException;
 
 @Configuration
-public class RabbitRetryConfig {
+public class RabbitRetryPolicy {
   @Bean
   public SimpleRetryPolicy simpleRetryPolicy() {
     Map<Class<? extends Throwable>, Boolean> retryableExceptions = new HashMap<>();
@@ -68,5 +71,32 @@ public class RabbitRetryConfig {
 
     retryableExceptions.put(FatalException.class, false);
     return new SimpleRetryPolicy(3, retryableExceptions, true, true);
+  }
+
+  @Bean
+  public ConditionalRejectingErrorHandler.DefaultExceptionStrategy defaultExceptionStrategy() {
+    return new ConditionalRejectingErrorHandler.DefaultExceptionStrategy();
+  }
+
+  @Bean
+  public NeverRetryPolicy neverRetryPolicy() {
+    return new NeverRetryPolicy();
+  }
+
+  @Bean
+  public ExceptionClassifierRetryPolicy exceptionClassifierRetryPolicy(
+      NeverRetryPolicy failFastPolicy,
+      ConditionalRejectingErrorHandler.DefaultExceptionStrategy defaultStrategy,
+      SimpleRetryPolicy simpleRetryPolicy) {
+
+    ExceptionClassifierRetryPolicy classifierRetryPolicy = new ExceptionClassifierRetryPolicy();
+    classifierRetryPolicy.setExceptionClassifier(
+        t -> {
+          if (defaultStrategy.isFatal(t)) {
+            return failFastPolicy;
+          }
+          return simpleRetryPolicy;
+        });
+    return classifierRetryPolicy;
   }
 }

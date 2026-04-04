@@ -7,15 +7,11 @@ import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.*;
-import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.*;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
-import org.springframework.retry.policy.NeverRetryPolicy;
-import org.springframework.retry.policy.SimpleRetryPolicy;
 
 @Configuration
 @EnableRabbit
@@ -65,30 +61,15 @@ public class RabbitMqConfig {
         rabbitTemplate, RabbitConstants.DLX_EXCHANGE, RabbitConstants.DEAD_LETTER_ROUTING_KEY);
   }
 
+
   @Bean
   public RetryOperationsInterceptor retryInterceptor(
-      RepublishMessageRecoverer recoverer, SimpleRetryPolicy simpleRetryPolicy) {
-    NeverRetryPolicy failFastPolicy = new NeverRetryPolicy();
-    ExceptionClassifierRetryPolicy classifierRetryPolicy = new ExceptionClassifierRetryPolicy();
-    ConditionalRejectingErrorHandler.DefaultExceptionStrategy defaultStrategy =
-        new ConditionalRejectingErrorHandler.DefaultExceptionStrategy();
-
-    classifierRetryPolicy.setExceptionClassifier(
-        t -> {
-          if (defaultStrategy.isFatal(t)) {
-            return failFastPolicy;
-          }
-          return simpleRetryPolicy;
-        });
-
-    ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-    backOffPolicy.setInitialInterval(1000);
-    backOffPolicy.setMultiplier(2.0);
-    backOffPolicy.setMaxInterval(10000);
+      RepublishMessageRecoverer recoverer,
+      ExceptionClassifierRetryPolicy retryPolicy) {
 
     return RetryInterceptorBuilder.stateless()
-        .retryPolicy(classifierRetryPolicy)
-        .backOffPolicy(backOffPolicy)
+        .retryPolicy(retryPolicy)
+        .backOffOptions(1000, 2.0, 10000) // initial, multiplier, max
         .recoverer(recoverer)
         .build();
   }
