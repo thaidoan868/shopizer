@@ -26,6 +26,7 @@ import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 
 @Testcontainers
 @SpringBootTest
+@Deprecated
 class KeycloakServiceTest {
 
   @Container
