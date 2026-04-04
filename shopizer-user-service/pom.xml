@@ -23,6 +23,12 @@
             <artifactId>shopizer-common</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>vn.io.oldmoon</groupId>
+            <artifactId>shopizer-rabbitmq</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -35,6 +41,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
         <!-- Security-->

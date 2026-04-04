@@ -20,6 +20,7 @@ import vn.io.oldmoon.shopizer.user.infra.repository.TokenRepository;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Deprecated
 public class TokenService {
   private final TokenRepository tokenRepo;
 

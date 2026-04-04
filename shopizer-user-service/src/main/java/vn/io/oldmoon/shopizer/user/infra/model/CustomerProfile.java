@@ -25,56 +25,43 @@ import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerProfile {
-    @Id
-    @UuidGenerator
-    private UUID id;
+  @Id @UuidGenerator private UUID id;
 
-    @NotBlank
-    @Builder.Default
-    private String realm = "shopizer";
+  @NotBlank @Builder.Default private String realm = "shopizer";
 
-    @NotNull
-    private UUID userId;
+  @NotNull private UUID userId;
 
-    @NotBlank
-    private String username;
+  @NotBlank private String username;
 
-    @NotBlank
-    private String email;
+  @NotBlank private String email;
 
-    @NotBlank
-    private String firstName;
+  @NotBlank private String firstName;
 
-    @NotBlank
-    private String lastName;
+  @NotBlank private String lastName;
 
-    @NotBlank
-    private String phoneNumber;
+  private String phoneNumber;
 
-    @NotBlank
-    private String address;
+  private String address;
 
-    private LocalDate dateOfBirth;
+  private LocalDate dateOfBirth;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
+  @Enumerated(EnumType.STRING)
+  private Gender gender;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    private Language language = Language.en;
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  private Language language = Language.en;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    @Valid
-    private AvatarMeta avatarMeta;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(columnDefinition = "jsonb")
+  @Valid
+  private AvatarMeta avatarMeta;
 
-    @CreationTimestamp
-    private Instant createdAt;
+  @CreationTimestamp private Instant createdAt;
 
-    @UpdateTimestamp
-    private Instant updatedAt;
+  @UpdateTimestamp private Instant updatedAt;
 
-    public String getFullName() {
-        return firstName + " " + lastName;
-    }
+  public String getFullName() {
+    return firstName + " " + lastName;
+  }
 }

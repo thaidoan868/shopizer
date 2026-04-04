@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.service.keycloak;
+package vn.io.oldmoon.shopizer.user.business.service;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ProcessingException;
@@ -19,9 +19,8 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import vn.io.oldmoon.shopizer.common.core.exception.ApiException;
-import vn.io.oldmoon.shopizer.common.core.exception.ErrorCode;
-import vn.io.oldmoon.shopizer.common.core.exception.ServiceException;
+import vn.io.oldmoon.shopizer.common.core.exception.*;
+import vn.io.oldmoon.shopizer.user.app.transfer.dto.keycloak.KeycloakErrorResponse;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 
 @Service
@@ -35,37 +34,30 @@ public class KeycloakService {
 
   /**
    * @throws NotFoundException if not found user
-   * @throws RuntimeException if auth or network errors occur
    */
   public UserRepresentation get(UUID userId) {
     String id = userId.toString();
     UsersResource users = keycloak.realm(realm).users();
     UserResource user = users.get(id);
     UserRepresentation userRep;
-
-    try {
-      userRep = user.toRepresentation();
-    } catch (NotFoundException e) {
-      throw new ApiException(ErrorCode.NOT_FOUND, "User with id '%s' not found".formatted(id));
-    }
+    userRep = user.toRepresentation();
     return userRep;
   }
 
   /**
-   * @throws ApiException if user not found
-   * @throws RuntimeException if auth or network errors occur
-   * @throws IllegalArgumentException if username is blank
+   * @throws ResourceNotFoundException if user not found
+   * @throws InvalidInputException if username is blank
    */
   public UserRepresentation getUserByUsername(String username) {
     if (username.isBlank()) {
-      throw new IllegalArgumentException("Username must not be blank");
+      throw new InvalidInputException("Username must not be blank");
     }
 
     List<UserRepresentation> users =
         keycloak.realm(realm).users().searchByUsername(username.trim(), true);
 
     if (users.isEmpty()) {
-      throw new ApiException(ErrorCode.NOT_FOUND, "User not found with username=" + username);
+      throw new ResourceNotFoundException("KeycloakUser", "username=" + username);
     }
 
     if (users.size() > 1) {
@@ -82,6 +74,7 @@ public class KeycloakService {
    *     roles
    * @throws ProcessingException if a network timeout or connectivity issue occurs
    */
+  @Deprecated
   public String create(UserRepresentation registerUser) {
     UsersResource usersResource = keycloak.realm(realm).users();
 
@@ -139,6 +132,7 @@ public class KeycloakService {
   /**
    * @throws RuntimeException if auth or network errors occur
    */
+  @Deprecated
   public void resetPassword(String userId, String newPassword) {
     UsersResource usersResource = keycloak.realm(realm).users();
     UserResource userResource = usersResource.get(userId);
