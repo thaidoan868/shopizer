@@ -3,16 +3,13 @@ package vn.io.oldmoon.shopizer.user.app.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import vn.io.oldmoon.shopizer.common.web.controller.AbstractController;
 import vn.io.oldmoon.shopizer.user.app.facade.CustomerFacade;
 import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.CustomerProfileResponse;
-import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.UpdateCustomerProfileRequest;
 
 @RestController
@@ -25,21 +22,12 @@ public class CustomerManagementController extends AbstractController {
 
   @GetMapping("/me/profile")
   @Operation(summary = "Get the full profile")
-  @PreAuthorize("hasRole('customer')")
   public ResponseEntity<CustomerProfileResponse> getProfile() {
     CustomerProfileResponse response = customerFacade.getProfile(getCurrentUserId());
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("/public/{id}/profile")
-  @Operation(summary = "Get public profile information")
-  public ResponseEntity<PublicCustomerProfileResponse> getPublicProfile(
-      @PathVariable("id") UUID userId) {
-    PublicCustomerProfileResponse response = customerFacade.getPublicProfile(userId);
-    return ResponseEntity.ok(response);
-  }
-
-  @PatchMapping("/me/profile/update")
+  @PatchMapping("/me/profile")
   @Operation(summary = "Update partly the current user's profile")
   public ResponseEntity<CustomerProfileResponse> updateProfile(
       @Valid @RequestBody UpdateCustomerProfileRequest request) {

@@ -3,6 +3,9 @@ package vn.io.oldmoon.shopizer.user.app.facade;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.io.oldmoon.shopizer.common.core.exception.ApiException;
+import vn.io.oldmoon.shopizer.common.core.exception.ErrorCode;
+import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.CustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.UpdateCustomerProfileRequest;
@@ -16,29 +19,30 @@ public class CustomerFacade {
   private final CustomerPopulator customerPopulator;
   private final CustomerService customerService;
 
-  public CustomerProfileResponse getProfile(UUID userId) {
-    // get profile
-    CustomerProfile profile = customerService.get(userId);
+  private CustomerProfile getProfileOrThrow(UUID userId) {
+    try {
+      return customerService.get(userId);
+    } catch (ResourceNotFoundException e) {
+      throw new ApiException(ErrorCode.NOT_FOUND, "Profile not found with userId: " + userId);
+    }
+  }
 
+  public CustomerProfileResponse getProfile(UUID userId) {
+    CustomerProfile profile = getProfileOrThrow(userId);
     return customerPopulator.toProfileResponse(profile);
   }
 
   public PublicCustomerProfileResponse getPublicProfile(UUID userId) {
-    // get profile
-    CustomerProfile profile = customerService.get(userId);
-
+    CustomerProfile profile = getProfileOrThrow(userId);
     return customerPopulator.toPublicProfileResponse(profile);
   }
 
   public CustomerProfileResponse updateProfile(UUID userId, UpdateCustomerProfileRequest request) {
-    // get the current user's profile
     CustomerProfile profile = customerService.get(userId);
 
-    // update the profile and save the updated profile
     customerPopulator.patchUpdate(request, profile);
     CustomerProfile newProfile = customerService.updateProfile(profile);
 
-    // convert to response
     return customerPopulator.toProfileResponse(newProfile);
   }
 }

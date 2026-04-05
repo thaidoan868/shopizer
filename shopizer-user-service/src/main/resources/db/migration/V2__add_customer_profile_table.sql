@@ -10,9 +10,9 @@ CREATE TABLE customer_profile(
     updated_at TIMESTAMPTZ  NOT NULL,
     gender  VARCHAR(10),
     date_of_birth   DATE,
-    language VARCHAR(5) NOT NULL,
-    phone_number VARCHAR(20) NOT NULL,
-    address VARCHAR(300) NOT NULL,
+    language VARCHAR(5),
+    phone_number VARCHAR(20),
+    address VARCHAR(300),
     avatar_meta JSONB,
 
     CONSTRAINT uq_profile_user_id UNIQUE (user_id)

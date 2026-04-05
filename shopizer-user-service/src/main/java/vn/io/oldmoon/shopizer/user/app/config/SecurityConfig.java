@@ -2,6 +2,7 @@ package vn.io.oldmoon.shopizer.user.app.config;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -12,13 +13,18 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableMethodSecurity
+@Slf4j
 public class SecurityConfig {
+  private final String adminRole = "ADMIN";
+  private final String customerRole = "CUSTOMER";
+
   @Bean
   public Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
     return jwt -> {
@@ -29,13 +35,19 @@ public class SecurityConfig {
   }
 
   private Collection<GrantedAuthority> extractAuthorities(Jwt jwt) {
-    Collection<String> realmRoles =
-        Optional.ofNullable((Map<String, Object>) jwt.getClaim("realm_access"))
-            .map(m -> (Collection<String>) m.get("roles"))
-            .orElseGet(List::of);
+    // 1. Safely extract the map using the JWT's built-in helper
+    Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
 
-    return realmRoles.stream()
-        .map(r -> (GrantedAuthority) () -> "ROLE_" + r.toUpperCase())
+    if (realmAccess == null || !realmAccess.containsKey("roles")) {
+      return Collections.emptyList();
+    }
+
+    // 2. Extract and Map roles
+    @SuppressWarnings("unchecked")
+    Collection<String> roles = (Collection<String>) realmAccess.get("roles");
+
+    return roles.stream()
+        .map(role -> new SimpleGrantedAuthority(role.toUpperCase()))
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
@@ -45,13 +57,7 @@ public class SecurityConfig {
   @Profile({"dev", "test"})
   SecurityFilterChain documentEndpoints(HttpSecurity http) throws Exception {
     return http.securityMatcher(
-            "/api/v1/users/",
-            "/api/v1/users/customers/register",
-            "/api/v1/users/customers/{id}/profile",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/swagger-ui.html",
-            "/webjars/**")
+            "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/webjars/**")
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
         .build();
@@ -59,6 +65,15 @@ public class SecurityConfig {
 
   @Bean
   @Order(2)
+  SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
+    return http.securityMatcher("/api/v1/public/**")
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+        .build();
+  }
+
+  @Bean
+  @Order(3)
   public SecurityFilterChain privateEndpoints(
       HttpSecurity http, Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthConverter)
       throws Exception {
@@ -66,9 +81,9 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             auth ->
                 auth.requestMatchers("/api/v1/users/admin")
-                    .hasRole("ADMIN")
-                    .requestMatchers("/api/v1/users/details")
-                    .authenticated()
+                    .hasAuthority(adminRole)
+                    .requestMatchers("/api/v1/users/customers/**")
+                    .hasAuthority(customerRole)
                     .anyRequest()
                     .authenticated())
         .oauth2ResourceServer(
