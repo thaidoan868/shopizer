@@ -21,6 +21,8 @@ public class UserCreatedCreateProfileListener implements EventListener<UserCreat
   @Override
   @RabbitListener(queues = RabbitConstants.USER_CREATED_QUEUE)
   public void handle(UserCreatedEvent event) {
+    log.info(
+        "Processing user created event: Creating customer profile for userId={}", event.userId());
     CustomerProfile profile =
         CustomerProfile.builder()
             .userId(UUID.fromString(event.userId()))
@@ -30,6 +32,6 @@ public class UserCreatedCreateProfileListener implements EventListener<UserCreat
             .lastName(event.lastName())
             .build();
     CustomerProfile savedProfile = customerService.createProfile(profile);
-    log.info("Handled UserCreatedEvent: Created profile with id={}", savedProfile.getId());
+    log.info("Created customer profile: id={},  userId={}", profile.getId(), profile.getUserId());
   }
 }

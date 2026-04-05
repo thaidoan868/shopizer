@@ -34,23 +34,23 @@ public class CustomerService {
     return profile;
   }
 
+  @Transactional
   public CustomerProfile createProfile(CustomerProfile profile) {
+    log.info("Attempting to persist profile for user={}", profile.getUserId());
     CustomerProfile createdProfile = profileRepo.save(profile);
-    log.info(
-        "Profile Created: id={}, userId={}", createdProfile.getId(), createdProfile.getUserId());
     return createdProfile;
   }
 
   /**
    * @throws InvalidInputException if tried to update a profile without id
    */
+  @Transactional
   public CustomerProfile updateProfile(CustomerProfile profile) {
     if (profile.getId() == null) {
       throw new InvalidInputException("Tried to update profile without id");
     }
+    log.info("Attempting to update profile for user={}", profile.getUserId());
     CustomerProfile updatedProfile = profileRepo.save(profile);
-
-    log.info("Updated profile: userId={}", updatedProfile.getUserId());
     return updatedProfile;
   }
 }
