@@ -2,14 +2,14 @@
 
 ## User Management
 
-- [] As a customer, I want to register a new account, so that I can buy things online on the website
+- [x] As a customer, I want to register a new account, so that I can buy things online on the website
 
-- [] As A customer, I want to have a profile, so that I can store my personal information
+- [x] As A customer, I want to have a profile, so that I can store my personal information
     - Priority: Must have
     - A profile is automatically created after registration
     - Profile includes basic fields
 
-- [] As a customer, I want to update my profile, so that I can keep my information up-to-day
+- [x] As a customer, I want to update my profile, so that I can keep my information up-to-day
 
 - [] As a customer, I want to receive a well-come email after registration
     - Priority: should have
@@ -42,6 +42,11 @@
 - As a customer, I want to chat with the owner, so that I can ask questions about products
 
 ## Product
+
+- As an admin, I want to add products
+- As an admin, I want to update product information
+- As an admin, I want to mark a product as discontinued, so that it is no longer available for sale.
+  As a customer, I want to view a list of products, so that I can browse available items.
 
 - CRUD
 - Search
