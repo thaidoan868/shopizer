@@ -1,69 +1,115 @@
-# User Stories
+# 🎯 Scope v1: Tổng quan Chức năng (Features)
 
-## User Management
+* **Authentication & User Profile:** Đăng ký, đăng nhập, quản lý thông tin cá nhân/địa chỉ.
+* **Product Catalog:** Danh sách sản phẩm, bộ lọc, tìm kiếm, chi tiết sản phẩm.
+* **Cart & Checkout:** Giỏ hàng, áp mã giảm giá, đặt hàng, tích hợp cổng thanh toán trực tuyến & COD.
+* **Order Management (Customer):** Lịch sử đơn hàng, theo dõi trạng thái đơn.
+* **Admin Dashboard (Basic):** Quản lý sản phẩm, quản lý đơn hàng, xem báo cáo doanh thu cơ bản.
 
-- [] As a customer, I want to register a new account, so that I can buy things online on the website
+---
 
-- [] As A customer, I want to have a profile, so that I can store my personal information
-    - Priority: Must have
-    - A profile is automatically created after registration
-    - Profile includes basic fields
+# 🗓️ Lộ trình Phát triển: Sprint 1 đến Sprint 4
 
-- [] As a customer, I want to update my profile, so that I can keep my information up-to-day
+> **Giả định:** Mỗi Sprint kéo dài 2 tuần. Đội ngũ bao gồm BA, UI/UX, Dev (FE/BE), QA và PM.
 
-- [] As a customer, I want to receive a well-come email after registration
-    - Priority: should have
+---
 
-- [] As a customer, I want to change my avatar, so that I can personalize my profile
-    - Priority: Must have
-    - Users can upload an image to update their avatar. The server generates two additional versions of the image: a
-      medium-sized version and a thumbnail version.
+## 🔷 Sprint 1: Nền tảng System, Authentication & Catalog Cơ bản
 
-- [] As a system, I want to check that customer addresses are valid in VietNam, so that the data is reliable
-    - Priority: should have
-    - Address must include fields province, ward, detailed_address
-    - Addresses must be valid in Vietnam
+**Mục tiêu:** Dựng framework, database và hoàn thiện giao diện/tính năng cho người dùng xem sản phẩm.
 
-- [] As a system, I want to detect whether a name looks Vietnamese, so that I can warn users and reduce invalid, random,
-  and typo names
-    - Priority: Should have
-    - provide an api endpoint: `/api/v1/tools/validate/vietname-names`
-    - Intput: `fullname` Output: `confidence sore` from 0 to 100
+### 1. Feature: Quản lý Tài khoản (Auth)
 
-## Admin management
+* **AC 1.1 (Đăng ký/Đăng nhập):**
+    * Người dùng có thể đăng ký tài khoản bằng Email và Mật khẩu.
+    * Hệ thống kiểm tra định dạng Email và độ mạnh mật khẩu (tối thiểu 8 ký tự).
+    * Người dùng có thể đăng nhập bằng Email/Password đã đăng ký.
+* **AC 1.2 (Quên mật khẩu):**
+    * Gửi link reset mật khẩu qua Email khi người dùng yêu cầu.
 
-- [] As an admin, I want to have a store table, so that I can store the store information like owner, address, email,
-  phone
-- [] As a user, I want to make a request to be an admin, so that I can support the admin manage the store
+### 2. Feature: Danh mục & Chi tiết Sản phẩm (Product Catalog)
 
-## Communication
+* **AC 2.1 (Danh sách sản phẩm):**
+    * Hiển thị danh sách sản phẩm dạng Grid có: Ảnh đại diện, Tên, Giá bán, Giá gạch (nếu có giảm giá).
+    * Có phân trang (Pagination) hoặc Tải thêm (Load more) - tối đa 20 sản phẩm/trang.
+* **AC 2.2 (Trang chi tiết sản phẩm - PDP):**
+    * Hiển thị gallery ảnh sản phẩm, tên, giá, mô tả ngắn, mô tả chi tiết, số lượng tồn kho.
+    * Cho phép chọn Variant (Size, Màu sắc). Giá và hình ảnh phải cập nhật tương ứng theo Variant được chọn.
 
-- As a customer, I want to receive notifications about my account activity so that I can monitor it
-- As a customer, I want to chat with the owner, so that I can ask questions about products
+---
 
-## Product
+## 🔷 Sprint 2: Tìm kiếm, Giỏ hàng & Admin Quản lý Sản phẩm
 
-- CRUD
-- Search
-- Category
-- Rating
-- Comment
+**Mục tiêu:** Cho phép người dùng tìm kiếm, đưa đồ vào giỏ và xây dựng trang Admin để Client có thể nhập dữ liệu sản
+phẩm.
 
-## Discount
+### 1. Feature: Tìm kiếm & Lọc sản phẩm (Search & Filter)
 
-## Inventory
+* **AC 1.1 (Tìm kiếm):**
+    * Thanh tìm kiếm (Search bar) trả về kết quả theo Tên sản phẩm khi bấm Enter hoặc icon Search.
+* **AC 1.2 (Bộ lọc):**
+    * Lọc sản phẩm theo Category (Danh mục), Khoảng giá (Price range).
+    * Sắp xếp theo: Giá tăng/giảm, Mới nhất.
 
-## Cart
+### 2. Feature: Giỏ hàng (Shopping Cart)
 
-## Order
+* **AC 2.1 (Thao tác giỏ hàng):**
+    * Người dùng (kể cả Guest chưa đăng nhập) có thể "Thêm vào giỏ hàng" từ trang chi tiết.
+    * Cập nhật số lượng sản phẩm trong giỏ (tăng/giảm/xóa). Không cho phép tăng quá số lượng tồn kho.
+    * Tự động tính toán: Tạm tính (Subtotal), Tổng tiền (Total).
 
-## Payment
+### 3. Feature (Admin): Quản lý Sản phẩm (Product Management)
 
-- COD
-- payos
+* **AC 3.1 (CRUD Sản phẩm):**
+    * Admin có thể Tạo mới / Chỉnh sửa / Xóa / Ẩn-Hiện sản phẩm.
+    * Admin có thể upload nhiều hình ảnh cho 1 sản phẩm.
 
-## Refund
+---
 
-## Delivery
+## 🔷 Sprint 3: Luồng Đặt hàng (Checkout) & Thanh toán
 
-## Content management
+**Mục tiêu:** Cốt lõi của E-commerce — Chuyển đổi từ Giỏ hàng thành Đơn hàng thành công.
+
+### 1. Feature: Quy trình Đặt hàng (Checkout Flow)
+
+* **AC 1.1 (Thông tin giao hàng):**
+    * Thu thập thông tin: Họ tên, Số điện thoại, Địa chỉ nhận hàng (Tỉnh/Thành, Quận/Huyện, Phường/Xã).
+    * Lưu danh sách địa chỉ nhận hàng vào Profile của User đăng nhập.
+* **AC 1.2 (Mã giảm giá - Voucher):**
+    * Cho phép nhập Coupon code tại bước Checkout. Hệ thống kiểm tra điều kiện và trừ tiền trực tiếp vào đơn hàng.
+
+### 2. Feature: Thanh toán (Payment Integration)
+
+* **AC 2.1 (Phương thức thanh toán):**
+    * Hỗ trợ thanh toán COD (Nhận hàng trả tiền).
+    * Tích hợp 01 Cổng thanh toán trực tuyến (ví dụ: VNPay / Momo / Stripe / Paypal tùy thị trường target).
+* **AC 2.2 (Xác nhận đơn hàng):**
+    * Sau khi đặt hàng thành công: Trả về trang "Order Success", trừ số lượng tồn kho của sản phẩm, gửi Email xác nhận
+      đơn hàng tự động cho khách hàng.
+
+---
+
+## 🔷 Sprint 4: Admin Quản lý Đơn hàng, Lịch sử Mua hàng & Hardening/Release
+
+**Mục tiêu:** Hoàn thiện luồng quản trị cho Client, xử lý bug, tối ưu hiệu năng và chuẩn bị Go-Live v1.
+
+### 1. Feature (Customer): Lịch sử & Trạng thái Đơn hàng
+
+* **AC 1.1 (Order History):**
+    * User đăng nhập có thể xem danh sách đơn hàng đã đặt và trạng thái tương ứng (`Pending`, `Processing`, `Shipping`,
+      `Completed`, `Cancelled`).
+    * User xem được chi tiết từng đơn hàng.
+
+### 2. Feature (Admin): Quản lý Đơn hàng (Order Management)
+
+* **AC 2.1 (Xử lý đơn hàng):**
+    * Admin xem danh sách đơn hàng toàn hệ thống, lọc theo trạng thái/ngày tháng/mã đơn.
+    * Admin có quyền chuyển trạng thái đơn hàng (VD: *Xác nhận đơn -> Đang giao -> Đã hoàn thành / Hủy đơn*).
+* **AC 2.2 (Báo cáo cơ bản):**
+    * Dashboard hiển thị: Tổng doanh thu, Số lượng đơn hàng mới, Sản phẩm bán chạy nhất trong khoảng thời gian chọn.
+
+### 3. Hardening & Launch Preparation (Cuối Sprint 4)
+
+* **UAT (User Acceptance Testing):** Client nghiệm thu toàn bộ luồng.
+* **Security & Performance:** Kiểm tra bảo mật cơ bản, tối ưu tốc độ load trang (< 3s).
+* **Deployment:** Cấu hình Production environment, trỏ Domain, SSL và Go-Live v1.
