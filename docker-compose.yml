@@ -57,8 +57,17 @@ services:
       KC_DB_PASSWORD: app_user_password
       KEYCLOAK_ADMIN: keycloakadmin
       KEYCLOAK_ADMIN_PASSWORD: keycloakadminpassword
+
+      # plugin Rabbitmq configuration
+      KK_TO_RMQ_URL: rabbitmq
+      KK_TO_RMQ_PORT: 5672
+      KK_TO_RMQ_USERNAME: rabitmqadmin
+      KK_TO_RMQ_PASSWORD: rabitmqadminpassword
+      KK_TO_RMQ_EXCHANGE: user.events
       KC_HEALTH_ENABLED: "true"
+      KK_TO_RMQ_VHOST: "/"
       KC_METRICS_ENABLED: "true"
+    
     ports:
       - "8080:8080"
     depends_on:
@@ -73,6 +82,7 @@ services:
     networks: [ appnet ]
     volumes:
       - ./infra/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      - ./infra/keycloak/keycloak-to-rabbit-3.0.5.jar:/opt/keycloak/providers/keycloak-to-rabbit-3.0.5.jar
 
   #  minio:
   #    image: minio/minio:RELEASE.2025-07-23T15-54-02Z
@@ -96,6 +106,7 @@ services:
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: rabbitmq
+    hostname: rabbitmq-server
     ports:
       # AMQP protocol port (used by your Spring app)
       - "5672:5672"
@@ -112,6 +123,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - appnet
+
 
   #  redpanda:
   #    image: redpandadata/redpanda:v25.3.4
