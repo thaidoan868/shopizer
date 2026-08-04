@@ -1,12 +1,12 @@
-package vn.io.oldmoon.shopizer.rabbitmq.event;
+package vn.io.oldmoon.shopizer.user.business.event.publisher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import vn.io.oldmoon.shopizer.common.event.EventPublisher;
-import vn.io.oldmoon.shopizer.common.event.UserCreatedEvent;
-import vn.io.oldmoon.shopizer.rabbitmq.RabbitConstants;
+import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
+import vn.io.oldmoon.shopizer.user.business.event.UserCreatedEvent;
 
 @Service
 @RequiredArgsConstructor
@@ -17,9 +17,9 @@ public class UserCreatedPublisher implements EventPublisher<UserCreatedEvent> {
   @Override
   public void publish(UserCreatedEvent event) {
     rabbitTemplate.convertAndSend(
-        RabbitConstants.MAIN_EXCHANGE, RabbitConstants.USER_CREATED_KEY, event);
+        RabbitMqConfig.userEventExchange, RabbitMqConfig.userCreatedBindingKey, event);
 
     log.info(
-        "Published an event to {}: userId={}", RabbitConstants.USER_CREATED_QUEUE, event.userId());
+        "Published an event: userId={}, bindingKey={}", event.userId(), RabbitMqConfig.userCreatedBindingKey);
   }
 }

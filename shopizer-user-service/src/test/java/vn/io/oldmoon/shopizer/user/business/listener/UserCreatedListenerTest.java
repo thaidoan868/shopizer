@@ -7,7 +7,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import vn.io.oldmoon.shopizer.common.event.UserCreatedEvent;
+import vn.io.oldmoon.shopizer.user.business.event.UserCreatedEvent;
+import vn.io.oldmoon.shopizer.user.business.event.listener.UserCreatedCreateProfileListener;
 import vn.io.oldmoon.shopizer.user.business.service.CustomerService;
 import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
 

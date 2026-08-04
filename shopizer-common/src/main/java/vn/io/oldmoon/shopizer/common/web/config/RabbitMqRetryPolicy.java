@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.rabbitmq;
+package vn.io.oldmoon.shopizer.common.web.config;
 
 import feign.FeignException;
 import java.net.ConnectException;
@@ -26,7 +26,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import vn.io.oldmoon.shopizer.common.core.exception.FatalException;
 
 @Configuration
-public class RabbitRetryPolicy {
+public class RabbitMqRetryPolicy {
   @Bean
   public SimpleRetryPolicy simpleRetryPolicy() {
     Map<Class<? extends Throwable>, Boolean> retryableExceptions = new HashMap<>();

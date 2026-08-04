@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.rabbitmq;
+package vn.io.oldmoon.shopizer.common.web.config;
 
 import org.aopalliance.aop.Advice;
 import org.springframework.amqp.core.*;
@@ -16,41 +16,26 @@ import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 @Configuration
 @EnableRabbit
 public class RabbitMqConfig {
-
-  // QUEUES
-  @Bean
-  public TopicExchange mainExchange() {
-    return new TopicExchange(RabbitConstants.MAIN_EXCHANGE);
-  }
-
-  @Bean
-  public Queue userCreatedQueue() {
-    return QueueBuilder.durable(RabbitConstants.USER_CREATED_QUEUE).build();
-  }
-
-  @Bean
-  public Binding userCreatedBinding() {
-    return BindingBuilder.bind(userCreatedQueue())
-        .to(mainExchange())
-        .with(RabbitConstants.USER_CREATED_KEY);
-  }
+  private final String DEAD_LETTER_EXCHANGE = "app.deadletter.exchange";
+  private final String DEAD_LETTER_QUEUE = "app.deadletter.queue";
+  private final String DEAD_LETTER_ROUTING_KEY = "dead.event";
 
   // Dead Letter Infrastructure
   @Bean
   public DirectExchange deadLetterExchange() {
-    return new DirectExchange(RabbitConstants.DLX_EXCHANGE);
+    return new DirectExchange(DEAD_LETTER_EXCHANGE);
   }
 
   @Bean
   public Queue deadLetterQueue() {
-    return QueueBuilder.durable(RabbitConstants.DLQ).build();
+    return QueueBuilder.durable(DEAD_LETTER_QUEUE).build();
   }
 
   @Bean
   public Binding dlqBinding() {
     return BindingBuilder.bind(deadLetterQueue())
         .to(deadLetterExchange())
-        .with(RabbitConstants.DEAD_LETTER_ROUTING_KEY);
+        .with(DEAD_LETTER_ROUTING_KEY);
   }
 
   // retry
@@ -58,14 +43,12 @@ public class RabbitMqConfig {
   @Bean
   public RepublishMessageRecoverer republishMessageRecoverer(RabbitTemplate rabbitTemplate) {
     return new RepublishMessageRecoverer(
-        rabbitTemplate, RabbitConstants.DLX_EXCHANGE, RabbitConstants.DEAD_LETTER_ROUTING_KEY);
+        rabbitTemplate, DEAD_LETTER_EXCHANGE, DEAD_LETTER_ROUTING_KEY);
   }
-
 
   @Bean
   public RetryOperationsInterceptor retryInterceptor(
-      RepublishMessageRecoverer recoverer,
-      ExceptionClassifierRetryPolicy retryPolicy) {
+      RepublishMessageRecoverer recoverer, ExceptionClassifierRetryPolicy retryPolicy) {
 
     return RetryInterceptorBuilder.stateless()
         .retryPolicy(retryPolicy)
