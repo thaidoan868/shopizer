@@ -16,7 +16,7 @@ import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.UpdateCusto
 import vn.io.oldmoon.shopizer.user.app.transfer.populator.url.UrlConverter;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.KeycloakRequiredAction;
 import vn.io.oldmoon.shopizer.user.infra.model.AvatarMeta;
-import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class CustomerPopulator {
     return userRep;
   }
 
-  public CustomerProfile toProfile(PersistableCustomer persistableCustomer) {
+  public User toProfile(PersistableCustomer persistableCustomer) {
     var result = customerMapper.toProfile(persistableCustomer);
     log.debug(
         "Converted PersistableCustomer to CustomerProfile, username={}",
@@ -49,9 +49,8 @@ public class CustomerPopulator {
   }
 
   // UPDATE
-  public CustomerProfile patchUpdate(
-      UpdateCustomerProfileRequest request, @MappingTarget CustomerProfile profile) {
-    CustomerProfile response = customerMapper.patchUpdate(request, profile);
+  public User patchUpdate(UpdateCustomerProfileRequest request, @MappingTarget User profile) {
+    User response = customerMapper.patchUpdate(request, profile);
 
     log.debug(
         "Successfully mapped PATCH UpdateCustomerRequest to CustomerProfile: userId={}",
@@ -79,7 +78,7 @@ public class CustomerPopulator {
         urlConverter.media(avatar.bucket(), avatar.thumbnailObjectName()));
   }
 
-  public CustomerProfileResponse toProfileResponse(CustomerProfile profile) {
+  public CustomerProfileResponse toProfileResponse(User profile) {
     CustomerProfileResponse response = customerMapper.toProfileResponse(profile);
 
     // set avatar urls
@@ -91,7 +90,7 @@ public class CustomerPopulator {
     return response;
   }
 
-  public PublicCustomerProfileResponse toPublicProfileResponse(CustomerProfile profile) {
+  public PublicCustomerProfileResponse toPublicProfileResponse(User profile) {
     PublicCustomerProfileResponse response = customerMapper.toPublicProfileResponse(profile);
 
     // set avatar urls

@@ -11,7 +11,7 @@ import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCusto
 import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.UpdateCustomerProfileRequest;
 import vn.io.oldmoon.shopizer.user.app.transfer.populator.customer.CustomerPopulator;
 import vn.io.oldmoon.shopizer.user.business.service.CustomerService;
-import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +19,7 @@ public class CustomerFacade {
   private final CustomerPopulator customerPopulator;
   private final CustomerService customerService;
 
-  private CustomerProfile getProfileOrThrow(UUID userId) {
+  private User getProfileOrThrow(UUID userId) {
     try {
       return customerService.get(userId);
     } catch (ResourceNotFoundException e) {
@@ -28,20 +28,20 @@ public class CustomerFacade {
   }
 
   public CustomerProfileResponse getProfile(UUID userId) {
-    CustomerProfile profile = getProfileOrThrow(userId);
+    User profile = getProfileOrThrow(userId);
     return customerPopulator.toProfileResponse(profile);
   }
 
   public PublicCustomerProfileResponse getPublicProfile(UUID userId) {
-    CustomerProfile profile = getProfileOrThrow(userId);
+    User profile = getProfileOrThrow(userId);
     return customerPopulator.toPublicProfileResponse(profile);
   }
 
   public CustomerProfileResponse updateProfile(UUID userId, UpdateCustomerProfileRequest request) {
-    CustomerProfile profile = customerService.get(userId);
+    User profile = customerService.get(userId);
 
     customerPopulator.patchUpdate(request, profile);
-    CustomerProfile newProfile = customerService.updateProfile(profile);
+    User newProfile = customerService.updateProfile(profile);
 
     return customerPopulator.toProfileResponse(newProfile);
   }

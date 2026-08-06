@@ -16,7 +16,7 @@ import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.CustomerPro
 import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.transfer.populator.customer.CustomerPopulator;
 import vn.io.oldmoon.shopizer.user.business.service.CustomerService;
-import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 class CustomerFacadeTest {
   @Mock private CustomerPopulator customerPopulator;
@@ -33,7 +33,7 @@ class CustomerFacadeTest {
   @Test
   void getProfile_shouldReturnProfileResponse_whenProfileExists() {
     UUID userId = UUID.randomUUID();
-    CustomerProfile profile = new CustomerProfile();
+    User profile = new User();
     CustomerProfileResponse response = new CustomerProfileResponse();
 
     when(customerService.get(userId)).thenReturn(profile);
@@ -66,7 +66,7 @@ class CustomerFacadeTest {
   @Test
   void getPublicProfile_shouldReturnPublicResponse_whenProfileExists() {
     UUID userId = UUID.randomUUID();
-    CustomerProfile profile = new CustomerProfile();
+    User profile = new User();
     PublicCustomerProfileResponse response = new PublicCustomerProfileResponse();
 
     when(customerService.get(userId)).thenReturn(profile);

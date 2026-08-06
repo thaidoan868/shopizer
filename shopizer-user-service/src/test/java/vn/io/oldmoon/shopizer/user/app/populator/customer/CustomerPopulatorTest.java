@@ -24,7 +24,7 @@ import vn.io.oldmoon.shopizer.user.app.transfer.populator.customer.CustomerPopul
 import vn.io.oldmoon.shopizer.user.app.transfer.populator.url.UrlConverter;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.KeycloakRequiredAction;
 import vn.io.oldmoon.shopizer.user.infra.model.AvatarMeta;
-import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 @TestPropertySource(
     properties = {
@@ -40,8 +40,8 @@ class CustomerPopulatorTest {
 
   @InjectMocks private CustomerPopulator populator;
 
-  private CustomerProfile createTestProfile() {
-    CustomerProfile profile = new CustomerProfile();
+  private User createTestProfile() {
+    User profile = new User();
     profile.setUserId(UUID.randomUUID());
     profile.setUsername("testuser");
 
@@ -80,14 +80,14 @@ class CustomerPopulatorTest {
     persistableCustomer.setUsername(username);
 
     UUID userId = UUID.randomUUID();
-    CustomerProfile mockProfile = new CustomerProfile();
+    User mockProfile = new User();
     mockProfile.setUsername(username);
     mockProfile.setUserId(userId);
 
     given(customerMapper.toProfile(persistableCustomer)).willReturn(mockProfile);
 
     // WHEN
-    CustomerProfile result = populator.toProfile(persistableCustomer);
+    User result = populator.toProfile(persistableCustomer);
 
     // THEN
     // Verify values haven't changed
@@ -99,14 +99,14 @@ class CustomerPopulatorTest {
   void patchUpdate_ShouldDelegateToMapper() {
     // GIVEN
     UpdateCustomerProfileRequest updateRequest = new UpdateCustomerProfileRequest();
-    CustomerProfile existingProfile = new CustomerProfile();
+    User existingProfile = new User();
     existingProfile.setUserId(UUID.randomUUID());
 
     // We simulate the MapStruct behavior (returning the same object)
     given(customerMapper.patchUpdate(updateRequest, existingProfile)).willReturn(existingProfile);
 
     // WHEN
-    CustomerProfile result = populator.patchUpdate(updateRequest, existingProfile);
+    User result = populator.patchUpdate(updateRequest, existingProfile);
 
     // THEN
     assertThat(result).isSameAs(existingProfile); // Identity check: nothing was lost
@@ -133,7 +133,7 @@ class CustomerPopulatorTest {
   @Test
   void toProfileResponse_shouldMapToProfileResponseWithAvatarUrls() {
     // GIVEN
-    CustomerProfile profile = createTestProfile();
+    User profile = createTestProfile();
     CustomerProfileResponse mockProfileResp = new CustomerProfileResponse();
     mockProfileResp.setUserId(profile.getUserId());
 
@@ -160,7 +160,7 @@ class CustomerPopulatorTest {
   @Test
   void toProfileResponse_ShouldHandleNullAvatarGracefully() {
     // GIVEN
-    CustomerProfile profile = new CustomerProfile();
+    User profile = new User();
     profile.setAvatarMeta(null);
     given(customerMapper.toProfileResponse(profile)).willReturn(new CustomerProfileResponse());
 
@@ -174,7 +174,7 @@ class CustomerPopulatorTest {
   @Test
   void toPublicProfileResponse_ShouldMapToPublicProfileResponseWithAvatarUrls() {
     // GIVEN
-    CustomerProfile profile = new CustomerProfile();
+    User profile = new User();
     profile.setUserId(UUID.randomUUID());
 
     AvatarMeta meta = new AvatarMeta("bucket-x", "origin.png", "med.png", "thumb.png");

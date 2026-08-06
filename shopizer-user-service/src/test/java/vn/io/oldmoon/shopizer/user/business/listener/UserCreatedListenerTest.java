@@ -10,7 +10,7 @@ import org.mockito.*;
 import vn.io.oldmoon.shopizer.user.business.event.UserCreatedEvent;
 import vn.io.oldmoon.shopizer.user.business.event.listener.UserCreatedCreateProfileListener;
 import vn.io.oldmoon.shopizer.user.business.service.CustomerService;
-import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 class UserCreatedListenerTest {
   @Mock private CustomerService customerService;
@@ -29,7 +29,7 @@ class UserCreatedListenerTest {
         new UserCreatedEvent(
             UUID.randomUUID().toString(), "test@example.com", "testuser", "John", "Doe");
 
-    CustomerProfile savedProfile = new CustomerProfile();
+    User savedProfile = new User();
 
     when(customerService.createProfile(any())).thenReturn(savedProfile);
 
@@ -37,11 +37,11 @@ class UserCreatedListenerTest {
     listener.handle(event);
 
     // then
-    ArgumentCaptor<CustomerProfile> captor = ArgumentCaptor.forClass(CustomerProfile.class);
+    ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
     verify(customerService).createProfile(captor.capture());
 
-    CustomerProfile passedProfile = captor.getValue();
+    User passedProfile = captor.getValue();
 
     assertThat(passedProfile.getUserId().toString()).isEqualTo(event.userId());
     assertThat(passedProfile.getEmail()).isEqualTo(event.email());

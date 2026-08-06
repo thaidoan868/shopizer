@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
-import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileRepository;
 
 @Service
@@ -22,8 +22,8 @@ public class CustomerService {
    * @throws ResourceNotFoundException if no user exists with that ID
    */
   @NonNull
-  public CustomerProfile get(UUID userId) {
-    CustomerProfile profile =
+  public User get(UUID userId) {
+    User profile =
         profileRepo
             .findByUserId(userId)
             .orElseThrow(
@@ -35,9 +35,9 @@ public class CustomerService {
   }
 
   @Transactional
-  public CustomerProfile createProfile(CustomerProfile profile) {
+  public User createProfile(User profile) {
     log.info("Attempting to persist profile for user={}", profile.getUserId());
-    CustomerProfile createdProfile = profileRepo.save(profile);
+    User createdProfile = profileRepo.save(profile);
     return createdProfile;
   }
 
@@ -45,12 +45,12 @@ public class CustomerService {
    * @throws InvalidInputException if tried to update a profile without id
    */
   @Transactional
-  public CustomerProfile updateProfile(CustomerProfile profile) {
+  public User updateProfile(User profile) {
     if (profile.getId() == null) {
       throw new InvalidInputException("Tried to update profile without id");
     }
     log.info("Attempting to update profile for user={}", profile.getUserId());
-    CustomerProfile updatedProfile = profileRepo.save(profile);
+    User updatedProfile = profileRepo.save(profile);
     return updatedProfile;
   }
 }

@@ -9,7 +9,7 @@ import vn.io.oldmoon.shopizer.common.event.EventListener;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.event.UserCreatedEvent;
 import vn.io.oldmoon.shopizer.user.business.service.CustomerService;
-import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 // create a profile for the new user
 @Component
@@ -23,15 +23,15 @@ public class UserCreatedCreateProfileListener implements EventListener<UserCreat
   public void handle(UserCreatedEvent event) {
     log.info(
         "Processing user created event: Creating customer profile for userId={}", event.userId());
-    CustomerProfile profile =
-        CustomerProfile.builder()
+    User profile =
+        User.builder()
             .userId(UUID.fromString(event.userId()))
             .email(event.email())
             .username(event.username())
             .firstName(event.firstName())
             .lastName(event.lastName())
             .build();
-    CustomerProfile savedProfile = customerService.createProfile(profile);
+    User savedProfile = customerService.createProfile(profile);
     log.info("Created customer profile: id={},  userId={}", profile.getId(), profile.getUserId());
   }
 }

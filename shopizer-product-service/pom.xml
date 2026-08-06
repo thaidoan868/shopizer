@@ -38,11 +38,6 @@
             <artifactId>shopizer-common</artifactId>
             <version>1.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>vn.io.oldmoon</groupId>
-            <artifactId>shopizer-rabbitmq</artifactId>
-            <version>1.0.0</version>
-        </dependency>
 
         <!-- Spring -->
         <dependency>
