@@ -13,6 +13,7 @@ import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 @Setter
 @ToString(callSuper = true)
 @Entity
+@Table(name = "super_admin_profiles")
 public class SuperAdminProfile extends BaseEntity {
   @OneToOne(
       fetch = FetchType.LAZY,

@@ -1,5 +1,7 @@
 package vn.io.oldmoon.shopizer.user.container;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
@@ -7,11 +9,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-
 @Testcontainers
 @Slf4j
+@Deprecated
 public class FlywayMigrationTest {
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");

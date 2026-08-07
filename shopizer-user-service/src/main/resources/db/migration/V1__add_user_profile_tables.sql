@@ -21,7 +21,7 @@ CREATE UNIQUE INDEX idx_users_keycloak_user_id ON users (keycloak_user_id);
 CREATE UNIQUE INDEX idx_users_username ON users (username);
 CREATE UNIQUE INDEX idx_users_email ON users (email);
 
-CREATE TABLE customer_profile (
+CREATE TABLE customer_profiles (
     -- BaseEntity fields
     id               UUID PRIMARY KEY,
     created          TIMESTAMP WITH TIME ZONE,
@@ -38,18 +38,18 @@ CREATE TABLE customer_profile (
     date_of_birth    DATE,
     gender           VARCHAR(20),
 
-    CONSTRAINT fk_customer_profile_user
+    CONSTRAINT fk_customer_profiles_user
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
 );
 
-CREATE UNIQUE INDEX idx_customer_profile_user_id
-    ON customer_profile (user_id)
+CREATE UNIQUE INDEX idx_customer_profiles_user_id
+    ON customer_profiles (user_id)
     WHERE user_id IS NOT NULL;
 
-CREATE UNIQUE INDEX idx_customer_profile_keycloak_user_id
-    ON customer_profile (keycloak_user_id);
+CREATE UNIQUE INDEX idx_customer_profiles_keycloak_user_id
+    ON customer_profiles (keycloak_user_id);
 
-CREATE TABLE store_manager_profile (
+CREATE TABLE store_manager_profiles (
     -- BaseEntity fields
     id               UUID PRIMARY KEY,
     created          TIMESTAMP WITH TIME ZONE,
@@ -62,18 +62,18 @@ CREATE TABLE store_manager_profile (
     keycloak_user_id UUID        NOT NULL,
     work_phone       VARCHAR(50),
 
-    CONSTRAINT fk_store_manager_profile_user
+    CONSTRAINT fk_store_manager_profiles_user
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
 );
 
-CREATE UNIQUE INDEX idx_store_manager_profile_user_id
-    ON store_manager_profile (user_id)
+CREATE UNIQUE INDEX idx_store_manager_profiles_user_id
+    ON store_manager_profiles (user_id)
     WHERE user_id IS NOT NULL;
 
-CREATE UNIQUE INDEX idx_store_manager_profile_keycloak_user_id
-    ON store_manager_profile (keycloak_user_id);
+CREATE UNIQUE INDEX idx_store_manager_profiles_keycloak_user_id
+    ON store_manager_profiles (keycloak_user_id);
 
-CREATE TABLE super_admin_profile (
+CREATE TABLE super_admin_profiles (
     -- BaseEntity fields
     id               UUID PRIMARY KEY,
     created          TIMESTAMP WITH TIME ZONE,
@@ -86,18 +86,18 @@ CREATE TABLE super_admin_profile (
     keycloak_user_id UUID        NOT NULL,
     work_phone       VARCHAR(50),
 
-    CONSTRAINT fk_super_admin_profile_user
+    CONSTRAINT fk_super_admin_profiles_user
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
 );
 
-CREATE UNIQUE INDEX idx_super_admin_profile_user_id
-    ON super_admin_profile (user_id)
+CREATE UNIQUE INDEX idx_super_admin_profiles_user_id
+    ON super_admin_profiles (user_id)
     WHERE user_id IS NOT NULL;
 
-CREATE UNIQUE INDEX idx_super_admin_profile_keycloak_user_id
-    ON super_admin_profile (keycloak_user_id);
+CREATE UNIQUE INDEX idx_super_admin_profiles_keycloak_user_id
+    ON super_admin_profiles (keycloak_user_id);
 
-CREATE TABLE support_agent_profile (
+CREATE TABLE support_agent_profiles (
     -- BaseEntity fields
     id               UUID PRIMARY KEY,
     created          TIMESTAMP WITH TIME ZONE,
@@ -112,18 +112,18 @@ CREATE TABLE support_agent_profile (
     work_phone       VARCHAR(50),
     support_phone    VARCHAR(50),
 
-    CONSTRAINT fk_support_agent_profile_user
+    CONSTRAINT fk_support_agent_profiles_user
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
 );
 
-CREATE UNIQUE INDEX idx_support_agent_profile_user_id
-    ON support_agent_profile (user_id)
+CREATE UNIQUE INDEX idx_support_agent_profiles_user_id
+    ON support_agent_profiles (user_id)
     WHERE user_id IS NOT NULL;
 
-CREATE UNIQUE INDEX idx_support_agent_profile_keycloak_user_id
-    ON support_agent_profile (keycloak_user_id);
+CREATE UNIQUE INDEX idx_support_agent_profiles_keycloak_user_id
+    ON support_agent_profiles (keycloak_user_id);
 
-CREATE TABLE warehouse_staff_profile (
+CREATE TABLE warehouse_staff_profiles (
     -- BaseEntity fields
     id               UUID PRIMARY KEY,
     created          TIMESTAMP WITH TIME ZONE,
@@ -137,13 +137,13 @@ CREATE TABLE warehouse_staff_profile (
     shift            VARCHAR(50),
     work_phone       VARCHAR(50),
 
-    CONSTRAINT fk_warehouse_staff_profile_user
+    CONSTRAINT fk_warehouse_staff_profiles_user
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
 );
 
-CREATE UNIQUE INDEX idx_warehouse_staff_profile_user_id
-    ON warehouse_staff_profile (user_id)
+CREATE UNIQUE INDEX idx_warehouse_staff_profiles_user_id
+    ON warehouse_staff_profiles (user_id)
     WHERE user_id IS NOT NULL;
 
-CREATE UNIQUE INDEX idx_warehouse_staff_profile_keycloak_user_id
-    ON warehouse_staff_profile (keycloak_user_id);
+CREATE UNIQUE INDEX idx_warehouse_staff_profiles_keycloak_user_id
+    ON warehouse_staff_profiles (keycloak_user_id);

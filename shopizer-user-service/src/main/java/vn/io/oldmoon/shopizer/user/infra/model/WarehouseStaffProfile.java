@@ -13,6 +13,7 @@ import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 @Setter
 @ToString(callSuper = true)
 @Entity
+@Table(name = "warehouse_staff_profiles")
 public class WarehouseStaffProfile extends BaseEntity {
   @OneToOne(
       fetch = FetchType.LAZY,

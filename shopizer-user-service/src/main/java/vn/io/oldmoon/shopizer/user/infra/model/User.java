@@ -17,6 +17,7 @@ import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 @Setter
 @ToString(callSuper = true)
 @Entity
+@Table(name = "users")
 public class User extends BaseEntity {
   @NotBlank @Builder.Default private String realm = "shopizer";
 
