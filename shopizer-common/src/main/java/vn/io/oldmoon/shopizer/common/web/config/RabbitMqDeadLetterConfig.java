@@ -15,7 +15,7 @@ import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 
 @Configuration
 @EnableRabbit
-public class RabbitMqConfig {
+public class RabbitMqDeadLetterConfig {
   private final String DEAD_LETTER_EXCHANGE = "app.deadletter.exchange";
   private final String DEAD_LETTER_QUEUE = "app.deadletter.queue";
   private final String DEAD_LETTER_ROUTING_KEY = "dead.event";

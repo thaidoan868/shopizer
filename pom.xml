@@ -22,8 +22,6 @@
 
         <module>shopizer-common</module>
 
-        <module>shopizer-rabbitmq</module>
-
         <module>shopizer-product-service</module>
     </modules>
 

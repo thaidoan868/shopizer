@@ -7,27 +7,26 @@ import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.PersistableCustomer
 import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.CustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCustomerProfileResponse;
 import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.UpdateCustomerProfileRequest;
-import vn.io.oldmoon.shopizer.user.infra.model.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 @Mapper(componentModel = "spring")
 public interface CustomerMapper {
   // TO MODELS
   UserRepresentation toUserRep(PersistableCustomer persistableCustomer);
 
-  CustomerProfile toProfile(PersistableCustomer persistableCustomer);
+  User toProfile(PersistableCustomer persistableCustomer);
 
   // Update
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-  CustomerProfile patchUpdate(
-      UpdateCustomerProfileRequest request, @MappingTarget CustomerProfile profile);
+  User patchUpdate(UpdateCustomerProfileRequest request, @MappingTarget User profile);
 
   // TO RESPONSE
   @Mapping(target = "id", ignore = true)
   CreatedUserResponse toCreatedUser(UserRepresentation userRep);
 
   @Mapping(target = "avatarMeta", ignore = true)
-  CustomerProfileResponse toProfileResponse(CustomerProfile profile);
+  CustomerProfileResponse toProfileResponse(User profile);
 
   @Mapping(target = "avatarMeta", ignore = true)
-  PublicCustomerProfileResponse toPublicProfileResponse(CustomerProfile profile);
+  PublicCustomerProfileResponse toPublicProfileResponse(User profile);
 }

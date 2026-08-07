@@ -4,32 +4,60 @@ server:
 spring:
   application:
     name: user-service
+
+  # Database Configuration (PostgreSQL prioritized over H2)
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: sa
+    url: jdbc:postgresql://localhost:5432/shopizer
+    driver-class-name: org.postgresql.Driver
+    username: postgresadmin
+    password: adminpassword
+
+  # JPA & Hibernate Configuration
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    open-in-view: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     properties:
+      hibernate.jdbc.time_zone: UTC
+      hibernate.format_sql: true
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
       javax:
         persistence:
           validation:
             mode: auto
+
+  # Database Migration
   flyway:
-    enabled: false
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+    validate-on-migrate: true
+
+  # Message Broker
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    publisher-confirm-type: correlated
+    publisher-returns: true
+
   # Security Configuration
   security:
     oauth2:
       resourceserver:
         jwt:
+          issuer-uri: http://localhost:8080/realms/shopizer
           jwk-set-uri: http://localhost:8080/realms/shopizer/protocol/openid-connect/certs
+
+  # JSON Serialization
   jackson:
     default-property-inclusion: non_null
 
-  # Email configuration
+  # Email Configuration
   mail:
     host: smtp.gmail.com
     port: 587
@@ -40,12 +68,10 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
+# Actuator & Management
 management:
-  #  tracing:
-  #    sampling:
-  #      probability: 1.0
   server:
-    port: 9000
+    port: 9100
   endpoints:
     web:
       base-path: /actuator
@@ -56,14 +82,15 @@ management:
       show-details: always
 #  otlp:
 #    tracing:
-#      endpoint: http://localhost:4318/v1/traces
+#      endpoint: http://jaeger:4318/v1/traces
 
-# Documentation
+# OpenAPI / Swagger Documentation
 springdoc:
   api-docs:
     enabled: true
     path: /v3/api-docs
 
+# Logging Configuration
 logging:
   level:
     root: INFO
@@ -72,17 +99,18 @@ logging:
     level: "%5p"
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{correlationId}] - %msg%n"
 
+# Keycloak Configuration
 keycloak:
   server-url: http://localhost:8080
   realm: shopizer
   client-id: backend
   client-secret: backendclientsecret
 
-# application setting
+# Application Custom Settings
 application:
   token-expiration: 15m
 
-# Object Storage
+# Object Storage (MinIO)
 minio:
   endpoint: http://localhost:9000
   public-bucket: "public-assets"

@@ -2,12 +2,9 @@ package vn.io.oldmoon.shopizer.user.infra.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.util.UUID;
 import lombok.*;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
-import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
-import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
 
 @Builder
 @AllArgsConstructor
@@ -16,12 +13,8 @@ import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
 @Setter
 @ToString(callSuper = true)
 @Entity
-@Table(name = "customer_profiles")
-public class CustomerProfile extends BaseEntity {
-  @Builder.Default
-  @Enumerated(EnumType.STRING)
-  private final Language language = Language.en;
-
+@Table(name = "super_admin_profiles")
+public class SuperAdminProfile extends BaseEntity {
   @OneToOne(
       fetch = FetchType.LAZY,
       cascade = {CascadeType.MERGE, CascadeType.PERSIST})
@@ -30,10 +23,5 @@ public class CustomerProfile extends BaseEntity {
   private User user;
 
   @NotNull private UUID keycloakUserId;
-  private String phoneNumber;
-  private String address;
-  private LocalDate dateOfBirth;
-
-  @Enumerated(EnumType.STRING)
-  private Gender gender;
+  private String workPhone;
 }

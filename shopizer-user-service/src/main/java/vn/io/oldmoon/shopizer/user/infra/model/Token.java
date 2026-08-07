@@ -1,23 +1,21 @@
 package vn.io.oldmoon.shopizer.user.infra.model;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.TokenType;
 
-import java.time.Instant;
-import java.util.UUID;
-
-@Entity
 @Data
 @NoArgsConstructor
+@Deprecated
 public class Token {
 
     @Id

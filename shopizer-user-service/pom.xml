@@ -23,11 +23,6 @@
             <artifactId>shopizer-common</artifactId>
             <version>1.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>vn.io.oldmoon</groupId>
-            <artifactId>shopizer-rabbitmq</artifactId>
-            <version>1.0.0</version>
-        </dependency>
 
         <!-- Spring -->
         <dependency>
@@ -171,6 +166,11 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
