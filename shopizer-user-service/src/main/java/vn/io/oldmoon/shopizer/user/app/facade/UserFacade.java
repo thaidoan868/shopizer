@@ -19,6 +19,7 @@ import vn.io.oldmoon.shopizer.user.infra.model.Token;
 
 @Service
 @RequiredArgsConstructor
+@Deprecated
 public class UserFacade {
   private final TaskExecutor taskExecutor;
 

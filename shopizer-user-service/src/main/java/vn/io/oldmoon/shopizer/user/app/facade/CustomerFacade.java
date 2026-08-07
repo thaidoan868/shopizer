@@ -15,6 +15,7 @@ import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 @Service
 @RequiredArgsConstructor
+@Deprecated
 public class CustomerFacade {
   private final CustomerPopulator customerPopulator;
   private final CustomerService customerService;

@@ -21,7 +21,6 @@ public class SuperAdminProfile extends BaseEntity {
   @ToString.Exclude
   private User user;
 
-  @NotNull
-  private UUID keycloakUserId;
+  @NotNull private UUID keycloakUserId;
   private String workPhone;
 }

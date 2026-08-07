@@ -18,6 +18,7 @@ import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCusto
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Customer Management Endpoints")
+@Deprecated
 public class PublicCustomerController {
   private final CustomerFacade customerFacade;
 
