@@ -17,9 +17,11 @@ public class UserCreatedPublisher implements EventPublisher<UserCreatedEvent> {
   @Override
   public void publish(UserCreatedEvent event) {
     rabbitTemplate.convertAndSend(
-        RabbitMqConfig.userEventExchange, RabbitMqConfig.userCreatedBindingKey, event);
+        RabbitMqConfig.userEventExchange, RabbitMqConfig.userRegisteredBindingKey, event);
 
     log.info(
-        "Published an event: userId={}, bindingKey={}", event.userId(), RabbitMqConfig.userCreatedBindingKey);
+        "Published an event: userId={}, bindingKey={}",
+        event.userId(),
+        RabbitMqConfig.userRegisteredBindingKey);
   }
 }

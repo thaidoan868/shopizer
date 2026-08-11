@@ -20,13 +20,14 @@ import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
 public class CustomerProfile extends BaseEntity {
   @Builder.Default
   @Enumerated(EnumType.STRING)
-  private final Language language = Language.en;
+  private Language language = Language.en;
 
   @OneToOne(
       fetch = FetchType.LAZY,
       cascade = {CascadeType.MERGE, CascadeType.PERSIST})
   @JoinColumn(name = "user_id")
   @ToString.Exclude
+  @NotNull
   private User user;
 
   @NotNull private UUID keycloakUserId;

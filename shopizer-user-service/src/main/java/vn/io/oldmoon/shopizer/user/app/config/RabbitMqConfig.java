@@ -8,8 +8,9 @@ import org.springframework.context.annotation.*;
 @EnableRabbit
 public class RabbitMqConfig {
   public static final String userEventExchange = "user.events";
-  public static final String userCreatedQueue = "user-created-queue";
-  public static final String userCreatedBindingKey = "user.created";
+  public static final String userRegisteredQueue = "user-registered-queue";
+  public static final String userRegisteredBindingKey =
+      "KK.EVENT.CLIENT.shopizer.SUCCESS.account-console.REGISTER";
 
   @Bean
   public TopicExchange userEventExchange() {
@@ -17,14 +18,14 @@ public class RabbitMqConfig {
   }
 
   @Bean
-  public Queue userCreatedQueue() {
-    return QueueBuilder.durable(userCreatedQueue).build();
+  public Queue userRegisteredQueue() {
+    return QueueBuilder.durable(userRegisteredQueue).build();
   }
 
   @Bean
-  public Binding userCreatedBinding() {
-    return BindingBuilder.bind(userCreatedQueue())
+  public Binding userRegisteredBindingKey() {
+    return BindingBuilder.bind(userRegisteredQueue())
         .to(userEventExchange())
-        .with(userCreatedBindingKey);
+        .with(userRegisteredBindingKey);
   }
 }
