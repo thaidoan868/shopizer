@@ -19,6 +19,7 @@ import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileRepository;
 @Slf4j
 public class CustomerProfileService implements ProfileService {
   private final CustomerProfileRepository customerProfileRepository;
+  private final UserService userService;
 
   @Override
   public Profile update() {
@@ -48,5 +49,19 @@ public class CustomerProfileService implements ProfileService {
     CustomerProfile profile = customerProfileRepository.save(customerProfile);
     log.info("Created a customer profile with userKeycloakUserId={}", profile.getKeycloakUserId());
     return profile;
+  }
+
+  /*
+  Create a new profile for a user that hasn't been saved
+   */
+  @Transactional
+  public CustomerProfile create(User notSavedUser) {
+    User savedUser = userService.create(notSavedUser);
+    CustomerProfile profile =
+        CustomerProfile.builder()
+            .user(savedUser)
+            .keycloakUserId(savedUser.getKeycloakUserId())
+            .build();
+    return customerProfileRepository.save(profile);
   }
 }
