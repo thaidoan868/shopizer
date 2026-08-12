@@ -14,7 +14,7 @@ import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 @ToString(callSuper = true)
 @Entity
 @Table(name = "store_manager_profiles")
-public class StoreManagerProfile extends BaseEntity {
+public class StoreManagerProfile extends BaseEntity implements Profile {
   @OneToOne(
       fetch = FetchType.LAZY,
       cascade = {CascadeType.MERGE, CascadeType.PERSIST})

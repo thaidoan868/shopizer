@@ -14,7 +14,7 @@ import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 @ToString(callSuper = true)
 @Entity
 @Table(name = "super_admin_profiles")
-public class SuperAdminProfile extends BaseEntity {
+public class SuperAdminProfile extends BaseEntity implements Profile {
   @OneToOne(
       fetch = FetchType.LAZY,
       cascade = {CascadeType.MERGE, CascadeType.PERSIST})
