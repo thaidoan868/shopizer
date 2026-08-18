@@ -27,10 +27,6 @@ public class AsyncConfig implements AsyncConfigurer {
       for (Object param : params) {
         log.error("Parameter value: {}", param);
       }
-
-      // - Send notification to Slack / Telegram / Sentry
-      // - Save failed job details into a DB table for manual retry
-      // - Push metric to Prometheus/Grafana
     }
   }
 }

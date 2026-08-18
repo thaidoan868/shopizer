@@ -11,7 +11,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import vn.io.oldmoon.shopizer.user.infra.data.constant.Header;
+import vn.io.oldmoon.shopizer.common.web.model.Header;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)

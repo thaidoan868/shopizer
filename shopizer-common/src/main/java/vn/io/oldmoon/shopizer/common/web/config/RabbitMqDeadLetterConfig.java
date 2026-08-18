@@ -8,7 +8,6 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.*;
 import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
-import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.*;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
@@ -28,7 +27,7 @@ public class RabbitMqDeadLetterConfig {
 
   @Bean
   public RetryOperationsInterceptor retryInterceptor(
-      RepublishMessageRecoverer recoverer, ExceptionClassifierRetryPolicy retryPolicy) {
+      RejectAndDontRequeueRecoverer recoverer, ExceptionClassifierRetryPolicy retryPolicy) {
 
     return RetryInterceptorBuilder.stateless()
         .retryPolicy(retryPolicy)
