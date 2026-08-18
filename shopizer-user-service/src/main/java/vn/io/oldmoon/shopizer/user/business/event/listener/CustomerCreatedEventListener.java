@@ -5,16 +5,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import vn.io.oldmoon.shopizer.common.event.ApplicationEventListener;
 import vn.io.oldmoon.shopizer.user.business.event.CustomerCreatedEvent;
-import vn.io.oldmoon.shopizer.user.business.service.KeycloakService;
+import vn.io.oldmoon.shopizer.user.business.service.keycloak.KeycloakService;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class CustomerCreatedEventListener {
+public class CustomerCreatedEventListener
+    implements ApplicationEventListener<CustomerCreatedEvent> {
   private final KeycloakService keycloakService;
 
+  @Override
   @EventListener
   @Async
   public void handle(CustomerCreatedEvent event) {

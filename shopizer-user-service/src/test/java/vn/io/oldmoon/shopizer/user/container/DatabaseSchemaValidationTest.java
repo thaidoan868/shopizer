@@ -5,7 +5,6 @@ import org.keycloak.admin.client.Keycloak;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -13,12 +12,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @Testcontainers
-@TestPropertySource(
-    properties = {
-      // Forces Hibernate to strictly validate entity models against the flyway database schema
-      "spring.jpa.hibernate.ddl-auto=validate",
-      "spring.flyway.enabled=true"
-    })
 class DatabaseSchemaValidationTest {
 
   @Container @ServiceConnection

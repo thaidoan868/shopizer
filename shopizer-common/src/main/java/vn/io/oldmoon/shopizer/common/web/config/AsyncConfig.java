@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @Configuration
-@EnableAsync
+@EnableAsync(proxyTargetClass = true)
 @Slf4j
 public class AsyncConfig implements AsyncConfigurer {
 

@@ -7,7 +7,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.User;
 import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
 
 @Service

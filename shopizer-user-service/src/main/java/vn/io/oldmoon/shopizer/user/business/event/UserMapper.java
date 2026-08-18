@@ -3,7 +3,7 @@ package vn.io.oldmoon.shopizer.user.business.event;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.User;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserMapper {
@@ -17,8 +17,5 @@ public interface UserMapper {
   @Mapping(target = "realm", ignore = true) // Defaulted to "shopizer" in entity
   @Mapping(target = "verified", ignore = true) // Defaulted to false in entity
   @Mapping(target = "avatarMeta", ignore = true)
-  @Mapping(target = "id", ignore = true) // BaseEntity field
-  @Mapping(target = "createdAt", ignore = true) // BaseEntity field
-  @Mapping(target = "updatedAt", ignore = true) // BaseEntity field
-  User toUserEntity(KeycloakUserRegisterEvent event);
+  User toUserEntity(KeycloakUserRegisterEvent eventDto);
 }

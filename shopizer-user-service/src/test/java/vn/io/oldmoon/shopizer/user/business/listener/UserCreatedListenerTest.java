@@ -10,7 +10,7 @@
 // import vn.io.oldmoon.shopizer.user.business.event.UserCreatedEvent;
 // import vn.io.oldmoon.shopizer.user.business.event.listener.UserCreatedCreateProfileListener;
 // import vn.io.oldmoon.shopizer.user.business.service.CustomerService;
-// import vn.io.oldmoon.shopizer.user.infra.model.User;
+// import vn.io.oldmoon.shopizer.user.infra.model.profile.User;
 //
 // class UserCreatedListenerTest {
 //  @Mock private CustomerService customerService;

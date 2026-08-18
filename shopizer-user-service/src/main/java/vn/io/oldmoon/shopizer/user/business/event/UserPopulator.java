@@ -3,7 +3,7 @@ package vn.io.oldmoon.shopizer.user.business.event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.User;
 
 @Service
 @RequiredArgsConstructor

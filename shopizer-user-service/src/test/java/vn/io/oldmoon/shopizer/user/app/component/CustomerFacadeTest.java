@@ -17,7 +17,7 @@
 // vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCustomerProfileResponse;
 // import vn.io.oldmoon.shopizer.user.app.transfer.populator.customer.CustomerPopulator;
 // import vn.io.oldmoon.shopizer.user.business.service.CustomerService;
-// import vn.io.oldmoon.shopizer.user.infra.model.User;
+// import vn.io.oldmoon.shopizer.user.infra.model.profile.User;
 //
 // class CustomerFacadeTest {
 //  @Mock private CustomerPopulator customerPopulator;
