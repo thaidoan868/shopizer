@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
-import vn.io.oldmoon.shopizer.user.infra.model.profile.User;
 import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileRepository;
 
 @Service

@@ -1,7 +1,6 @@
-package vn.io.oldmoon.shopizer.user.app.component;
+package vn.io.oldmoon.shopizer.common.web.component;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -36,12 +35,12 @@ class ApiLoggingFilterTest {
     FilterChain filterChain = mock(FilterChain.class);
 
     doThrow(new RuntimeException("Database unreachable"))
-        .when(filterChain).doFilter(request, response);
+        .when(filterChain)
+        .doFilter(request, response);
 
     assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
         .isInstanceOf(RuntimeException.class)
         .hasMessage("Database unreachable");
     verify(response).getStatus();
   }
-
 }

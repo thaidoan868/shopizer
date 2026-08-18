@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.*;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 @Builder
 @AllArgsConstructor

@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.app.component;
+package vn.io.oldmoon.shopizer.common.web.component;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -18,7 +18,7 @@
 // import vn.io.oldmoon.shopizer.user.app.transfer.populator.url.UrlConverter;
 // import vn.io.oldmoon.shopizer.user.infra.data.constant.KeycloakRequiredAction;
 // import vn.io.oldmoon.shopizer.user.infra.model.profile.AvatarMeta;
-// import vn.io.oldmoon.shopizer.user.infra.model.profile.User;
+// import vn.io.oldmoon.shopizer.user.infra.model.User;
 //
 // @Service
 // @RequiredArgsConstructor

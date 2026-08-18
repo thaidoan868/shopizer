@@ -8,6 +8,7 @@ import lombok.*;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 @Builder
 @AllArgsConstructor

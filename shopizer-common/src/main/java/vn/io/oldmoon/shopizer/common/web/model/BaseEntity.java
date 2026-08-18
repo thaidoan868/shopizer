@@ -30,8 +30,8 @@ public abstract class BaseEntity {
   @Column(updatable = false)
   private UUID createdBy;
 
-  @LastModifiedBy private Instant modified;
-  @UpdateTimestamp private UUID modifiedBy;
+  @UpdateTimestamp private Instant modified;
+  @LastModifiedBy private UUID modifiedBy;
 
   @Override
   public boolean equals(Object o) {

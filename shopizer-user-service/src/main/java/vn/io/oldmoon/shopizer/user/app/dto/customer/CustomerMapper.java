@@ -9,7 +9,7 @@
 // vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCustomerProfileResponse;
 // import
 // vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.UpdateCustomerProfileRequest;
-// import vn.io.oldmoon.shopizer.user.infra.model.profile.User;
+// import vn.io.oldmoon.shopizer.user.infra.model.User;
 //
 // @Mapper(componentModel = "spring")
 // public interface CustomerMapper {

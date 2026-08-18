@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.event;
+package vn.io.oldmoon.shopizer.user.business.event.registration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

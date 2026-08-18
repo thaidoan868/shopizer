@@ -1,12 +1,11 @@
-package vn.io.oldmoon.shopizer.user.business.event.listener;
+package vn.io.oldmoon.shopizer.user.business.event.registration;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import vn.io.oldmoon.shopizer.common.event.ApplicationEventListener;
-import vn.io.oldmoon.shopizer.user.business.event.CustomerCreatedEvent;
+import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.service.keycloak.KeycloakService;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 
@@ -18,8 +17,7 @@ public class CustomerCreatedEventListener
   private final KeycloakService keycloakService;
 
   @Override
-  @EventListener
-  @Async
+  @RabbitListener(queues = RabbitMqConfig.customerCreatedQueue)
   public void handle(CustomerCreatedEvent event) {
     log.info("Processing CustomerCreatedEvent keycloakUserId={}", event.keycloakUserId());
     keycloakService.assignRealmRole(event.keycloakUserId(), Role.CUSTOMER);

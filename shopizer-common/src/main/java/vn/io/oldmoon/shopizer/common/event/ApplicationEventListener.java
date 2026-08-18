@@ -6,5 +6,5 @@ public interface ApplicationEventListener<T extends ApplicationEvent> {
    *
    * @param event The event received from the queue.
    */
-  void handle(T event) throws NoSuchMethodException;
+  void handle(T event);
 }

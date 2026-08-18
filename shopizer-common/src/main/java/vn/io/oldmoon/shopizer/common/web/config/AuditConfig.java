@@ -1,6 +1,5 @@
 package vn.io.oldmoon.shopizer.common.web.config;
 
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +12,6 @@ import vn.io.oldmoon.shopizer.common.web.controller.AbstractController;
 public class AuditConfig {
   @Bean
   public AuditorAware<UUID> auditorAware() {
-    return () -> Optional.of(AbstractController.getCurrentUserId());
+    return AbstractController::getCurrentUserId;
   }
 }
