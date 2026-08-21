@@ -183,6 +183,18 @@
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- 2. Spring AMQP / RabbitMQ Test Support -->
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- 4. Testcontainers RabbitMQ Module -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>rabbitmq</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- Source: https://mvnrepository.com/artifact/com.github.dasniko/testcontainers-keycloak -->
         <dependency>
             <groupId>com.github.dasniko</groupId>
@@ -192,7 +204,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <argLine></argLine>
         <mockito.version>5.17.0</mockito.version>
     </properties>
 

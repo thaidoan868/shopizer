@@ -9,6 +9,7 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.AvatarMeta;
 
 @Builder
 @AllArgsConstructor
@@ -27,7 +28,7 @@ public class User extends BaseEntity {
 
   @NotBlank private String email;
 
-  @NotBlank @Builder.Default private Boolean verified = Boolean.FALSE;
+  @NotNull @Builder.Default private Boolean verified = Boolean.FALSE;
 
   @NotBlank private String firstName;
 

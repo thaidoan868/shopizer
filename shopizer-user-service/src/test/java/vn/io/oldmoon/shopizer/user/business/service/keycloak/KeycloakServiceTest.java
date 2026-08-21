@@ -6,44 +6,55 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import vn.io.oldmoon.shopizer.user.business.service.KeycloakService;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 
 @Testcontainers
 @SpringBootTest
-@Deprecated
 class KeycloakServiceTest {
+  @Container @ServiceConnection
+  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
   @Container
   static KeycloakContainer keycloakContainer =
-      new KeycloakContainer("quay.io/keycloak/keycloak:26.0")
-          .withRealmImportFile("realm-export.json");
+      new KeycloakContainer("quay.io/keycloak/keycloak:26.0");
 
+  private final String realm = "master";
   @Autowired private KeycloakService keycloakService;
-
   @Autowired private Keycloak keycloak;
-
-  @Value("${keycloak.realm}")
-  private String realm;
 
   @DynamicPropertySource
   static void registerProperties(DynamicPropertyRegistry registry) {
     registry.add("keycloak.server-url", keycloakContainer::getAuthServerUrl);
+    registry.add("keycloak.realm", () -> "master"); // Explicitly set realm property
+  }
+
+  @BeforeEach
+  void setUp() {
+    // Ensure the CUSTOMER role exists in the realm before tests run
+    try {
+      keycloak.realm(realm).roles().get(Role.CUSTOMER.name()).toRepresentation();
+    } catch (Exception e) {
+      RoleRepresentation customerRole = new RoleRepresentation();
+      customerRole.setName(Role.CUSTOMER.name());
+      keycloak.realm(realm).roles().create(customerRole);
+    }
   }
 
   private String createUser(String email) {
@@ -54,23 +65,22 @@ class KeycloakServiceTest {
     user.setFirstName("firstname");
     user.setLastName("lastname");
 
-    Response response = keycloak.realm(realm).users().create(user);
-
-    return CreatedResponseUtil.getCreatedId(response);
+    try (Response response = keycloak.realm(realm).users().create(user)) {
+      return CreatedResponseUtil.getCreatedId(response);
+    }
   }
 
   @Test
   void shouldGetUser() {
-    // Create
+    // given
     String email = "user-" + UUID.randomUUID() + "@mail.com";
-    String username = email;
     String userId = createUser(email);
 
-    // Fetch via service
+    // when
     UserRepresentation userByID = keycloakService.get(UUID.fromString(userId));
-    UserRepresentation userByUsername = keycloakService.getUserByUsername(username);
+    UserRepresentation userByUsername = keycloakService.getUserByUsername(email);
 
-    // Assert
+    // then
     assertThat(userByID.getEmail()).isEqualTo(email);
     assertThat(userByUsername.getEmail()).isEqualTo(email);
   }
@@ -79,7 +89,7 @@ class KeycloakServiceTest {
   void shouldAssignRoleCustomer() {
     // given
     String userId = createUser(UUID.randomUUID() + "@mail.com");
-    Role role = Role.customer;
+    Role role = Role.CUSTOMER;
 
     // when
     keycloakService.assignRealmRole(userId, role);

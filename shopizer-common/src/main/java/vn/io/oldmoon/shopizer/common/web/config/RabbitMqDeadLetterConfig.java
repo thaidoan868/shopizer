@@ -7,7 +7,7 @@ import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.*;
-import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
+import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.*;
 import org.springframework.retry.interceptor.RetryOperationsInterceptor;
@@ -16,39 +16,18 @@ import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 @Configuration
 @EnableRabbit
 public class RabbitMqDeadLetterConfig {
-  private final String DEAD_LETTER_EXCHANGE = "app.deadletter.exchange";
-  private final String DEAD_LETTER_QUEUE = "app.deadletter.queue";
-  private final String DEAD_LETTER_ROUTING_KEY = "dead.event";
-
-  // Dead Letter Infrastructure
+  /**
+   * Rejects the message without requeueing when retries are exhausted. RabbitMQ will natively
+   * transfer it to the queue's x-dead-letter-exchange and x-dead-letter-routing-key.
+   */
   @Bean
-  public DirectExchange deadLetterExchange() {
-    return new DirectExchange(DEAD_LETTER_EXCHANGE);
-  }
-
-  @Bean
-  public Queue deadLetterQueue() {
-    return QueueBuilder.durable(DEAD_LETTER_QUEUE).build();
-  }
-
-  @Bean
-  public Binding dlqBinding() {
-    return BindingBuilder.bind(deadLetterQueue())
-        .to(deadLetterExchange())
-        .with(DEAD_LETTER_ROUTING_KEY);
-  }
-
-  // retry
-
-  @Bean
-  public RepublishMessageRecoverer republishMessageRecoverer(RabbitTemplate rabbitTemplate) {
-    return new RepublishMessageRecoverer(
-        rabbitTemplate, DEAD_LETTER_EXCHANGE, DEAD_LETTER_ROUTING_KEY);
+  public RejectAndDontRequeueRecoverer rejectAndDontRequeueRecoverer() {
+    return new RejectAndDontRequeueRecoverer();
   }
 
   @Bean
   public RetryOperationsInterceptor retryInterceptor(
-      RepublishMessageRecoverer recoverer, ExceptionClassifierRetryPolicy retryPolicy) {
+      RejectAndDontRequeueRecoverer recoverer, ExceptionClassifierRetryPolicy retryPolicy) {
 
     return RetryInterceptorBuilder.stateless()
         .retryPolicy(retryPolicy)

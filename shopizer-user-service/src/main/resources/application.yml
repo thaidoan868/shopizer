@@ -9,8 +9,8 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/shopizer
     driver-class-name: org.postgresql.Driver
-    username: postgresadmin
-    password: adminpassword
+    username: app_user
+    password: app_user_password
 
   # JPA & Hibernate Configuration
   jpa:
@@ -39,8 +39,8 @@ spring:
   rabbitmq:
     host: localhost
     port: 5672
-    username: guest
-    password: guest
+    username: rabitmqadmin
+    password: rabitmqadminpassword
     virtual-host: /
     publisher-confirm-type: correlated
     publisher-returns: true
@@ -103,8 +103,8 @@ logging:
 keycloak:
   server-url: http://localhost:8080
   realm: shopizer
-  client-id: backend
-  client-secret: backendclientsecret
+  client-id: user-service
+  client-secret: qr8Qw6vQodFh3ipb1uNUBiaRo6JtkQwB
 
 # Application Custom Settings
 application:

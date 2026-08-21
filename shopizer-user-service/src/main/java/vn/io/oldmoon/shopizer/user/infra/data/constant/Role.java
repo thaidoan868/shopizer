@@ -1,6 +1,9 @@
 package vn.io.oldmoon.shopizer.user.infra.data.constant;
 
 public enum Role {
-    customer,
-    merchant
+  CUSTOMER,
+  STORE_MANAGER,
+  SUPER_ADMIN,
+  SUPPORT_AGENT,
+  WAREHOUSE_STAFF
 }
