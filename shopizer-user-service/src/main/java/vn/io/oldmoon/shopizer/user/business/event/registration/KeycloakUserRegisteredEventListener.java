@@ -24,11 +24,12 @@ public class KeycloakUserRegisteredEventListener
   @Override
   @RabbitListener(queues = RabbitMqConfig.userRegisteredQueue)
   public void handle(KeycloakUserRegisteredEvent event) {
-    log.info("Processing KeycloakUserRegisterEvent keycloakUserId={}", event.userId());
+    log.info("Processing KeycloakUserRegisterEvent userId={}", event.userId());
     User user = userPopulator.toUserEntity(event);
     CustomerProfile customerProfile = customerProfileService.create(user);
     CustomerCreatedEvent customerCreatedEvent =
         new CustomerCreatedEvent(customerProfile.getKeycloakUserId().toString());
+    log.info("Successfully registered user userId={}", event.userId());
     // I didn't use @Transactional and told Keycloak to assign the customer role directly
     // because, if Keycloak is busy, it could cause database connection pool exhaustion
     eventPublisher.publish(customerCreatedEvent, RabbitMqConfig.customerCreatedBindingKey);

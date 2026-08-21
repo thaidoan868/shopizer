@@ -28,7 +28,7 @@ public class User extends BaseEntity {
 
   @NotBlank private String email;
 
-  @NotBlank @Builder.Default private Boolean verified = Boolean.FALSE;
+  @NotNull @Builder.Default private Boolean verified = Boolean.FALSE;
 
   @NotBlank private String firstName;
 

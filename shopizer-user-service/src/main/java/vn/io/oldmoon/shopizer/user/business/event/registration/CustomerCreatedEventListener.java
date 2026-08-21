@@ -19,7 +19,7 @@ public class CustomerCreatedEventListener
   @Override
   @RabbitListener(queues = RabbitMqConfig.customerCreatedQueue)
   public void handle(CustomerCreatedEvent event) {
-    log.info("Processing CustomerCreatedEvent keycloakUserId={}", event.keycloakUserId());
+    log.info("Processing CustomerCreatedEvent userId={}", event.keycloakUserId());
     keycloakService.assignRealmRole(event.keycloakUserId(), Role.CUSTOMER);
   }
 }

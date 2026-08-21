@@ -10,13 +10,12 @@ import vn.io.oldmoon.shopizer.user.infra.model.User;
 @RequiredArgsConstructor
 @Slf4j
 public class UserPopulator {
-  private UserMapper userMapper;
+  private final UserMapper userMapper;
 
   public User toUserEntity(KeycloakUserRegisteredEvent event) {
     User user = userMapper.toUserEntity(event);
     log.info(
-        "Converted to user from keycloakUserRegisterEvent: keycloakUserId {}",
-        user.getKeycloakUserId());
+        "Converted to user from keycloakUserRegisterEvent: userId {}", user.getKeycloakUserId());
     return user;
   }
 }

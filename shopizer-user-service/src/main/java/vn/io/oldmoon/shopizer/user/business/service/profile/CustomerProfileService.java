@@ -33,16 +33,16 @@ public class CustomerProfileService implements ProfileService {
   }
 
   @NonNull
-  public User get(UUID keycloakUserId) {
-    User user =
+  public CustomerProfile get(UUID keycloakUserId) {
+    CustomerProfile profile =
         customerProfileRepository
             .findByKeycloakUserId(keycloakUserId)
             .orElseThrow(
                 () ->
                     new ResourceNotFoundException(
-                        "CustomerProfile with", "keycloakUserId: " + keycloakUserId.toString()));
+                        "CustomerProfile with", "userId: " + keycloakUserId.toString()));
     log.info("Fetched Customer profile: userId={}", keycloakUserId);
-    return user;
+    return profile;
   }
 
   @Transactional

@@ -15,6 +15,8 @@ public class RabbitMqConfig {
   public static final String userRegisteredQueue = "user-registered-queue";
   public static final String userRegisteredBindingKey =
       "KK.EVENT.CLIENT.shopizer.SUCCESS.account-console.REGISTER";
+  public static final String userRegisteredBySecurityConsoleBindingKey =
+      "KK.EVENT.CLIENT.shopizer.SUCCESS.security-admin-console.REGISTER";
   public static final String userRegisteredDlq = "user-registered-dlq";
   public static final String userRegisteredDlqBindingKey = "user-registered.dlq";
   // 2. Customer Created Queue & DLQ
@@ -51,6 +53,13 @@ public class RabbitMqConfig {
     return BindingBuilder.bind(userRegisteredQueue())
         .to(userEventExchange())
         .with(userRegisteredBindingKey);
+  }
+
+  @Bean
+  public Binding userRegisteredBySecurityConsoleBinding() {
+    return BindingBuilder.bind(userRegisteredQueue())
+        .to(userEventExchange())
+        .with(userRegisteredBySecurityConsoleBindingKey);
   }
 
   @Bean

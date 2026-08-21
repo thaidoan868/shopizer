@@ -28,15 +28,16 @@ public class UserService {
             .orElseThrow(
                 () ->
                     new ResourceNotFoundException(
-                        "User with", "keycloakUserId: " + keycloakUserId.toString()));
-    log.info("Fetched Customer profile: userId={}", keycloakUserId);
+                        "User", "userId=%s".formatted(keycloakUserId.toString())));
+
+    log.debug("Fetched User: userId={}", keycloakUserId);
     return user;
   }
 
   @Transactional
   public User create(User user) {
     User newUser = userRepository.save(user);
-    log.info("Created a user with userKeycloakUserId={}", newUser.getKeycloakUserId());
+    log.info("Persisting user entity userKeycloakUserId={}", newUser.getKeycloakUserId());
     return newUser;
   }
 

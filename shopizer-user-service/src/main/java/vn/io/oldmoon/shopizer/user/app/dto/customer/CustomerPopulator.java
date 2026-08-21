@@ -88,7 +88,8 @@
 //    response.setAvatarMeta(toAvatarResponse(avatar));
 //
 //    log.debug(
-//        "Converted CustomerProfile to CustomerProfileResponse: userId={}", profile.getUserId());
+//        "Converted CustomerProfile to CustomerProfileResponse: userId={}",
+// profile.getUserId());
 //    return response;
 //  }
 //
