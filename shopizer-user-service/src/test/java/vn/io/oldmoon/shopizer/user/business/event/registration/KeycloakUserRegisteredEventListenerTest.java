@@ -14,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
-import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
 import vn.io.oldmoon.shopizer.user.business.event.RabbitMqEventPublisher;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
@@ -25,7 +24,7 @@ class KeycloakUserRegisteredEventListenerTest {
 
   @Mock private CustomerProfileService customerProfileService;
 
-  @Mock private UserPopulator userPopulator;
+  @Mock private KeycloakUserRegisteredEventParser keycloakUserRegisteredEventParser;
 
   @Mock private RabbitMqEventPublisher eventPublisher;
 
@@ -42,7 +41,7 @@ class KeycloakUserRegisteredEventListenerTest {
     CustomerProfile customerProfile = mock(CustomerProfile.class);
 
     when(event.userId()).thenReturn(userId);
-    when(userPopulator.toUserEntity(event)).thenReturn(user);
+    when(keycloakUserRegisteredEventParser.toUserEntity(event)).thenReturn(user);
     when(customerProfileService.create(user)).thenReturn(customerProfile);
     when(customerProfile.getKeycloakUserId()).thenReturn(userId);
 
@@ -50,7 +49,7 @@ class KeycloakUserRegisteredEventListenerTest {
     listener.handle(event);
 
     // Then
-    verify(userPopulator).toUserEntity(event);
+    verify(keycloakUserRegisteredEventParser).toUserEntity(event);
     verify(customerProfileService).create(user);
 
     // Capture published event & routing key

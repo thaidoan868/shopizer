@@ -30,9 +30,9 @@ public class User extends BaseEntity {
 
   @NotNull @Builder.Default private Boolean verified = Boolean.FALSE;
 
-  @NotBlank private String firstName;
+  @NotNull @Builder.Default private String firstName = "";
 
-  @NotBlank private String lastName;
+  @NotNull @Builder.Default private String lastName = "";
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")

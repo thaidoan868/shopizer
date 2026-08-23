@@ -7,4 +7,10 @@ import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
   Optional<User> findByKeycloakUserId(UUID keycloakUserId);
+
+  Optional<User> findByUsername(String username);
+
+  Optional<User> findByEmail(String email);
+
+  boolean existsByKeycloakUserId(UUID keycloakUserId);
 }

@@ -6,7 +6,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import vn.io.oldmoon.shopizer.common.event.ApplicationEventListener;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
-import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
 import vn.io.oldmoon.shopizer.user.business.event.RabbitMqEventPublisher;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
@@ -18,14 +17,14 @@ import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
 public class KeycloakUserRegisteredEventListener
     implements ApplicationEventListener<KeycloakUserRegisteredEvent> {
   private final CustomerProfileService customerProfileService;
-  private final UserPopulator userPopulator;
+  private final KeycloakUserRegisteredEventParser keycloakUserRegisteredEventParser;
   private final RabbitMqEventPublisher eventPublisher;
 
   @Override
   @RabbitListener(queues = RabbitMqConfig.userRegisteredQueue)
   public void handle(KeycloakUserRegisteredEvent event) {
     log.info("Processing KeycloakUserRegisterEvent userId={}", event.userId());
-    User user = userPopulator.toUserEntity(event);
+    User user = keycloakUserRegisteredEventParser.toUserEntity(event);
     CustomerProfile customerProfile = customerProfileService.create(user);
     CustomerCreatedEvent customerCreatedEvent =
         new CustomerCreatedEvent(customerProfile.getKeycloakUserId().toString());

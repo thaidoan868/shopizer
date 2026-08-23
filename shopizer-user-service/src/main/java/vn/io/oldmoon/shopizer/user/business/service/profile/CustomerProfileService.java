@@ -1,5 +1,6 @@
 package vn.io.oldmoon.shopizer.user.business.service.profile;
 
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,16 @@ public class CustomerProfileService implements ProfileService {
 
   @Transactional
   public CustomerProfile create(CustomerProfile customerProfile) {
+    if (customerProfile.getKeycloakUserId() != null) {
+      Optional<CustomerProfile> existing =
+          customerProfileRepository.findByKeycloakUserId(customerProfile.getKeycloakUserId());
+      if (existing.isPresent()) {
+        log.info(
+            "CustomerProfile with keycloakUserId={} already exists. Skipping insertion for idempotency.",
+            customerProfile.getKeycloakUserId());
+        return existing.get();
+      }
+    }
     CustomerProfile profile = customerProfileRepository.save(customerProfile);
     log.info("Created a customer profile with userKeycloakUserId={}", profile.getKeycloakUserId());
     return profile;
@@ -63,6 +74,6 @@ public class CustomerProfileService implements ProfileService {
             .user(savedUser)
             .keycloakUserId(savedUser.getKeycloakUserId())
             .build();
-    return customerProfileRepository.save(profile);
+    return this.create(profile);
   }
 }

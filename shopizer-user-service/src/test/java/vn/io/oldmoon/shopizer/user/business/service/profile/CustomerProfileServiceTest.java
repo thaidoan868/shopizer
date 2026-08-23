@@ -41,7 +41,7 @@ class CustomerProfileServiceTest {
   @Test
   @DisplayName("update should return null")
   void update_ShouldReturnNull() {
-    assertThat(customerProfileService.update()).isNotNull();
+    assertThat(customerProfileService.update()).isNull();
   }
 
   @Test
