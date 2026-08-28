@@ -18,7 +18,7 @@ import vn.io.oldmoon.shopizer.user.infra.model.User;
 @ToString(callSuper = true)
 @Entity
 @Table(name = "customer_profiles")
-public class CustomerProfile extends BaseEntity implements Profile {
+public class CustomerProfile extends BaseEntity {
   @Builder.Default
   @Enumerated(EnumType.STRING)
   private Language language = Language.en;

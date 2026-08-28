@@ -14,8 +14,8 @@ import vn.io.oldmoon.shopizer.user.infra.model.User;
 @Setter
 @ToString(callSuper = true)
 @Entity
-@Table(name = "store_manager_profiles")
-public class StoreManagerProfile extends BaseEntity implements Profile {
+@Table(name = "employee_profiles")
+public class EmployeeProfile extends BaseEntity {
   @OneToOne(
       fetch = FetchType.LAZY,
       cascade = {CascadeType.MERGE, CascadeType.PERSIST})
@@ -24,6 +24,9 @@ public class StoreManagerProfile extends BaseEntity implements Profile {
   private User user;
 
   @NotNull private UUID keycloakUserId;
+
+  @Enumerated(EnumType.STRING)
+  private Shift shift;
 
   private String workPhone;
 }
