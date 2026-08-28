@@ -9,10 +9,10 @@ import vn.io.oldmoon.shopizer.user.infra.model.User;
 @RequiredArgsConstructor
 @Slf4j
 public class KeycloakUserRegisteredEventParser {
-  private final UserMapper userMapper;
+  private final KeycloakUserRegisteredEventMapper keycloakuserRegisteredEventMapper;
 
   public User toUserEntity(KeycloakUserRegisteredEvent event) {
-    User user = userMapper.toUserEntity(event);
+    User user = keycloakuserRegisteredEventMapper.toUserEntity(event);
     log.info(
         "Converted to user from keycloakUserRegisterEvent: userId {}", user.getKeycloakUserId());
     return user;

@@ -6,7 +6,7 @@ import org.mapstruct.MappingConstants;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface UserMapper {
+public interface KeycloakUserRegisteredEventMapper {
 
   @Mapping(target = "keycloakUserId", source = "eventDto.userId")
   @Mapping(target = "username", source = "eventDto.details.username")

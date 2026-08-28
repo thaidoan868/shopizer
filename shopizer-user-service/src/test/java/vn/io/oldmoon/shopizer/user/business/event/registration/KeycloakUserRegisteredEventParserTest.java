@@ -16,7 +16,7 @@ import vn.io.oldmoon.shopizer.user.infra.model.User;
 @ExtendWith(MockitoExtension.class)
 class KeycloakUserRegisteredEventParserTest {
 
-  @Mock private UserMapper userMapper;
+  @Mock private KeycloakUserRegisteredEventMapper keycloakuserRegisteredEventMapper;
 
   @InjectMocks private KeycloakUserRegisteredEventParser parser;
 
@@ -46,7 +46,7 @@ class KeycloakUserRegisteredEventParserTest {
             .lastName("Doe")
             .build();
 
-    when(userMapper.toUserEntity(event)).thenReturn(expectedUser);
+    when(keycloakuserRegisteredEventMapper.toUserEntity(event)).thenReturn(expectedUser);
 
     User actualUser = parser.toUserEntity(event);
 
@@ -57,6 +57,6 @@ class KeycloakUserRegisteredEventParserTest {
     assertThat(actualUser.getFirstName()).isEqualTo("John");
     assertThat(actualUser.getLastName()).isEqualTo("Doe");
 
-    verify(userMapper).toUserEntity(event);
+    verify(keycloakuserRegisteredEventMapper).toUserEntity(event);
   }
 }
