@@ -3,7 +3,6 @@ package vn.io.oldmoon.shopizer.user.infra.model.profile;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.UUID;
 import lombok.*;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
@@ -31,7 +30,6 @@ public class CustomerProfile extends BaseEntity {
   @NotNull
   private User user;
 
-  @NotNull private UUID keycloakUserId;
   private String phoneNumber;
   private String address;
   private LocalDate dateOfBirth;

@@ -31,7 +31,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
-import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileQueryDto;
 import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileRepository;
 
 @SpringBootTest
@@ -90,7 +90,7 @@ class KeycloakUserRegisteredEventListenerIT {
         .atMost(Duration.ofSeconds(5))
         .untilAsserted(
             () -> {
-              Optional<CustomerProfile> profile =
+              Optional<CustomerProfileQueryDto> profile =
                   customerProfileRepository.findByKeycloakUserId(event.userId());
               assertThat(profile).isPresent();
             });

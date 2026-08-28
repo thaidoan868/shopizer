@@ -43,7 +43,6 @@ class KeycloakUserRegisteredEventListenerTest {
     when(event.userId()).thenReturn(userId);
     when(keycloakUserRegisteredEventParser.toUserEntity(event)).thenReturn(user);
     when(customerProfileService.create(user)).thenReturn(customerProfile);
-    when(customerProfile.getKeycloakUserId()).thenReturn(userId);
 
     // When
     listener.handle(event);

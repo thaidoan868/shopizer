@@ -27,7 +27,7 @@ public class KeycloakUserRegisteredEventListener
     User user = keycloakUserRegisteredEventParser.toUserEntity(event);
     CustomerProfile customerProfile = customerProfileService.create(user);
     CustomerCreatedEvent customerCreatedEvent =
-        new CustomerCreatedEvent(customerProfile.getKeycloakUserId().toString());
+        new CustomerCreatedEvent(user.getKeycloakUserId().toString());
     log.info("Successfully registered user userId={}", event.userId());
     // I didn't use @Transactional and told Keycloak to assign the customer role directly
     // because, if Keycloak is busy, it could cause database connection pool exhaustion

@@ -1,8 +1,6 @@
 package vn.io.oldmoon.shopizer.user.infra.model.profile;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
 import lombok.*;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
@@ -22,8 +20,6 @@ public class EmployeeProfile extends BaseEntity {
   @JoinColumn(name = "user_id")
   @ToString.Exclude
   private User user;
-
-  @NotNull private UUID keycloakUserId;
 
   @Enumerated(EnumType.STRING)
   private Shift shift;
