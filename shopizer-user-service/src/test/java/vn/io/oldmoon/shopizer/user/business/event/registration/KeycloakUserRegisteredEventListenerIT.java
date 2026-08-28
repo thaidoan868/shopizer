@@ -133,4 +133,37 @@ class KeycloakUserRegisteredEventListenerIT {
               assertThat(body).contains(event.userId().toString());
             });
   }
+
+  @Test
+  @DisplayName(
+      "Bad path: Resilience & Idempotency: Duplicate events with same keycloak user ID should not cause primary key violation")
+  void handle_Idempotency_DuplicateEvents_ShouldNotCausePrimaryKeyViolation() {
+    // When: Send first event
+    rabbitTemplate.convertAndSend(
+        RabbitMqConfig.userEventExchange, RabbitMqConfig.userRegisteredBindingKey, event);
+
+    // Verify first event persisted
+    await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(
+            () -> {
+              Optional<CustomerProfileQueryDto> customerProfileQueryDto =
+                  customerProfileRepository.findByKeycloakUserId(event.userId());
+              assertThat(customerProfileQueryDto).isPresent();
+            });
+
+    // When: Send duplicate event with same user ID
+    rabbitTemplate.convertAndSend(
+        RabbitMqConfig.userEventExchange, RabbitMqConfig.userRegisteredBindingKey, event);
+
+    // Then: Verify user still exists and no crash / DLQ occurs
+    await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(
+            () -> {
+              Optional<CustomerProfileQueryDto> customerProfileQueryDto =
+                  customerProfileRepository.findByKeycloakUserId(event.userId());
+              assertThat(customerProfileQueryDto).isPresent();
+            });
+  }
 }

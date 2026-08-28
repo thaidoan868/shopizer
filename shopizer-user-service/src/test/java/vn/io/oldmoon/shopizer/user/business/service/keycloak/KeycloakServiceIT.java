@@ -27,7 +27,7 @@ import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 
 @Testcontainers
 @SpringBootTest
-class KeycloakServiceTest {
+class KeycloakServiceIT {
   @Container @ServiceConnection
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 

@@ -24,7 +24,7 @@ public class CustomerProfile extends BaseEntity {
 
   @OneToOne(
       fetch = FetchType.LAZY,
-      cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+      cascade = {CascadeType.MERGE})
   @JoinColumn(name = "user_id")
   @ToString.Exclude
   @NotNull
