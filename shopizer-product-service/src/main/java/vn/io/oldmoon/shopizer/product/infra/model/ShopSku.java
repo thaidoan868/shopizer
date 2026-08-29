@@ -29,12 +29,12 @@ public class ShopSku extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "product_id")
   @ToString.Exclude
-  private Product product;
+  private ShopProduct product;
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "defaultSku")
   @Builder.Default
   @ToString.Exclude
-  private List<Product> defaultSkuOfProducts = new ArrayList<>();
+  private List<ShopProduct> defaultSkuOfProducts = new ArrayList<>();
 
   private Integer availableQuantity;
   @Builder.Default private Boolean deleted = false;
