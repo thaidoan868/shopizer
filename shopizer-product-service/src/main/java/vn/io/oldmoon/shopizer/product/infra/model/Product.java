@@ -86,6 +86,7 @@ public class Product extends BaseEntity {
   public void addProductOption(ProductOption newOption) {
     if (newOption == null) {
       log.warn("Product option is null");
+      return;
     }
 
     if (getProductOptions().contains(newOption)) {

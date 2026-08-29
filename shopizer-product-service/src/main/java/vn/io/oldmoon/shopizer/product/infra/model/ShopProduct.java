@@ -20,7 +20,7 @@ public class ShopProduct extends BaseEntity {
   @ToString.Exclude
   @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name = "default_sku_id")
-  private Sku defaultSku;
+  private ShopSku defaultSku;
 
   @Builder.Default private Boolean deleted = false;
 }

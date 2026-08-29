@@ -1,8 +1,6 @@
 package vn.io.oldmoon.shopizer.user.infra.model.profile;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
 import lombok.*;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
@@ -14,16 +12,17 @@ import vn.io.oldmoon.shopizer.user.infra.model.User;
 @Setter
 @ToString(callSuper = true)
 @Entity
-@Table(name = "store_manager_profiles")
-public class StoreManagerProfile extends BaseEntity implements Profile {
+@Table(name = "employee_profiles")
+public class EmployeeProfile extends BaseEntity {
   @OneToOne(
       fetch = FetchType.LAZY,
-      cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+      cascade = {CascadeType.MERGE})
   @JoinColumn(name = "user_id")
   @ToString.Exclude
   private User user;
 
-  @NotNull private UUID keycloakUserId;
+  @Enumerated(EnumType.STRING)
+  private Shift shift;
 
   private String workPhone;
 }

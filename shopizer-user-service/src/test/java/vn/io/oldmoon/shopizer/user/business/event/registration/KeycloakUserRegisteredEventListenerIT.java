@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -31,7 +30,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
-import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileQueryDto;
 import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileRepository;
 
 @SpringBootTest
@@ -65,16 +64,15 @@ class KeycloakUserRegisteredEventListenerIT {
     UUID keycloakUserId = UUID.randomUUID();
     KeycloakRegistrationDetails details =
         new KeycloakRegistrationDetails(
-            "openid-connect", // auth_method
+            "openid-connect",
             "code", // auth_type
             "form", // register_method
             "Doe", // last_name
-            "http://localhost/callback", // redirect_uri
+            "http://localhost/callback",
             "John", // first_name
-            UUID.randomUUID().toString(), // code_id
-            "john@example.com", // email
-            "johndoe" // username
-            );
+            UUID.randomUUID().toString(),
+            UUID.randomUUID() + "@example.com",
+            "johndoe" + UUID.randomUUID());
     this.event = new KeycloakUserRegisteredEvent(keycloakUserId, details);
   }
 
@@ -90,7 +88,7 @@ class KeycloakUserRegisteredEventListenerIT {
         .atMost(Duration.ofSeconds(5))
         .untilAsserted(
             () -> {
-              Optional<CustomerProfile> profile =
+              Optional<CustomerProfileQueryDto> profile =
                   customerProfileRepository.findByKeycloakUserId(event.userId());
               assertThat(profile).isPresent();
             });
@@ -132,5 +130,33 @@ class KeycloakUserRegisteredEventListenerIT {
               String body = new String(dlqMessage.getBody());
               assertThat(body).contains(event.userId().toString());
             });
+  }
+
+  @Test
+  @DisplayName(
+      "Bad path: Resilience & Idempotency: Duplicate events with same keycloak user ID should not cause primary key violation")
+  void handle_Idempotency_DuplicateEvents_ShouldNotCausePrimaryKeyViolation() {
+    // When: Send first event
+    rabbitTemplate.convertAndSend(
+        RabbitMqConfig.userEventExchange, RabbitMqConfig.userRegisteredBindingKey, event);
+
+    // Verify first event persisted
+    await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(
+            () -> {
+              Optional<CustomerProfileQueryDto> customerProfileQueryDto =
+                  customerProfileRepository.findByKeycloakUserId(event.userId());
+              assertThat(customerProfileQueryDto).isPresent();
+            });
+
+    // When: Send duplicate event with same user ID
+    rabbitTemplate.convertAndSend(
+        RabbitMqConfig.userEventExchange, RabbitMqConfig.userRegisteredBindingKey, event);
+
+    // Verify the listener method was invoked 2 times total without throwing an exception
+    await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(() -> verify(customerCreatedEventListener, times(2)).handle(any()));
   }
 }

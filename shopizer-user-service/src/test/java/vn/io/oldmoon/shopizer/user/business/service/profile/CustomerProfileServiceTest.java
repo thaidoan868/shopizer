@@ -1,9 +1,9 @@
 package vn.io.oldmoon.shopizer.user.business.service.profile;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,11 +16,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
-import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileQueryDto;
 import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,85 +32,116 @@ class CustomerProfileServiceTest {
   @InjectMocks private CustomerProfileService customerProfileService;
 
   @Test
-  @DisplayName("getSupportedRole should return Role.CUSTOMER")
-  void getSupportedRole_ShouldReturnCustomer() {
-    assertThat(customerProfileService.getSupportedRole()).isEqualTo(Role.CUSTOMER);
-  }
-
-  @Test
-  @DisplayName("update should return null")
-  void update_ShouldReturnNull() {
-    assertThat(customerProfileService.update()).isNotNull();
-  }
-
-  @Test
-  @DisplayName("get should return Customer profile when found")
-  void get_WhenFound_ShouldReturnUser() {
+  @DisplayName("get should return Optional containing Customer profile when found")
+  void get_WhenFound_ShouldReturnCustomerProfile() {
     // Given
-    UUID userId = UUID.randomUUID();
+    UUID keycloakUserId = UUID.randomUUID();
+    UUID profileId = UUID.randomUUID();
+    CustomerProfileQueryDto queryDto = new CustomerProfileQueryDto(profileId);
     CustomerProfile expectedProfile = mock(CustomerProfile.class);
-    when(customerProfileRepository.findByKeycloakUserId(userId))
-        .thenReturn(Optional.of(expectedProfile));
+
+    when(customerProfileRepository.findByKeycloakUserId(keycloakUserId))
+        .thenReturn(Optional.of(queryDto));
+    when(customerProfileRepository.findById(profileId)).thenReturn(Optional.of(expectedProfile));
 
     // When
-    CustomerProfile actualProfile = customerProfileService.get(userId);
+    Optional<CustomerProfile> actualProfile = customerProfileService.get(keycloakUserId);
 
     // Then
-    assertThat(actualProfile).isNotNull().isEqualTo(expectedProfile);
-    verify(customerProfileRepository).findByKeycloakUserId(userId);
+    assertThat(actualProfile).isPresent().contains(expectedProfile);
+    verify(customerProfileRepository).findByKeycloakUserId(keycloakUserId);
+    verify(customerProfileRepository).findById(profileId);
   }
 
   @Test
-  @DisplayName("get should throw ResourceNotFoundException when user is not found")
-  void get_WhenNotFound_ShouldThrowResourceNotFoundException() {
+  @DisplayName("get should return empty Optional when user is not found")
+  void get_WhenNotFound_ShouldReturnEmptyOptional() {
     // Given
-    UUID userId = UUID.randomUUID();
-    when(customerProfileRepository.findByKeycloakUserId(userId)).thenReturn(Optional.empty());
+    UUID keycloakUserId = UUID.randomUUID();
+    when(customerProfileRepository.findByKeycloakUserId(keycloakUserId))
+        .thenReturn(Optional.empty());
 
-    // When / Then
-    assertThatThrownBy(() -> customerProfileService.get(userId))
-        .isInstanceOf(ResourceNotFoundException.class);
+    // When
+    Optional<CustomerProfile> actualProfile = customerProfileService.get(keycloakUserId);
+
+    // Then
+    assertThat(actualProfile).isEmpty();
+    verify(customerProfileRepository).findByKeycloakUserId(keycloakUserId);
+    verify(customerProfileRepository, never()).findById(any());
   }
 
   @Test
-  @DisplayName("create(CustomerProfile) should save and return CustomerProfile")
-  void create_WithCustomerProfile_ShouldSaveAndReturnProfile() {
+  @DisplayName(
+      "create(CustomerProfile) should save and return CustomerProfile when profile does not exist")
+  void create_WithCustomerProfile_WhenNotExist_ShouldSaveAndReturnProfile() {
     // Given
-    UUID userId = UUID.randomUUID();
-    CustomerProfile inputProfile = CustomerProfile.builder().keycloakUserId(userId).build();
+    UUID keycloakUserId = UUID.randomUUID();
+    User user = User.builder().keycloakUserId(keycloakUserId).build();
+    CustomerProfile inputProfile = CustomerProfile.builder().user(user).build();
 
-    CustomerProfile expectedSavedProfile = CustomerProfile.builder().keycloakUserId(userId).build();
-
-    when(customerProfileRepository.save(inputProfile)).thenReturn(expectedSavedProfile);
+    when(customerProfileRepository.findByKeycloakUserId(keycloakUserId))
+        .thenReturn(Optional.empty());
+    when(customerProfileRepository.save(inputProfile)).thenReturn(inputProfile);
 
     // When
     CustomerProfile result = customerProfileService.create(inputProfile);
 
     // Then
-    assertThat(result).isNotNull();
-    assertThat(result.getKeycloakUserId()).isEqualTo(userId);
+    assertThat(result).isNotNull().isEqualTo(inputProfile);
+    verify(customerProfileRepository).findByKeycloakUserId(keycloakUserId);
     verify(customerProfileRepository).save(inputProfile);
   }
 
   @Test
   @DisplayName(
-      "create(User) should save User via UserService, construct CustomerProfile, and save it")
+      "create(CustomerProfile) should return existing profile and skip saving when profile already exists")
+  void create_WithCustomerProfile_WhenExists_ShouldReturnExistingProfileAndSkipSave() {
+    // Given
+    UUID keycloakUserId = UUID.randomUUID();
+    UUID profileId = UUID.randomUUID();
+    User user = User.builder().keycloakUserId(keycloakUserId).build();
+    CustomerProfile inputProfile = CustomerProfile.builder().user(user).build();
+
+    CustomerProfileQueryDto queryDto = new CustomerProfileQueryDto(profileId);
+    CustomerProfile existingProfile = CustomerProfile.builder().user(user).build();
+    existingProfile.setId(profileId);
+
+    when(customerProfileRepository.findByKeycloakUserId(keycloakUserId))
+        .thenReturn(Optional.of(queryDto));
+    when(customerProfileRepository.findById(profileId)).thenReturn(Optional.of(existingProfile));
+
+    // When
+    CustomerProfile result = customerProfileService.create(inputProfile);
+
+    // Then
+    assertThat(result).isNotNull().isEqualTo(existingProfile);
+    verify(customerProfileRepository).findByKeycloakUserId(keycloakUserId);
+    verify(customerProfileRepository).findById(profileId);
+    verify(customerProfileRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName(
+      "create(User) should save User via UserService, construct CustomerProfile, and delegate to create(CustomerProfile)")
   void create_WithUnsavedUser_ShouldCreateUserAndSaveProfile() {
     // Given
-    UUID userId = UUID.randomUUID();
+    UUID keycloakUserId = UUID.randomUUID();
     User unsavedUser = mock(User.class);
-    User savedUser = mock(User.class);
-    CustomerProfile savedProfile = mock(CustomerProfile.class);
+    User savedUser = User.builder().keycloakUserId(keycloakUserId).build();
 
-    when(savedUser.getKeycloakUserId()).thenReturn(userId);
     when(userService.create(unsavedUser)).thenReturn(savedUser);
-    when(customerProfileRepository.save(any(CustomerProfile.class))).thenReturn(savedProfile);
+    when(customerProfileRepository.findByKeycloakUserId(keycloakUserId))
+        .thenReturn(Optional.empty());
+
+    CustomerProfile expectedSavedProfile = mock(CustomerProfile.class);
+    when(customerProfileRepository.save(any(CustomerProfile.class)))
+        .thenReturn(expectedSavedProfile);
 
     // When
     CustomerProfile result = customerProfileService.create(unsavedUser);
 
     // Then
-    assertThat(result).isEqualTo(savedProfile);
+    assertThat(result).isEqualTo(expectedSavedProfile);
     verify(userService).create(unsavedUser);
 
     ArgumentCaptor<CustomerProfile> profileCaptor = ArgumentCaptor.forClass(CustomerProfile.class);
@@ -119,6 +149,5 @@ class CustomerProfileServiceTest {
 
     CustomerProfile capturedProfile = profileCaptor.getValue();
     assertThat(capturedProfile.getUser()).isEqualTo(savedUser);
-    assertThat(capturedProfile.getKeycloakUserId()).isEqualTo(userId);
   }
 }

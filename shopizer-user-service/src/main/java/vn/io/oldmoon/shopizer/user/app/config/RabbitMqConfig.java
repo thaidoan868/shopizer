@@ -24,6 +24,12 @@ public class RabbitMqConfig {
   public static final String customerCreatedBindingKey = "user.customer.created";
   public static final String customerCreatedDlq = "customer-created-dlq";
   public static final String customerCreatedDlqBindingKey = "user.customer.created.dlq";
+  // 3. User Created Queue & DLQ (Admin Event)
+  public static final String AdminUserCreatedQueue = "user.events.admin.user-created";
+  public static final String AdminUserCreatedBindingKey =
+      "KK.EVENT.ADMIN.shopizer.SUCCESS.USER.CREATE";
+  public static final String AdminUserCreatedDlq = "user.events.admin.user-created.dlq";
+  public static final String AdminUserCreatedDlqBindingKey = "user.events.admin.user-created.dlq";
 
   private final String xDeadLetterExchange = "x-dead-letter-exchange";
   private final String xDeadLetterRoutingKey = "x-dead-letter-routing-key";
@@ -100,5 +106,33 @@ public class RabbitMqConfig {
     return BindingBuilder.bind(customerCreatedDlq())
         .to(deadLetterExchange())
         .with(customerCreatedDlqBindingKey);
+  }
+
+  // --- 3. User Created (Admin Event) Configuration ---
+  @Bean
+  public Queue userCreatedQueue() {
+    return QueueBuilder.durable(AdminUserCreatedQueue)
+        .withArgument(xDeadLetterExchange, deadLetterExchange)
+        .withArgument(xDeadLetterRoutingKey, AdminUserCreatedDlqBindingKey)
+        .build();
+  }
+
+  @Bean
+  public Binding userCreatedBinding() {
+    return BindingBuilder.bind(userCreatedQueue())
+        .to(userEventExchange())
+        .with(AdminUserCreatedBindingKey);
+  }
+
+  @Bean
+  public Queue userCreatedDlq() {
+    return QueueBuilder.durable(AdminUserCreatedDlq).build();
+  }
+
+  @Bean
+  public Binding userCreatedDlqBinding() {
+    return BindingBuilder.bind(userCreatedDlq())
+        .to(deadLetterExchange())
+        .with(AdminUserCreatedDlqBindingKey);
   }
 }

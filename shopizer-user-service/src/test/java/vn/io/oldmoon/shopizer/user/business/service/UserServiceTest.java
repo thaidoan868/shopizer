@@ -72,7 +72,7 @@ class UserServiceTest {
   class CreateTest {
 
     @Test
-    @DisplayName("should save and return created User")
+    @DisplayName("should save and return created User when user does not exist")
     void create_ShouldSaveAndReturnUser() {
       // Given
       UUID keycloakUserId = UUID.randomUUID();
@@ -90,6 +90,7 @@ class UserServiceTest {
               .email("john@example.com")
               .build();
 
+      when(userRepository.findByKeycloakUserId(keycloakUserId)).thenReturn(Optional.empty());
       when(userRepository.save(inputUser)).thenReturn(savedUser);
 
       // When
@@ -97,7 +98,40 @@ class UserServiceTest {
 
       // Then
       assertThat(result).isNotNull().isEqualTo(savedUser);
+      verify(userRepository).findByKeycloakUserId(keycloakUserId);
       verify(userRepository).save(inputUser);
+    }
+
+    @Test
+    @DisplayName(
+        "should return existing user without saving when user already exists with keycloakUserId")
+    void create_WhenUserAlreadyExists_ShouldReturnExistingUser() {
+      // Given
+      UUID keycloakUserId = UUID.randomUUID();
+      User inputUser =
+          User.builder()
+              .keycloakUserId(keycloakUserId)
+              .username("johndoe")
+              .email("john@example.com")
+              .build();
+
+      User existingUser =
+          User.builder()
+              .keycloakUserId(keycloakUserId)
+              .username("johndoe")
+              .email("john@example.com")
+              .build();
+
+      when(userRepository.findByKeycloakUserId(keycloakUserId))
+          .thenReturn(Optional.of(existingUser));
+
+      // When
+      User result = userService.create(inputUser);
+
+      // Then
+      assertThat(result).isNotNull().isEqualTo(existingUser);
+      verify(userRepository).findByKeycloakUserId(keycloakUserId);
+      org.mockito.Mockito.verify(userRepository, org.mockito.Mockito.never()).save(inputUser);
     }
   }
 }
