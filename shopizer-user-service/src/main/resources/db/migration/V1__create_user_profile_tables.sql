@@ -45,8 +45,6 @@ CREATE UNIQUE INDEX idx_customer_profiles_user_id
     ON customer_profiles (user_id)
     WHERE user_id IS NOT NULL;
 
-CREATE UNIQUE INDEX idx_customer_profiles_keycloak_user_id
-    ON customer_profiles (keycloak_user_id);
 
 CREATE TABLE employee_profiles (
     -- BaseEntity fields

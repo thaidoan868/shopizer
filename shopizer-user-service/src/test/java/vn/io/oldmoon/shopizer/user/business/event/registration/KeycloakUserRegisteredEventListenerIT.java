@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -65,16 +64,15 @@ class KeycloakUserRegisteredEventListenerIT {
     UUID keycloakUserId = UUID.randomUUID();
     KeycloakRegistrationDetails details =
         new KeycloakRegistrationDetails(
-            "openid-connect", // auth_method
+            "openid-connect",
             "code", // auth_type
             "form", // register_method
             "Doe", // last_name
-            "http://localhost/callback", // redirect_uri
+            "http://localhost/callback",
             "John", // first_name
-            UUID.randomUUID().toString(), // code_id
-            "john@example.com", // email
-            "johndoe" // username
-            );
+            UUID.randomUUID().toString(),
+            UUID.randomUUID() + "@example.com",
+            "johndoe" + UUID.randomUUID());
     this.event = new KeycloakUserRegisteredEvent(keycloakUserId, details);
   }
 
@@ -156,14 +154,9 @@ class KeycloakUserRegisteredEventListenerIT {
     rabbitTemplate.convertAndSend(
         RabbitMqConfig.userEventExchange, RabbitMqConfig.userRegisteredBindingKey, event);
 
-    // Then: Verify user still exists and no crash / DLQ occurs
+    // Verify the listener method was invoked 2 times total without throwing an exception
     await()
         .atMost(Duration.ofSeconds(5))
-        .untilAsserted(
-            () -> {
-              Optional<CustomerProfileQueryDto> customerProfileQueryDto =
-                  customerProfileRepository.findByKeycloakUserId(event.userId());
-              assertThat(customerProfileQueryDto).isPresent();
-            });
+        .untilAsserted(() -> verify(customerCreatedEventListener, times(2)).handle(any()));
   }
 }

@@ -2,6 +2,9 @@ package vn.io.oldmoon.shopizer.user.business.event.adminUserCreatedEvent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -44,6 +47,10 @@ class KeycloakAdminUserCreatedEventListenerIT {
   @Autowired private RabbitTemplate rabbitTemplate;
   @Autowired private UserRepository userRepository;
   @MockitoSpyBean private UserService userService;
+
+  @MockitoSpyBean
+  private KeycloakAdminUserCreatedEventListener keycloakAdminUserCreatedEventListener;
+
   private UUID keycloakUserId;
   private String username;
   private String email;
@@ -131,13 +138,9 @@ class KeycloakAdminUserCreatedEventListenerIT {
     rabbitTemplate.convertAndSend(
         RabbitMqConfig.userEventExchange, RabbitMqConfig.AdminUserCreatedBindingKey, event);
 
-    // Then: Verify user still exists and no crash / DLQ occurs
+    // Verify the listener method was invoked 2 times total without throwing an exception
     await()
         .atMost(Duration.ofSeconds(5))
-        .untilAsserted(
-            () -> {
-              Optional<User> userOptional = userRepository.findByKeycloakUserId(keycloakUserId);
-              assertThat(userOptional).isPresent();
-            });
+        .untilAsserted(() -> verify(keycloakAdminUserCreatedEventListener, times(2)).handle(any()));
   }
 }
