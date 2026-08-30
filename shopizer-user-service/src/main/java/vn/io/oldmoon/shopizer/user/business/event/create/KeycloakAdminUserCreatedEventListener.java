@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.event.adminUserCreatedEvent;
+package vn.io.oldmoon.shopizer.user.business.event.create;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.event.ApplicationEventListener;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
-import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminEvent;
-import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminEventParser;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEvent;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEventParser;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 
@@ -19,7 +19,6 @@ import vn.io.oldmoon.shopizer.user.infra.model.User;
 public class KeycloakAdminUserCreatedEventListener
     implements ApplicationEventListener<KeycloakAdminEvent> {
 
-  private final KeycloakAdminEventParser eventParser;
   private final UserService userService;
   private final KeycloakAdminEventParser parser;
 

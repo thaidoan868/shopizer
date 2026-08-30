@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.event.adminUserCreatedEvent;
+package vn.io.oldmoon.shopizer.user.business.event.create;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;

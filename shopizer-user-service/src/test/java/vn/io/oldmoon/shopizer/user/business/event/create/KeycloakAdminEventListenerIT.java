@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.event.adminUserCreatedEvent;
+package vn.io.oldmoon.shopizer.user.business.event.create;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -27,8 +27,8 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
-import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminAuthDetails;
-import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminEvent;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminAuthDetails;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEvent;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
@@ -78,7 +78,9 @@ class KeycloakAdminEventListenerIT {
             .build();
 
     String representation =
-        "{\\\"username\\\":\\\"%s\\\",\\\"firstName\\\":\\\"\\\",\\\"lastName\\\":\\\"\\\",\\\"email\\\":\\\"%s\\\",\\\"emailVerified\\\":false,\\\"attributes\\\":{\\\"locale\\\":[\\\"\\\"]},\\\"enabled\\\":true,\\\"requiredActions\\\":[],\\\"groups\\\":[]}"
+        """
+        {"username":"%s","firstName":"","lastName":"","email":"%s","emailVerified":false,"attributes":{"locale":[""]},"enabled":true,"requiredActions":[],"groups":[]}
+        """
             .formatted(username, email);
 
     event =
@@ -115,7 +117,7 @@ class KeycloakAdminEventListenerIT {
               assertThat(user.getEmail()).isEqualTo(this.email);
 
               assertThat(user.getVerified()).isFalse();
-              assertThat(user.getRealm()).isEqualTo("master");
+              assertThat(user.getRealm()).isEqualTo("shopizer");
             });
   }
 
