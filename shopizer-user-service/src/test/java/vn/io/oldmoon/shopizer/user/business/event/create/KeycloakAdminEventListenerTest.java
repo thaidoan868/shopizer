@@ -102,6 +102,7 @@ class KeycloakAdminEventListenerTest {
               .resourcePath("users/" + userId)
               .authDetails(authDetails)
               .build();
+      when(parser.extractUserId(event)).thenReturn(userId);
     }
 
     @Test

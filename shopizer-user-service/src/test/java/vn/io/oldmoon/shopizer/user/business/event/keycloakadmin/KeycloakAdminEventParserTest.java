@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.user.business.event.create.KeycloakAdminUserCreatedRepresentation;
+import vn.io.oldmoon.shopizer.user.business.event.rolemapping.KeycloakRoleRepresentation;
 
 class KeycloakAdminEventParserTest {
 
@@ -138,6 +139,98 @@ class KeycloakAdminEventParserTest {
 
       assertThatThrownBy(
               () -> parser.parseRepresentation(event, KeycloakAdminUserCreatedRepresentation.class))
+          .isInstanceOf(InvalidInputException.class)
+          .hasMessageContaining("Malformed representation JSON");
+    }
+  }
+
+  @Nested
+  @DisplayName("List Representation Deserialization Tests")
+  class ParseListRepresentationTests {
+
+    @Test
+    @DisplayName("Should parse JSON array of role representations correctly")
+    void parseListRepresentations_WithJsonArray_ShouldReturnListOfRoles() {
+      String json =
+          """
+          [
+            {
+              "id": "2b230619-bcfc-4ae4-b608-954a4b185290",
+              "name": "SUPER_ADMIN",
+              "description": "Full System Access",
+              "composite": false,
+              "clientRole": false,
+              "containerId": "a9cbd686-1d46-44c5-9c61-26078d493828"
+            },
+            {
+              "id": "3c341720-cdfd-5bf5-c719-065b5c296301",
+              "name": "STORE_MANAGER",
+              "description": "Store Manager Access",
+              "composite": false,
+              "clientRole": false,
+              "containerId": "a9cbd686-1d46-44c5-9c61-26078d493828"
+            }
+          ]
+          """;
+      KeycloakAdminEvent event = KeycloakAdminEvent.builder().representation(json).build();
+
+      var roles = parser.parseListRepresentations(event, KeycloakRoleRepresentation.class);
+
+      assertThat(roles).hasSize(2);
+      assertThat(roles.get(0).name()).isEqualTo("SUPER_ADMIN");
+      assertThat(roles.get(0).id()).isEqualTo("2b230619-bcfc-4ae4-b608-954a4b185290");
+      assertThat(roles.get(0).description()).isEqualTo("Full System Access");
+      assertThat(roles.get(1).name()).isEqualTo("STORE_MANAGER");
+      assertThat(roles.get(1).id()).isEqualTo("3c341720-cdfd-5bf5-c719-065b5c296301");
+    }
+
+    @Test
+    @DisplayName("Should parse single JSON object of role representation correctly")
+    void parseListRepresentations_WithSingleObject_ShouldReturnSingletonList() {
+      String json =
+          """
+          {
+            "id": "2b230619-bcfc-4ae4-b608-954a4b185290",
+            "name": "SUPPORT_AGENT",
+            "description": "Customer Support",
+            "composite": false,
+            "clientRole": false,
+            "containerId": "a9cbd686-1d46-44c5-9c61-26078d493828"
+          }
+          """;
+      KeycloakAdminEvent event = KeycloakAdminEvent.builder().representation(json).build();
+
+      var roles = parser.parseListRepresentations(event, KeycloakRoleRepresentation.class);
+
+      assertThat(roles).hasSize(1);
+      assertThat(roles.get(0).name()).isEqualTo("SUPPORT_AGENT");
+      assertThat(roles.get(0).id()).isEqualTo("2b230619-bcfc-4ae4-b608-954a4b185290");
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"   "})
+    @DisplayName("Should throw InvalidInputException when representation is null or blank")
+    void parseListRepresentations_WithNullOrBlankJson_ShouldThrowException(String json) {
+      KeycloakAdminEvent event = KeycloakAdminEvent.builder().representation(json).build();
+
+      assertThatThrownBy(
+              () -> parser.parseListRepresentations(event, KeycloakRoleRepresentation.class))
+          .isInstanceOf(InvalidInputException.class)
+          .hasMessageContaining("Representation JSON string must not be null or blank");
+    }
+
+    @Test
+    @DisplayName("Should throw InvalidInputException when representation is malformed")
+    void parseListRepresentations_WithMalformedJson_ShouldThrowException() {
+      String json =
+          """
+        ["field1": "value1", "field2": "value2"]  // Does not represent JSON objects
+        """;
+      KeycloakAdminEvent event = KeycloakAdminEvent.builder().representation(json).build();
+
+      assertThatThrownBy(
+              () -> parser.parseListRepresentations(event, KeycloakRoleRepresentation.class))
           .isInstanceOf(InvalidInputException.class)
           .hasMessageContaining("Malformed representation JSON");
     }

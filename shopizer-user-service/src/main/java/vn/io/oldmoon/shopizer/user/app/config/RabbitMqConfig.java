@@ -30,6 +30,20 @@ public class RabbitMqConfig {
       "KK.EVENT.ADMIN.shopizer.SUCCESS.USER.CREATE";
   public static final String AdminUserCreatedDlq = "user.events.admin.user-created.dlq";
   public static final String AdminUserCreatedDlqBindingKey = "user.events.admin.user-created.dlq";
+  // 4. Role Mapping Created Queue & DLQ (Admin Event)
+  public static final String adminRoleMappingCreatedQueue =
+      "user.events.admin.realm-role-mapping-created";
+  public static final String AdminRoleMappingCreatedQueue = adminRoleMappingCreatedQueue;
+  public static final String adminRoleMappingCreatedBindingKey =
+      "KK.EVENT.ADMIN.shopizer.SUCCESS.REALM_ROLE_MAPPING.CREATE";
+  public static final String AdminRoleMappingCreatedBindingKey = adminRoleMappingCreatedBindingKey;
+  public static final String adminRoleMappingCreatedDlq =
+      "user.events.admin.realm-role-mapping-created.dlq";
+  public static final String AdminRoleMappingCreatedDlq = adminRoleMappingCreatedDlq;
+  public static final String adminRoleMappingCreatedDlqBindingKey =
+      "user.events.admin.realm-role-mapping-created.dlq";
+  public static final String AdminRoleMappingCreatedDlqBindingKey =
+      adminRoleMappingCreatedDlqBindingKey;
 
   private final String xDeadLetterExchange = "x-dead-letter-exchange";
   private final String xDeadLetterRoutingKey = "x-dead-letter-routing-key";
@@ -134,5 +148,33 @@ public class RabbitMqConfig {
     return BindingBuilder.bind(userCreatedDlq())
         .to(deadLetterExchange())
         .with(AdminUserCreatedDlqBindingKey);
+  }
+
+  // --- 4. Role Mapping Created (Admin Event) Configuration ---
+  @Bean
+  public Queue adminRoleMappingCreatedQueue() {
+    return QueueBuilder.durable(adminRoleMappingCreatedQueue)
+        .withArgument(xDeadLetterExchange, deadLetterExchange)
+        .withArgument(xDeadLetterRoutingKey, adminRoleMappingCreatedDlqBindingKey)
+        .build();
+  }
+
+  @Bean
+  public Binding adminRoleMappingCreatedBinding() {
+    return BindingBuilder.bind(adminRoleMappingCreatedQueue())
+        .to(userEventExchange())
+        .with(adminRoleMappingCreatedBindingKey);
+  }
+
+  @Bean
+  public Queue adminRoleMappingCreatedDlq() {
+    return QueueBuilder.durable(adminRoleMappingCreatedDlq).build();
+  }
+
+  @Bean
+  public Binding adminRoleMappingCreatedDlqBinding() {
+    return BindingBuilder.bind(adminRoleMappingCreatedDlq())
+        .to(deadLetterExchange())
+        .with(adminRoleMappingCreatedDlqBindingKey);
   }
 }
