@@ -7,7 +7,7 @@ import lombok.Builder;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder(toBuilder = true)
-public record KeycloakAdminUserRepresentation(
+public record KeycloakAdminUserCreatedRepresentation(
     String username,
     String email,
     String firstName,

@@ -13,6 +13,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminAuthDetails;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminEvent;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminEventParser;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 class KeycloakAdminEventParserTest {
@@ -24,7 +27,7 @@ class KeycloakAdminEventParserTest {
   class ExtractUserIdTests {
 
     @Test
-    @DisplayName("Should extract UUID from standard 'users/{uuid}' resourcePath")
+    @DisplayName("Should extract UUID from standard 'users/{uuid}/abc/pdf' resourcePath")
     void extractUserId_WithStandardPath_ShouldReturnUuid() {
       UUID expected = UUID.fromString("a9cef68e-4cb9-4d69-bc3f-8f555c583ba5");
       UUID actual = parser.extractUserId("users/a9cef68e-4cb9-4d69-bc3f-8f555c583ba5");
@@ -80,7 +83,7 @@ class KeycloakAdminEventParserTest {
 
       String repJson =
           "{\\\"username\\\":\\\"napolenon\\\",\\\"firstName\\\":\\\"\\\",\\\"lastName\\\":\\\"\\\",\\\"email\\\":\\\"napoleon@france\\\",\\\"emailVerified\\\":false,\\\"attributes\\\":{\\\"locale\\\":[\\\"\\\"]},\\\"enabled\\\":true,\\\"requiredActions\\\":[],\\\"groups\\\":[]}";
-      KeycloakAdminUserRepresentation rep = parser.parseRepresentation(repJson);
+      KeycloakAdminUserCreatedRepresentation rep = parser.parseRepresentation(repJson);
 
       assertThat(rep).isNotNull();
       assertThat(rep.username()).isEqualTo("napolenon");
@@ -111,7 +114,7 @@ class KeycloakAdminEventParserTest {
   @Nested
   @DisplayName("User Entity Mapping Tests")
   class ToUserEntityTests {
-    KeycloakAdminUserCreatedEvent event;
+    KeycloakAdminEvent event;
     UUID userId;
 
     @BeforeEach
@@ -119,7 +122,7 @@ class KeycloakAdminEventParserTest {
       this.userId = UUID.fromString("a9cef68e-4cb9-4d69-bc3f-8f555c583ba5");
 
       this.event =
-          KeycloakAdminUserCreatedEvent.builder()
+          KeycloakAdminEvent.builder()
               .resourcePath("users/" + userId)
               .authDetails(KeycloakAdminAuthDetails.builder().realmName("master").build())
               .representation(
@@ -170,8 +173,8 @@ class KeycloakAdminEventParserTest {
     @Test
     @DisplayName("Should throw InvalidInputException when userId is null")
     void toUserEntity_WithNullUserId_ShouldThrowException() {
-      KeycloakAdminUserRepresentation rep =
-          KeycloakAdminUserRepresentation.builder()
+      KeycloakAdminUserCreatedRepresentation rep =
+          KeycloakAdminUserCreatedRepresentation.builder()
               .username("testuser")
               .email("test@example.com")
               .build();
@@ -185,8 +188,11 @@ class KeycloakAdminEventParserTest {
     @DisplayName("Should throw InvalidInputException when username is missing")
     void toUserEntity_WithMissingUsername_ShouldThrowException() {
       UUID userId = UUID.randomUUID();
-      KeycloakAdminUserRepresentation rep =
-          KeycloakAdminUserRepresentation.builder().email("test@example.com").username("").build();
+      KeycloakAdminUserCreatedRepresentation rep =
+          KeycloakAdminUserCreatedRepresentation.builder()
+              .email("test@example.com")
+              .username("")
+              .build();
 
       assertThatThrownBy(() -> parser.toUserEntity(rep, userId, event))
           .isInstanceOf(InvalidInputException.class)
@@ -197,8 +203,8 @@ class KeycloakAdminEventParserTest {
     @DisplayName("Should throw InvalidInputException when email is missing")
     void toUserEntity_WithMissingEmail_ShouldThrowException() {
       UUID userId = UUID.randomUUID();
-      KeycloakAdminUserRepresentation rep =
-          KeycloakAdminUserRepresentation.builder().username("testuser").email(null).build();
+      KeycloakAdminUserCreatedRepresentation rep =
+          KeycloakAdminUserCreatedRepresentation.builder().username("testuser").email(null).build();
 
       assertThatThrownBy(() -> parser.toUserEntity(rep, userId, event))
           .isInstanceOf(InvalidInputException.class)

@@ -27,13 +27,15 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminAuthDetails;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminEvent;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
 
 @SpringBootTest
 @Testcontainers
-class KeycloakAdminUserCreatedEventListenerIT {
+class KeycloakAdminEventListenerIT {
 
   @Container @ServiceConnection
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
@@ -54,7 +56,7 @@ class KeycloakAdminUserCreatedEventListenerIT {
   private UUID keycloakUserId;
   private String username;
   private String email;
-  private KeycloakAdminUserCreatedEvent event;
+  private KeycloakAdminEvent event;
 
   @DynamicPropertySource
   static void configureProperties(DynamicPropertyRegistry registry) {
@@ -80,7 +82,7 @@ class KeycloakAdminUserCreatedEventListenerIT {
             .formatted(username, email);
 
     event =
-        KeycloakAdminUserCreatedEvent.builder()
+        KeycloakAdminEvent.builder()
             .time(System.currentTimeMillis())
             .authDetails(authDetails)
             .resourceType("USER")

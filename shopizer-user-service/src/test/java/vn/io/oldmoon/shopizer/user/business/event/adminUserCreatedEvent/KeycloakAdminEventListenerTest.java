@@ -13,11 +13,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminEvent;
+import vn.io.oldmoon.shopizer.user.business.event.keycloakAdminEvent.KeycloakAdminEventParser;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 @ExtendWith(MockitoExtension.class)
-class KeycloakAdminUserCreatedEventListenerTest {
+class KeycloakAdminEventListenerTest {
 
   @Mock private KeycloakAdminEventParser eventParser;
 
@@ -30,7 +32,7 @@ class KeycloakAdminUserCreatedEventListenerTest {
   void handle_ShouldParseAndPersistUser() {
     // Given
     UUID userId = UUID.randomUUID();
-    KeycloakAdminUserCreatedEvent event = mock(KeycloakAdminUserCreatedEvent.class);
+    KeycloakAdminEvent event = mock(KeycloakAdminEvent.class);
     User userToSave =
         User.builder().keycloakUserId(userId).username("napoleon").email("napoleon@france").build();
     User savedUser =
@@ -51,7 +53,7 @@ class KeycloakAdminUserCreatedEventListenerTest {
   @DisplayName("handle should propagate exception when event parser fails")
   void handle_WhenEventParserFails_ShouldPropagateException() {
     // Given
-    KeycloakAdminUserCreatedEvent event = mock(KeycloakAdminUserCreatedEvent.class);
+    KeycloakAdminEvent event = mock(KeycloakAdminEvent.class);
     when(eventParser.toUserEntity(event))
         .thenThrow(new InvalidInputException("Malformed representation"));
 
