@@ -17,13 +17,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 
 @Configuration
 @EnableMethodSecurity
 @Slf4j
 public class SecurityConfig {
-  private final String adminRole = "ADMIN";
-  private final String customerRole = "CUSTOMER";
 
   @Bean
   public Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
@@ -80,10 +79,8 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/api/v1/users/admin")
-                    .hasAuthority(adminRole)
-                    .requestMatchers("/api/v1/users/customers/**")
-                    .hasAuthority(customerRole)
+                auth.requestMatchers("/api/v1/customer/**")
+                    .hasRole(Role.CUSTOMER.toString())
                     .anyRequest()
                     .authenticated())
         .oauth2ResourceServer(

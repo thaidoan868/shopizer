@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
@@ -20,8 +21,16 @@ import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileRepository;
 public class CustomerProfileService {
   private final CustomerProfileRepository customerProfileRepository;
   private final UserService userService;
+  private final UserPopulator userPopulator;
+
 
   @NonNull
+  /**
+   * Fetches a CustomerProfile by the associated Keycloak user ID.
+   *
+   * @param keycloakUserId The UUID of the Keycloak user.
+   * @return An Optional containing the CustomerProfile if found, or an empty Optional if not found.
+   */
   public Optional<CustomerProfile> get(UUID keycloakUserId) {
     Optional<CustomerProfileQueryDto> existingProfile =
         customerProfileRepository.findByKeycloakUserId(keycloakUserId);
