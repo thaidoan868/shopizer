@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.event.adminUserCreatedEvent;
+package vn.io.oldmoon.shopizer.user.business.event.create;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
@@ -7,7 +7,7 @@ import lombok.Builder;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder(toBuilder = true)
-public record KeycloakAdminUserRepresentation(
+public record KeycloakAdminUserCreatedRepresentation(
     String username,
     String email,
     String firstName,
