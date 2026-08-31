@@ -1,6 +1,7 @@
 package vn.io.oldmoon.shopizer.user.business.service.profile;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -16,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
@@ -32,7 +34,7 @@ class CustomerProfileServiceTest {
   @InjectMocks private CustomerProfileService customerProfileService;
 
   @Test
-  @DisplayName("get should return Optional containing Customer profile when found")
+  @DisplayName("get should return CustomerProfile when found")
   void get_WhenFound_ShouldReturnCustomerProfile() {
     // Given
     UUID keycloakUserId = UUID.randomUUID();
@@ -45,29 +47,46 @@ class CustomerProfileServiceTest {
     when(customerProfileRepository.findById(profileId)).thenReturn(Optional.of(expectedProfile));
 
     // When
-    Optional<CustomerProfile> actualProfile = customerProfileService.get(keycloakUserId);
+    CustomerProfile actualProfile = customerProfileService.get(keycloakUserId);
 
     // Then
-    assertThat(actualProfile).isPresent().contains(expectedProfile);
+    assertThat(actualProfile).isNotNull().isEqualTo(expectedProfile);
     verify(customerProfileRepository).findByKeycloakUserId(keycloakUserId);
     verify(customerProfileRepository).findById(profileId);
   }
 
   @Test
-  @DisplayName("get should return empty Optional when user is not found")
-  void get_WhenNotFound_ShouldReturnEmptyOptional() {
+  @DisplayName("get should throw ResourceNotFoundException when user is not found")
+  void get_WhenNotFound_ShouldThrowResourceNotFoundException() {
     // Given
     UUID keycloakUserId = UUID.randomUUID();
     when(customerProfileRepository.findByKeycloakUserId(keycloakUserId))
         .thenReturn(Optional.empty());
 
-    // When
-    Optional<CustomerProfile> actualProfile = customerProfileService.get(keycloakUserId);
-
-    // Then
-    assertThat(actualProfile).isEmpty();
+    // When & Then
+    assertThatThrownBy(() -> customerProfileService.get(keycloakUserId))
+        .isInstanceOf(ResourceNotFoundException.class);
     verify(customerProfileRepository).findByKeycloakUserId(keycloakUserId);
     verify(customerProfileRepository, never()).findById(any());
+  }
+
+  @Test
+  @DisplayName("get should throw ResourceNotFoundException when profile ID is not found")
+  void get_WhenProfileIdNotFound_ShouldThrowResourceNotFoundException() {
+    // Given
+    UUID keycloakUserId = UUID.randomUUID();
+    UUID profileId = UUID.randomUUID();
+    CustomerProfileQueryDto queryDto = new CustomerProfileQueryDto(profileId);
+
+    when(customerProfileRepository.findByKeycloakUserId(keycloakUserId))
+        .thenReturn(Optional.of(queryDto));
+    when(customerProfileRepository.findById(profileId)).thenReturn(Optional.empty());
+
+    // When & Then
+    assertThatThrownBy(() -> customerProfileService.get(keycloakUserId))
+        .isInstanceOf(ResourceNotFoundException.class);
+    verify(customerProfileRepository).findByKeycloakUserId(keycloakUserId);
+    verify(customerProfileRepository).findById(profileId);
   }
 
   @Test
