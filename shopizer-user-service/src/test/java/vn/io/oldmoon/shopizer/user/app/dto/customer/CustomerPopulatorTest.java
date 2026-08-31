@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.user.app.dto.user.AvatarDto;
 import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.AvatarMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
@@ -20,43 +23,106 @@ import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
 @ExtendWith(MockitoExtension.class)
 class CustomerPopulatorTest {
 
+  @Mock private CustomerMapper customerMapper;
+
   @Mock private UserPopulator userPopulator;
 
   @InjectMocks private CustomerPopulator customerPopulator;
 
   @Test
-  @DisplayName("CustomerPopulator should delegate to UserPopulator for toCustomerProfileDto")
-  void toCustomerProfileDto_ShouldDelegateToUserPopulator() {
+  @DisplayName("toCustomerProfileDto should map User and CustomerProfile with avatar URLs")
+  void toCustomerProfileDto_WithAvatar_ShouldPopulateAvatarUrls() {
     // Given
-    User user = User.builder().keycloakUserId(UUID.randomUUID()).username("charlie").build();
-    CustomerProfile profile = CustomerProfile.builder().user(user).build();
-    CustomerProfileDto expectedDto = CustomerProfileDto.builder().username("charlie").build();
+    UUID userId = UUID.randomUUID();
+    UUID keycloakUserId = UUID.randomUUID();
+    AvatarMeta avatarMeta = new AvatarMeta("test-bucket", "orig.jpg", "med.jpg", "thumb.jpg");
 
-    given(userPopulator.toCustomerProfileDto(user, profile)).willReturn(expectedDto);
+    User user =
+        User.builder()
+            .keycloakUserId(keycloakUserId)
+            .username("alice")
+            .email("alice@example.com")
+            .firstName("Alice")
+            .lastName("Smith")
+            .verified(true)
+            .avatarMeta(avatarMeta)
+            .build();
+    user.setId(userId);
+
+    CustomerProfile profile =
+        CustomerProfile.builder()
+            .user(user)
+            .gender(Gender.female)
+            .dateOfBirth(LocalDate.of(1995, 5, 20))
+            .language(Language.en)
+            .phoneNumber("+1234567890")
+            .address("123 Main Street")
+            .build();
+
+    CustomerProfileDto mockDto =
+        CustomerProfileDto.builder()
+            .id(userId)
+            .keycloakUserId(keycloakUserId)
+            .username("alice")
+            .email("alice@example.com")
+            .firstName("Alice")
+            .lastName("Smith")
+            .verified(true)
+            .gender(Gender.female)
+            .dateOfBirth(LocalDate.of(1995, 5, 20))
+            .language(Language.en)
+            .phoneNumber("+1234567890")
+            .address("123 Main Street")
+            .build();
+
+    AvatarDto avatarDto =
+        new AvatarDto(
+            "http://cdn.example.com/test-bucket/orig.jpg",
+            "http://cdn.example.com/test-bucket/med.jpg",
+            "http://cdn.example.com/test-bucket/thumb.jpg");
+
+    given(customerMapper.toCustomerProfileDto(user, profile)).willReturn(mockDto);
+    given(userPopulator.toAvatarDto(avatarMeta)).willReturn(avatarDto);
 
     // When
     CustomerProfileDto result = customerPopulator.toCustomerProfileDto(user, profile);
 
     // Then
-    assertThat(result).isSameAs(expectedDto);
-    verify(userPopulator).toCustomerProfileDto(user, profile);
+    assertThat(result).isNotNull();
+    assertThat(result.getId()).isEqualTo(userId);
+    assertThat(result.getKeycloakUserId()).isEqualTo(keycloakUserId);
+    assertThat(result.getUsername()).isEqualTo("alice");
+    assertThat(result.getEmail()).isEqualTo("alice@example.com");
+    assertThat(result.getFirstName()).isEqualTo("Alice");
+    assertThat(result.getLastName()).isEqualTo("Smith");
+    assertThat(result.getVerified()).isTrue();
+    assertThat(result.getGender()).isEqualTo(Gender.female);
+    assertThat(result.getDateOfBirth()).isEqualTo(LocalDate.of(1995, 5, 20));
+    assertThat(result.getLanguage()).isEqualTo(Language.en);
+    assertThat(result.getPhoneNumber()).isEqualTo("+1234567890");
+    assertThat(result.getAddress()).isEqualTo("123 Main Street");
+    assertThat(result.getAvatarMeta()).isEqualTo(avatarDto);
+
+    verify(customerMapper).toCustomerProfileDto(user, profile);
+    verify(userPopulator).toAvatarDto(avatarMeta);
   }
 
   @Test
-  @DisplayName("CustomerPopulator should delegate to UserPopulator for toAvatarDto")
-  void toAvatarDto_ShouldDelegateToUserPopulator() {
+  @DisplayName("toCustomerProfileDto should handle null avatar gracefully")
+  void toCustomerProfileDto_WithoutAvatar_ShouldHaveNullAvatarMeta() {
     // Given
-    AvatarMeta avatarMeta = new AvatarMeta("bucket", "o.png", "m.png", "t.png");
-    AvatarDto expectedAvatarDto =
-        new AvatarDto("http://cdn/o.png", "http://cdn/m.png", "http://cdn/t.png");
+    User user = User.builder().username("bob").avatarMeta(null).build();
+    CustomerProfile profile = CustomerProfile.builder().user(user).build();
+    CustomerProfileDto mockDto = CustomerProfileDto.builder().username("bob").build();
 
-    given(userPopulator.toAvatarDto(avatarMeta)).willReturn(expectedAvatarDto);
+    given(customerMapper.toCustomerProfileDto(user, profile)).willReturn(mockDto);
 
     // When
-    AvatarDto result = customerPopulator.toAvatarDto(avatarMeta);
+    CustomerProfileDto result = customerPopulator.toCustomerProfileDto(user, profile);
 
     // Then
-    assertThat(result).isSameAs(expectedAvatarDto);
-    verify(userPopulator).toAvatarDto(avatarMeta);
+    assertThat(result).isNotNull();
+    assertThat(result.getAvatarMeta()).isNull();
+    verify(customerMapper).toCustomerProfileDto(user, profile);
   }
 }

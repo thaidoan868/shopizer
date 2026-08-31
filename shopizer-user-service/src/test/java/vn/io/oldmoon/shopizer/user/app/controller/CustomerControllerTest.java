@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,28 +24,42 @@ import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.common.core.exception.handler.BusinessExceptionHandler;
 import vn.io.oldmoon.shopizer.common.core.exception.handler.GlobalExceptionHandler;
 import vn.io.oldmoon.shopizer.user.app.config.SecurityConfig;
+import vn.io.oldmoon.shopizer.user.app.dto.customer.CustomerPopulator;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.CustomerProfileDto;
 import vn.io.oldmoon.shopizer.user.app.dto.user.AvatarDto;
+import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
+import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
 
 @WebMvcTest(controllers = CustomerController.class)
-@ContextConfiguration(classes = {CustomerController.class, SecurityConfig.class, BusinessExceptionHandler.class, GlobalExceptionHandler.class})
+@ContextConfiguration(
+    classes = {
+      CustomerController.class,
+      SecurityConfig.class,
+      BusinessExceptionHandler.class,
+      GlobalExceptionHandler.class
+    })
 class CustomerControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
+  @MockitoBean private UserService userService;
   @MockitoBean private CustomerProfileService customerProfileService;
-  @MockitoBean private org.springframework.amqp.rabbit.connection.ConnectionFactory connectionFactory;
-  @MockitoBean private org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder;
-  @MockitoBean private org.keycloak.admin.client.Keycloak keycloak;
+  @MockitoBean private CustomerPopulator customerPopulator;
 
   @Test
-  @DisplayName("GET /api/v1/customer/profile with CUSTOMER role should return 200 and CustomerProfileDto")
+  @DisplayName(
+      "GET /api/v1/customer/profile with CUSTOMER role should return 200 and CustomerProfileDto")
   void getProfile_WithCustomerRole_ShouldReturn200AndProfileDto() throws Exception {
     // Given
     UUID userId = UUID.randomUUID();
+    User user = User.builder().keycloakUserId(userId).username("alice").build();
+    CustomerProfile profile = CustomerProfile.builder().user(user).build();
+
     CustomerProfileDto profileDto =
         CustomerProfileDto.builder()
             .id(UUID.randomUUID())
@@ -60,11 +75,12 @@ class CustomerControllerTest {
             .phoneNumber("+1234567890")
             .address("123 Main St")
             .avatarMeta(
-                new AvatarDto(
-                    "http://cdn/orig.jpg", "http://cdn/med.jpg", "http://cdn/thumb.jpg"))
+                new AvatarDto("http://cdn/orig.jpg", "http://cdn/med.jpg", "http://cdn/thumb.jpg"))
             .build();
 
-    given(customerProfileService.getCustomerProfile(userId)).willReturn(profileDto);
+    given(userService.get(userId)).willReturn(user);
+    given(customerProfileService.get(userId)).willReturn(Optional.of(profile));
+    given(customerPopulator.toCustomerProfileDto(user, profile)).willReturn(profileDto);
 
     // When & Then
     mockMvc
@@ -77,7 +93,9 @@ class CustomerControllerTest {
                                 jwtBuilder
                                     .subject(userId.toString())
                                     .claim("preferred_username", "alice")
-                                    .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                                    .claim(
+                                        "realm_access",
+                                        Map.of("roles", List.of(Role.CUSTOMER.toString()))))
                         .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -104,7 +122,8 @@ class CustomerControllerTest {
   }
 
   @Test
-  @DisplayName("GET /api/v1/customer/profile with non-CUSTOMER role (e.g. ADMIN only) should return 403 Forbidden")
+  @DisplayName(
+      "GET /api/v1/customer/profile with non-CUSTOMER role (e.g. ADMIN only) should return 403 Forbidden")
   void getProfile_WithAdminRoleOnly_ShouldReturn403() throws Exception {
     UUID userId = UUID.randomUUID();
 
@@ -125,11 +144,12 @@ class CustomerControllerTest {
 
   @Test
   @DisplayName("GET /api/v1/customer/profile when profile not found should return 404 Not Found")
-  void getProfile_WhenNotFound_ShouldReturn404() throws Exception {
+  void getProfile_WhenProfileNotFound_ShouldReturn404() throws Exception {
     UUID userId = UUID.randomUUID();
+    User user = User.builder().keycloakUserId(userId).username("alice").build();
 
-    given(customerProfileService.getCustomerProfile(userId))
-        .willThrow(new ResourceNotFoundException("CustomerProfile", "userId=" + userId));
+    given(userService.get(userId)).willReturn(user);
+    given(customerProfileService.get(userId)).willReturn(Optional.empty());
 
     mockMvc
         .perform(
@@ -142,7 +162,34 @@ class CustomerControllerTest {
                                     .subject(userId.toString())
                                     .claim("preferred_username", "alice")
                                     .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
-                        .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+                        .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.error").value("Resource not found"))
+        .andExpect(jsonPath("$.message").exists());
+  }
+
+  @Test
+  @DisplayName("GET /api/v1/customer/profile when user not found should return 404 Not Found")
+  void getProfile_WhenUserNotFound_ShouldReturn404() throws Exception {
+    UUID userId = UUID.randomUUID();
+
+    given(userService.get(userId))
+        .willThrow(new ResourceNotFoundException("User", "userId=" + userId));
+
+    mockMvc
+        .perform(
+            get("/api/v1/customer/profile")
+                .with(
+                    jwt()
+                        .jwt(
+                            jwtBuilder ->
+                                jwtBuilder
+                                    .subject(userId.toString())
+                                    .claim("preferred_username", "alice")
+                                    .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                        .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.error").value("Resource not found"))
         .andExpect(jsonPath("$.message").exists());

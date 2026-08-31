@@ -16,8 +16,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import vn.io.oldmoon.shopizer.user.app.dto.customer.CustomerProfileDto;
-import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
@@ -31,81 +29,7 @@ class CustomerProfileServiceTest {
 
   @Mock private UserService userService;
 
-  @Mock private UserPopulator userPopulator;
-
   @InjectMocks private CustomerProfileService customerProfileService;
-
-  @Test
-  @DisplayName("getCustomerProfile should return CustomerProfileDto when user and profile exist")
-  void getCustomerProfile_WhenUserAndProfileExist_ShouldReturnDto() {
-    // Given
-    UUID keycloakUserId = UUID.randomUUID();
-    UUID profileId = UUID.randomUUID();
-    User user = User.builder().keycloakUserId(keycloakUserId).username("alice").build();
-    CustomerProfile profile = CustomerProfile.builder().user(user).build();
-    CustomerProfileQueryDto queryDto = new CustomerProfileQueryDto(profileId);
-    CustomerProfileDto expectedDto = CustomerProfileDto.builder().username("alice").build();
-
-    when(userService.get(keycloakUserId)).thenReturn(user);
-    when(customerProfileRepository.findByKeycloakUserId(keycloakUserId))
-        .thenReturn(Optional.of(queryDto));
-    when(customerProfileRepository.findById(profileId)).thenReturn(Optional.of(profile));
-    when(userPopulator.toCustomerProfileDto(user, profile)).thenReturn(expectedDto);
-
-    // When
-    CustomerProfileDto result = customerProfileService.getCustomerProfile(keycloakUserId);
-
-    // Then
-    assertThat(result).isNotNull().isEqualTo(expectedDto);
-    verify(userService).get(keycloakUserId);
-    verify(customerProfileRepository).findByKeycloakUserId(keycloakUserId);
-    verify(customerProfileRepository).findById(profileId);
-    verify(userPopulator).toCustomerProfileDto(user, profile);
-  }
-
-  @Test
-  @DisplayName(
-      "getCustomerProfile should throw ResourceNotFoundException when User exists but CustomerProfile is missing")
-  void getCustomerProfile_WhenUserExistsButProfileNotFound_ShouldThrowResourceNotFoundException() {
-    // Given
-    UUID keycloakUserId = UUID.randomUUID();
-    User user = User.builder().keycloakUserId(keycloakUserId).username("alice").build();
-
-    when(userService.get(keycloakUserId)).thenReturn(user);
-    when(customerProfileRepository.findByKeycloakUserId(keycloakUserId))
-        .thenReturn(Optional.empty());
-
-    // When & Then
-    org.assertj.core.api.Assertions.assertThatThrownBy(
-            () -> customerProfileService.getCustomerProfile(keycloakUserId))
-        .isInstanceOf(vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException.class)
-        .hasMessageContaining("CustomerProfile");
-
-    verify(userService).get(keycloakUserId);
-    verify(customerProfileRepository).findByKeycloakUserId(keycloakUserId);
-    verify(customerProfileRepository, never()).findById(any());
-    verify(userPopulator, never()).toCustomerProfileDto(any(), any());
-  }
-
-  @Test
-  @DisplayName("getCustomerProfile should throw ResourceNotFoundException when User is not found")
-  void getCustomerProfile_WhenUserNotFound_ShouldThrowResourceNotFoundException() {
-    // Given
-    UUID keycloakUserId = UUID.randomUUID();
-    when(userService.get(keycloakUserId))
-        .thenThrow(
-            new vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException(
-                "User", "userId=" + keycloakUserId));
-
-    // When & Then
-    org.assertj.core.api.Assertions.assertThatThrownBy(
-            () -> customerProfileService.getCustomerProfile(keycloakUserId))
-        .isInstanceOf(vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException.class)
-        .hasMessageContaining("User");
-
-    verify(userService).get(keycloakUserId);
-    verify(customerProfileRepository, never()).findByKeycloakUserId(any());
-  }
 
   @Test
   @DisplayName("get should return Optional containing Customer profile when found")

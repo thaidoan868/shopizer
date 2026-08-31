@@ -9,7 +9,6 @@ import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.event.RabbitMqEventPublisher;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
-import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
 
 @Component
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class KeycloakUserRegisteredEventListener
   public void handle(KeycloakUserRegisteredEvent event) {
     log.info("Processing KeycloakUserRegisterEvent userId={}", event.userId());
     User user = keycloakUserRegisteredEventParser.toUserEntity(event);
-    CustomerProfile customerProfile = customerProfileService.create(user);
+    customerProfileService.create(user);
     CustomerCreatedEvent customerCreatedEvent =
         new CustomerCreatedEvent(user.getKeycloakUserId().toString());
     log.info("Successfully registered user userId={}", event.userId());

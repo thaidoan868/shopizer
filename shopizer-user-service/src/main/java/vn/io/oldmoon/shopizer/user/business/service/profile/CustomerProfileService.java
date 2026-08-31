@@ -1,13 +1,13 @@
 package vn.io.oldmoon.shopizer.user.business.service.profile;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
+import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
@@ -21,47 +21,60 @@ import vn.io.oldmoon.shopizer.user.infra.repository.CustomerProfileRepository;
 public class CustomerProfileService {
   private final CustomerProfileRepository customerProfileRepository;
   private final UserService userService;
-  private final UserPopulator userPopulator;
 
-
-  @NonNull
   /**
-   * Fetches a CustomerProfile by the associated Keycloak user ID.
+   * Fetches a customer profile by the associated Keycloak user ID.
    *
-   * @param keycloakUserId The UUID of the Keycloak user.
-   * @return An Optional containing the CustomerProfile if found, or an empty Optional if not found.
+   * @param keycloakUserId the Keycloak user ID
+   * @return the CustomerProfile entity
+   * @throws ResourceNotFoundException if no profile is found for the given Keycloak user ID
    */
-  public Optional<CustomerProfile> get(UUID keycloakUserId) {
+  public CustomerProfile get(UUID keycloakUserId) {
     Optional<CustomerProfileQueryDto> existingProfile =
         customerProfileRepository.findByKeycloakUserId(keycloakUserId);
     if (existingProfile.isPresent()) {
       log.info("Fetching Customer Profile for keycloakUserId={}", keycloakUserId);
-      return customerProfileRepository.findById(existingProfile.get().id());
+      return customerProfileRepository
+          .findById(existingProfile.get().id())
+          .orElseThrow(
+              () ->
+                  new ResourceNotFoundException(
+                      "Profile", "userId=%s".formatted(keycloakUserId.toString())));
+    } else {
+      throw new ResourceNotFoundException(
+          "Profile", "userId=%s".formatted(keycloakUserId.toString()));
     }
-    log.info("Customer Profile Not Found for keycloakUserId={}", keycloakUserId);
-    return Optional.empty();
   }
 
+  /**
+   * Creates a new customer profile in the database. If a profile with the same Keycloak user ID
+   * already exists, it returns the existing profile for idempotency.
+   *
+   * @param customerProfile the customer profile to create
+   */
   @Transactional
   public CustomerProfile create(CustomerProfile customerProfile) {
-    Optional<CustomerProfile> existing = get(customerProfile.getUser().getKeycloakUserId());
-
-    if (existing.isPresent()) {
+    CustomerProfile existingProfile;
+    CustomerProfile profile;
+    try {
+      existingProfile = get(customerProfile.getUser().getKeycloakUserId());
       log.info(
           "CustomerProfile with keycloakUserId={} already exists. Skipping insertion for idempotency.",
           customerProfile.getUser().getKeycloakUserId());
-      return existing.get();
+      return existingProfile;
+    } catch (ResourceNotFoundException e) {
+      log.info(
+          "Persisting a customer profile with userKeycloakUserId={}",
+          customerProfile.getUser().getKeycloakUserId());
+      profile = customerProfileRepository.save(customerProfile);
+      return profile;
     }
-
-    log.info(
-        "Persisting a customer profile with userKeycloakUserId={}",
-        customerProfile.getUser().getKeycloakUserId());
-    CustomerProfile profile = customerProfileRepository.save(customerProfile);
-    return profile;
   }
 
   @Transactional
   public CustomerProfile create(User notSavedUser) {
+    Objects.requireNonNull(notSavedUser);
+
     User savedUser = userService.create(notSavedUser);
     CustomerProfile profile = CustomerProfile.builder().user(savedUser).build();
     return this.create(profile);
