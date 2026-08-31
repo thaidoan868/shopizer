@@ -1,9 +1,9 @@
 package vn.io.oldmoon.shopizer.user.business.event.keycloakadmin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +29,7 @@ public class KeycloakAdminEventParser {
    *     user ID
    */
   public UUID extractUserId(KeycloakAdminEvent event) {
+    Objects.requireNonNull(event);
     String resourcePath = event.resourcePath();
 
     if (resourcePath == null || resourcePath.isBlank()) {
@@ -63,6 +64,9 @@ public class KeycloakAdminEventParser {
    * @throws InvalidInputException if representation is null, blank, or malformed
    */
   public <T> T parseRepresentation(KeycloakAdminEvent event, Class<T> clazz) {
+    Objects.requireNonNull(event);
+    Objects.requireNonNull(clazz);
+
     String representation = event.representation();
     if (representation == null || representation.isBlank()) {
       throw new InvalidInputException("Representation JSON string must not be null or blank");
@@ -74,11 +78,9 @@ public class KeycloakAdminEventParser {
     }
   }
 
-
-
   /**
-   * Parses the representation JSON string into a list of objects of type T.
-   * Handles both JSON arrays and single JSON objects.
+   * Parses the representation JSON string into a list of objects of type T. Handles both JSON
+   * arrays and single JSON objects.
    *
    * @param event the Keycloak admin event
    * @param clazz the class type of the objects in the list
@@ -86,6 +88,9 @@ public class KeycloakAdminEventParser {
    * @throws InvalidInputException if representation is null, blank, or malformed
    */
   public <T> List<T> parseListRepresentations(KeycloakAdminEvent event, Class<T> clazz) {
+    Objects.requireNonNull(event);
+    Objects.requireNonNull(clazz);
+
     String representation = event.representation();
     if (representation == null || representation.isBlank()) {
       throw new InvalidInputException("Representation JSON string must not be null or blank");

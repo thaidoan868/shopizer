@@ -1,5 +1,6 @@
 package vn.io.oldmoon.shopizer.user.business.event.create;
 
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,15 @@ public class KeycloakAdminUserCreatedEventListener
         savedUser.getEmail());
   }
 
+  /**
+   * Maps a KeycloakAdminEvent to a User entity.
+   *
+   * @throws InvalidInputException The user must contain keycloakUserId, username, and email. If any
+   *     of these fields are missing or blank, an exception is thrown.
+   */
   public User toUserEntity(KeycloakAdminEvent event) {
+    Objects.requireNonNull(event);
+
     UUID userId = parser.extractUserId(event);
 
     KeycloakAdminUserCreatedRepresentation representation =
@@ -67,9 +76,10 @@ public class KeycloakAdminUserCreatedEventListener
         user.getKeycloakUserId(),
         user.getUsername(),
         user.getEmail());
-    UUID createdBy =
-        event.authDetails().userId() != null ? UUID.fromString(event.authDetails().userId()) : null;
-    user.setCreatedBy(createdBy);
+    if (event.authDetails() != null && event.authDetails().userId() != null) {
+      UUID createdBy = UUID.fromString(event.authDetails().userId());
+      user.setCreatedBy(createdBy);
+    }
     return user;
   }
 }

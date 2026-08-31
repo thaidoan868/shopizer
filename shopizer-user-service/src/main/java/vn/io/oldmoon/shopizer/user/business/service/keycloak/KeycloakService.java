@@ -6,6 +6,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -152,6 +153,8 @@ public class KeycloakService {
    * @throws RuntimeException if auth or network errors occur
    */
   public void assignRealmRole(String userId, Role role) {
+    Objects.requireNonNull(userId);
+    Objects.requireNonNull(role);
     // Get user
     RealmResource realmResource = keycloak.realm(realm);
     UserResource userResource = realmResource.users().get(userId);
@@ -176,6 +179,7 @@ public class KeycloakService {
    * @throws IllegalArgumentException if user is blank
    */
   public void update(UserRepresentation userRepresentation) {
+    Objects.requireNonNull(userRepresentation, "User representation must not be null");
     // get user
     if (userRepresentation.getId() == null | userRepresentation.getId().isBlank()) {
       throw new IllegalArgumentException("User id must not be null or blank");

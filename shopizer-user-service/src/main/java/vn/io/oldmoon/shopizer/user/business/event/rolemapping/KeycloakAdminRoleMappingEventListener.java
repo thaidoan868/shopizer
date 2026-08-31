@@ -54,21 +54,15 @@ public class KeycloakAdminRoleMappingEventListener
         event.operationType(),
         event.resourceType());
 
-    List<KeycloakRoleRepresentation> roles = parser.parseListRepresentations(event, KeycloakRoleRepresentation.class);
+    List<KeycloakRoleRepresentation> roles =
+        parser.parseListRepresentations(event, KeycloakRoleRepresentation.class);
     if (!hasTriggerRole(roles)) {
-      log.info(
-          "No trigger operational roles found in event representation for resourcePath: {}. Skipping employee profile creation.",
-          event.resourcePath());
-      return;
+      throw new IllegalArgumentException(
+          "No trigger operational roles found in event representation for resourcePath: "
+              + event.resourcePath());
     }
 
     UUID userId = parser.extractUserId(event);
-
-    if (employeeProfileService.get(userId).isPresent()) {
-      log.info("Employee profile already exists for userId: {}. Skipping creation.", userId);
-      return;
-    }
-
     User user = userService.get(userId);
     EmployeeProfile employeeProfile = toEmployeeProfileEntity(event, user);
     EmployeeProfile savedProfile = employeeProfileService.create(employeeProfile);
@@ -90,12 +84,16 @@ public class KeycloakAdminRoleMappingEventListener
   }
 
   public EmployeeProfile toEmployeeProfileEntity(KeycloakAdminEvent event, User user) {
+    Objects.requireNonNull(user);
+    Objects.requireNonNull(event);
+
     EmployeeProfile employeeProfile = EmployeeProfile.builder().user(user).build();
     if (event.authDetails() != null && event.authDetails().userId() != null) {
       try {
         employeeProfile.setCreatedBy(UUID.fromString(event.authDetails().userId()));
       } catch (IllegalArgumentException e) {
-        log.warn("Could not parse createdBy UUID from authDetails: {}", event.authDetails().userId());
+        log.warn(
+            "Could not parse createdBy UUID from authDetails: {}", event.authDetails().userId());
       }
     }
     log.info(

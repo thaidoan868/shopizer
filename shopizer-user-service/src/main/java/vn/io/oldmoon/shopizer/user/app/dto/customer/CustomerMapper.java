@@ -1,34 +1,26 @@
-// package vn.io.oldmoon.shopizer.user.app.transfer.populator.customer;
-//
-// import org.keycloak.representations.idm.UserRepresentation;
-// import org.mapstruct.*;
-// import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.CreatedUserResponse;
-// import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.PersistableCustomer;
-// import vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.CustomerProfileResponse;
-// import
-// vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.PublicCustomerProfileResponse;
-// import
-// vn.io.oldmoon.shopizer.user.app.transfer.dto.customer.profile.UpdateCustomerProfileRequest;
-// import vn.io.oldmoon.shopizer.user.infra.model.User;
-//
-// @Mapper(componentModel = "spring")
-// public interface CustomerMapper {
-//  // TO MODELS
-//  UserRepresentation toUserRep(PersistableCustomer persistableCustomer);
-//
-//  User toProfile(PersistableCustomer persistableCustomer);
-//
-//  // Update
-//  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-//  User patchUpdate(UpdateCustomerProfileRequest request, @MappingTarget User profile);
-//
-//  // TO RESPONSE
-//  @Mapping(target = "id", ignore = true)
-//  CreatedUserResponse toCreatedUser(UserRepresentation userRep);
-//
-//  @Mapping(target = "avatarMeta", ignore = true)
-//  CustomerProfileResponse toProfileResponse(User profile);
-//
-//  @Mapping(target = "avatarMeta", ignore = true)
-//  PublicCustomerProfileResponse toPublicProfileResponse(User profile);
-// }
+package vn.io.oldmoon.shopizer.user.app.dto.customer;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
+
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+public interface CustomerMapper {
+
+  @Mapping(target = "id", source = "user.id")
+  @Mapping(target = "keycloakUserId", source = "user.keycloakUserId")
+  @Mapping(target = "username", source = "user.username")
+  @Mapping(target = "email", source = "user.email")
+  @Mapping(target = "firstName", source = "user.firstName")
+  @Mapping(target = "lastName", source = "user.lastName")
+  @Mapping(target = "verified", source = "user.verified")
+  @Mapping(target = "gender", source = "customerProfile.gender")
+  @Mapping(target = "dateOfBirth", source = "customerProfile.dateOfBirth")
+  @Mapping(target = "language", source = "customerProfile.language")
+  @Mapping(target = "phoneNumber", source = "customerProfile.phoneNumber")
+  @Mapping(target = "address", source = "customerProfile.address")
+  @Mapping(target = "avatarMeta", ignore = true)
+  CustomerProfileDto toCustomerProfileDto(User user, CustomerProfile customerProfile);
+}
