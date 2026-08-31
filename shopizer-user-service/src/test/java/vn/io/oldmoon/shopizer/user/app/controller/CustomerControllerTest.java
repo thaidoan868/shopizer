@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -79,7 +78,7 @@ class CustomerControllerTest {
             .build();
 
     given(userService.get(userId)).willReturn(user);
-    given(customerProfileService.get(userId)).willReturn(Optional.of(profile));
+    given(customerProfileService.get(userId)).willReturn(profile);
     given(customerPopulator.toCustomerProfileDto(user, profile)).willReturn(profileDto);
 
     // When & Then
@@ -149,7 +148,8 @@ class CustomerControllerTest {
     User user = User.builder().keycloakUserId(userId).username("alice").build();
 
     given(userService.get(userId)).willReturn(user);
-    given(customerProfileService.get(userId)).willReturn(Optional.empty());
+    given(customerProfileService.get(userId))
+        .willThrow(new ResourceNotFoundException("Profile", "userId=" + userId));
 
     mockMvc
         .perform(

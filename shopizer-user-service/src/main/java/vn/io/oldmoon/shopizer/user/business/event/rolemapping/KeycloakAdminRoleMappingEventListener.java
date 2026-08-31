@@ -35,6 +35,16 @@ public class KeycloakAdminRoleMappingEventListener
   private final EmployeeProfileService employeeProfileService;
   private final KeycloakAdminEventParser parser;
 
+  /**
+   * Handles KeycloakAdminEvent for role mapping creation.
+   *
+   * <p>This method processes the event, checks for trigger roles, extracts the user ID, and creates
+   * an EmployeeProfile entity if applicable.
+   *
+   * @param event The KeycloakAdminEvent to handle.
+   * @throws IllegalArgumentException If no trigger operational roles are found in the event
+   *     representation.
+   */
   @Override
   @RabbitListener(queues = RabbitMqConfig.adminRoleMappingCreatedQueue)
   public void handle(KeycloakAdminEvent event) {

@@ -1,6 +1,7 @@
 package vn.io.oldmoon.shopizer.user.business.service.profile;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileQueryDto;
@@ -28,7 +30,7 @@ class EmployeeProfileServiceTest {
   @InjectMocks private EmployeeProfileService employeeProfileService;
 
   @Test
-  @DisplayName("get should return Optional containing EmployeeProfile when found")
+  @DisplayName("get should return EmployeeProfile when found")
   void get_WhenFound_ShouldReturnEmployeeProfile() {
     // Given
     UUID keycloakUserId = UUID.randomUUID();
@@ -41,29 +43,46 @@ class EmployeeProfileServiceTest {
     when(employeeProfileRepository.findById(profileId)).thenReturn(Optional.of(expectedProfile));
 
     // When
-    Optional<EmployeeProfile> actualProfile = employeeProfileService.get(keycloakUserId);
+    EmployeeProfile actualProfile = employeeProfileService.get(keycloakUserId);
 
     // Then
-    assertThat(actualProfile).isPresent().contains(expectedProfile);
+    assertThat(actualProfile).isNotNull().isEqualTo(expectedProfile);
     verify(employeeProfileRepository).findByKeycloakUserId(keycloakUserId);
     verify(employeeProfileRepository).findById(profileId);
   }
 
   @Test
-  @DisplayName("get should return empty Optional when employee profile is not found")
-  void get_WhenNotFound_ShouldReturnEmptyOptional() {
+  @DisplayName("get should throw ResourceNotFoundException when employee profile is not found")
+  void get_WhenNotFound_ShouldThrowResourceNotFoundException() {
     // Given
     UUID keycloakUserId = UUID.randomUUID();
     when(employeeProfileRepository.findByKeycloakUserId(keycloakUserId))
         .thenReturn(Optional.empty());
 
-    // When
-    Optional<EmployeeProfile> actualProfile = employeeProfileService.get(keycloakUserId);
-
-    // Then
-    assertThat(actualProfile).isEmpty();
+    // When & Then
+    assertThatThrownBy(() -> employeeProfileService.get(keycloakUserId))
+        .isInstanceOf(ResourceNotFoundException.class);
     verify(employeeProfileRepository).findByKeycloakUserId(keycloakUserId);
     verify(employeeProfileRepository, never()).findById(any());
+  }
+
+  @Test
+  @DisplayName("get should throw ResourceNotFoundException when employee profile ID is not found")
+  void get_WhenProfileIdNotFound_ShouldThrowResourceNotFoundException() {
+    // Given
+    UUID keycloakUserId = UUID.randomUUID();
+    UUID profileId = UUID.randomUUID();
+    EmployeeProfileQueryDto queryDto = new EmployeeProfileQueryDto(profileId);
+
+    when(employeeProfileRepository.findByKeycloakUserId(keycloakUserId))
+        .thenReturn(Optional.of(queryDto));
+    when(employeeProfileRepository.findById(profileId)).thenReturn(Optional.empty());
+
+    // When & Then
+    assertThatThrownBy(() -> employeeProfileService.get(keycloakUserId))
+        .isInstanceOf(ResourceNotFoundException.class);
+    verify(employeeProfileRepository).findByKeycloakUserId(keycloakUserId);
+    verify(employeeProfileRepository).findById(profileId);
   }
 
   @Test
