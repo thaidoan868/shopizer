@@ -73,4 +73,138 @@ class CustomerMapperTest {
     CustomerProfileDto dto = customerMapper.toCustomerProfileDto(null, null);
     assertThat(dto).isNull();
   }
+
+  @Test
+  @DisplayName("updateUserFromDto should update only non-null user fields from DTO")
+  void updateUserFromDto_ShouldUpdateNonNullFieldsOnly() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    UUID keycloakUserId = UUID.randomUUID();
+    User user =
+        User.builder()
+            .keycloakUserId(keycloakUserId)
+            .username("johndoe")
+            .email("johndoe@example.com")
+            .firstName("OldFirst")
+            .lastName("OldLast")
+            .verified(true)
+            .build();
+    user.setId(userId);
+
+    UpdateCustomerDto dto =
+        UpdateCustomerDto.builder().firstName("NewFirst").lastName("NewLast").build();
+
+    // When
+    customerMapper.updateUserFromDto(dto, user);
+
+    // Then
+    assertThat(user.getFirstName()).isEqualTo("NewFirst");
+    assertThat(user.getLastName()).isEqualTo("NewLast");
+    assertThat(user.getId()).isEqualTo(userId);
+    assertThat(user.getKeycloakUserId()).isEqualTo(keycloakUserId);
+    assertThat(user.getUsername()).isEqualTo("johndoe");
+    assertThat(user.getEmail()).isEqualTo("johndoe@example.com");
+    assertThat(user.getVerified()).isTrue();
+  }
+
+  @Test
+  @DisplayName("updateUserFromDto should ignore null fields and retain original user values")
+  void updateUserFromDto_WhenDtoHasNulls_ShouldRetainExistingValues() {
+    // Given
+    User user =
+        User.builder()
+            .username("johndoe")
+            .firstName("OriginalFirst")
+            .lastName("OriginalLast")
+            .build();
+
+    UpdateCustomerDto dto = UpdateCustomerDto.builder().firstName("OnlyNewFirst").build();
+
+    // When
+    customerMapper.updateUserFromDto(dto, user);
+
+    // Then
+    assertThat(user.getFirstName()).isEqualTo("OnlyNewFirst");
+    assertThat(user.getLastName()).isEqualTo("OriginalLast");
+  }
+
+  @Test
+  @DisplayName("updateUserFromDto should do nothing when DTO is null")
+  void updateUserFromDto_WhenDtoIsNull_ShouldNotModifyUser() {
+    User user = User.builder().firstName("First").lastName("Last").build();
+    customerMapper.updateUserFromDto(null, user);
+    assertThat(user.getFirstName()).isEqualTo("First");
+    assertThat(user.getLastName()).isEqualTo("Last");
+  }
+
+  @Test
+  @DisplayName("updateCustomerProfileFromDto should update non-null profile fields from DTO")
+  void updateCustomerProfileFromDto_ShouldUpdateNonNullFieldsOnly() {
+    // Given
+    UUID profileId = UUID.randomUUID();
+    CustomerProfile profile =
+        CustomerProfile.builder()
+            .gender(Gender.male)
+            .dateOfBirth(LocalDate.of(1990, 1, 1))
+            .language(Language.en)
+            .phoneNumber("+1234567890")
+            .address("Old Address")
+            .build();
+    profile.setId(profileId);
+
+    UpdateCustomerDto dto =
+        UpdateCustomerDto.builder()
+            .gender(Gender.female)
+            .dateOfBirth(LocalDate.of(1995, 5, 20))
+            .language(Language.vn)
+            .phoneNumber("+84987654321")
+            .address("New Address")
+            .build();
+
+    // When
+    customerMapper.updateCustomerProfileFromDto(dto, profile);
+
+    // Then
+    assertThat(profile.getId()).isEqualTo(profileId);
+    assertThat(profile.getGender()).isEqualTo(Gender.female);
+    assertThat(profile.getDateOfBirth()).isEqualTo(LocalDate.of(1995, 5, 20));
+    assertThat(profile.getLanguage()).isEqualTo(Language.vn);
+    assertThat(profile.getPhoneNumber()).isEqualTo("+84987654321");
+    assertThat(profile.getAddress()).isEqualTo("New Address");
+  }
+
+  @Test
+  @DisplayName("updateCustomerProfileFromDto should ignore null fields in DTO")
+  void updateCustomerProfileFromDto_WhenDtoHasNulls_ShouldRetainExistingValues() {
+    // Given
+    CustomerProfile profile =
+        CustomerProfile.builder()
+            .gender(Gender.male)
+            .dateOfBirth(LocalDate.of(1990, 1, 1))
+            .language(Language.en)
+            .phoneNumber("+1234567890")
+            .address("Old Address")
+            .build();
+
+    UpdateCustomerDto dto =
+        UpdateCustomerDto.builder().phoneNumber("+84987654321").address("New Address").build();
+
+    // When
+    customerMapper.updateCustomerProfileFromDto(dto, profile);
+
+    // Then
+    assertThat(profile.getGender()).isEqualTo(Gender.male);
+    assertThat(profile.getDateOfBirth()).isEqualTo(LocalDate.of(1990, 1, 1));
+    assertThat(profile.getLanguage()).isEqualTo(Language.en);
+    assertThat(profile.getPhoneNumber()).isEqualTo("+84987654321");
+    assertThat(profile.getAddress()).isEqualTo("New Address");
+  }
+
+  @Test
+  @DisplayName("updateCustomerProfileFromDto should do nothing when DTO is null")
+  void updateCustomerProfileFromDto_WhenDtoIsNull_ShouldNotModifyProfile() {
+    CustomerProfile profile = CustomerProfile.builder().address("Original Address").build();
+    customerMapper.updateCustomerProfileFromDto(null, profile);
+    assertThat(profile.getAddress()).isEqualTo("Original Address");
+  }
 }

@@ -36,4 +36,32 @@ public class CustomerPopulator {
         user.getKeycloakUserId());
     return profileDto;
   }
+
+  /**
+   * Updates target User and CustomerProfile entities in-place from an UpdateCustomerDto.
+   *
+   * @param user the target User entity
+   * @param customerProfile the target CustomerProfile entity
+   * @param updateCustomerDto the incoming update DTO
+   */
+  public void update(
+      User user, CustomerProfile customerProfile, UpdateCustomerDto updateCustomerDto) {
+    Objects.requireNonNull(user);
+    Objects.requireNonNull(customerProfile);
+    Objects.requireNonNull(updateCustomerDto);
+
+    customerMapper.updateUserFromDto(updateCustomerDto, user);
+    customerMapper.updateCustomerProfileFromDto(updateCustomerDto, customerProfile);
+    log.info(
+        "Updated User and CustomerProfile entities in-place for keycloakUserId={}",
+        user.getKeycloakUserId());
+  }
+
+  /**
+   * Alias for update method.
+   */
+  public void populate(
+      User user, CustomerProfile customerProfile, UpdateCustomerDto updateCustomerDto) {
+    update(user, customerProfile, updateCustomerDto);
+  }
 }

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
@@ -57,17 +58,21 @@ public class UserService {
     log.info("Persisting user entity userKeycloakUserId={}", newUser.getKeycloakUserId());
     return newUser;
   }
-}
 
   /**
-   * @throws InvalidInputException if tried to update a profile without id
+   * Updates an existing user in the database.
+   *
+   * @throws InvalidInputException if tried to update a user with invalid id
    */
-  //  @Transactional
-  //  public User updateProfile(User profile) {
-  //    if (profile.getId() == null) {
-  //      throw new InvalidInputException("Tried to update profile without id");
-  //    }
-  //    log.info("Attempting to update profile for user={}", profile.getUserId());
-  //    User updatedProfile = profileRepo.save(profile);
-  //    return updatedProfile;
-  //  }
+  @Transactional
+  public User update(User user) {
+    Objects.requireNonNull(user);
+    if (user.getId() == null || !userRepository.existsById(user.getId())) {
+      throw new InvalidInputException("Tried to update user with invalid id");
+    }
+    log.info(
+        "Updating user entity userKeycloakUserId={}",
+        user.getKeycloakUserId() != null ? user.getKeycloakUserId() : "null");
+    return userRepository.save(user);
+  }
+}

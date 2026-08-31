@@ -1,6 +1,7 @@
 package vn.io.oldmoon.shopizer.user.app.dto.customer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -124,5 +125,87 @@ class CustomerPopulatorTest {
     assertThat(result).isNotNull();
     assertThat(result.getAvatarMeta()).isNull();
     verify(customerMapper).toCustomerProfileDto(user, profile);
+  }
+
+  @Test
+  @DisplayName("toCustomerProfileDto should throw NullPointerException when user is null")
+  void toCustomerProfileDto_WhenUserIsNull_ShouldThrowNpe() {
+    CustomerProfile profile = CustomerProfile.builder().build();
+    assertThatThrownBy(() -> customerPopulator.toCustomerProfileDto(null, profile))
+        .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  @DisplayName("toCustomerProfileDto should throw NullPointerException when profile is null")
+  void toCustomerProfileDto_WhenProfileIsNull_ShouldThrowNpe() {
+    User user = User.builder().build();
+    assertThatThrownBy(() -> customerPopulator.toCustomerProfileDto(user, null))
+        .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  @DisplayName("update should delegate to CustomerMapper for both User and CustomerProfile")
+  void update_ShouldDelegateToCustomerMapper() {
+    // Given
+    User user = User.builder().firstName("OldFirst").lastName("OldLast").build();
+    CustomerProfile profile =
+        CustomerProfile.builder().phoneNumber("+1234567890").address("Old Address").build();
+    UpdateCustomerDto dto =
+        UpdateCustomerDto.builder()
+            .firstName("NewFirst")
+            .lastName("NewLast")
+            .phoneNumber("+84987654321")
+            .address("New Address")
+            .build();
+
+    // When
+    customerPopulator.update(user, profile, dto);
+
+    // Then
+    verify(customerMapper).updateUserFromDto(dto, user);
+    verify(customerMapper).updateCustomerProfileFromDto(dto, profile);
+  }
+
+  @Test
+  @DisplayName("populate should delegate to update method")
+  void populate_ShouldDelegateToUpdate() {
+    // Given
+    User user = User.builder().firstName("OldFirst").build();
+    CustomerProfile profile = CustomerProfile.builder().phoneNumber("+1234567890").build();
+    UpdateCustomerDto dto = UpdateCustomerDto.builder().firstName("NewFirst").build();
+
+    // When
+    customerPopulator.populate(user, profile, dto);
+
+    // Then
+    verify(customerMapper).updateUserFromDto(dto, user);
+    verify(customerMapper).updateCustomerProfileFromDto(dto, profile);
+  }
+
+  @Test
+  @DisplayName("update should throw NullPointerException when user is null")
+  void update_WhenUserIsNull_ShouldThrowNpe() {
+    CustomerProfile profile = CustomerProfile.builder().build();
+    UpdateCustomerDto dto = UpdateCustomerDto.builder().build();
+    assertThatThrownBy(() -> customerPopulator.update(null, profile, dto))
+        .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  @DisplayName("update should throw NullPointerException when profile is null")
+  void update_WhenProfileIsNull_ShouldThrowNpe() {
+    User user = User.builder().build();
+    UpdateCustomerDto dto = UpdateCustomerDto.builder().build();
+    assertThatThrownBy(() -> customerPopulator.update(user, null, dto))
+        .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  @DisplayName("update should throw NullPointerException when dto is null")
+  void update_WhenDtoIsNull_ShouldThrowNpe() {
+    User user = User.builder().build();
+    CustomerProfile profile = CustomerProfile.builder().build();
+    assertThatThrownBy(() -> customerPopulator.update(user, profile, null))
+        .isInstanceOf(NullPointerException.class);
   }
 }
