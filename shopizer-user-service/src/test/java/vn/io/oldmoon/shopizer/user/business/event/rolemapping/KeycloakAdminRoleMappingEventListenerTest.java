@@ -1,6 +1,7 @@
 package vn.io.oldmoon.shopizer.user.business.event.rolemapping;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -70,13 +70,13 @@ class KeycloakAdminRoleMappingEventListenerTest {
       // Given
       KeycloakRoleRepresentation role = KeycloakRoleRepresentation.builder().name(roleName).build();
       User user = User.builder().keycloakUserId(userId).username("employee").build();
+      EmployeeProfile savedProfile = EmployeeProfile.builder().user(user).build();
+      savedProfile.setId(UUID.randomUUID());
 
       when(parser.parseListRepresentations(event, KeycloakRoleRepresentation.class)).thenReturn(List.of(role));
       when(parser.extractUserId(event)).thenReturn(userId);
-      when(employeeProfileService.get(userId)).thenReturn(Optional.empty());
       when(userService.get(userId)).thenReturn(user);
-      when(employeeProfileService.create((EmployeeProfile) any()))
-          .thenAnswer(invocation -> invocation.getArgument(0));
+      when(employeeProfileService.create((EmployeeProfile) any())).thenReturn(savedProfile);
 
       // When
       listener.handle(event);
@@ -84,7 +84,6 @@ class KeycloakAdminRoleMappingEventListenerTest {
       // Then
       verify(parser).parseListRepresentations(event, KeycloakRoleRepresentation.class);
       verify(parser).extractUserId(event);
-      verify(employeeProfileService).get(userId);
       verify(userService).get(userId);
       verify(employeeProfileService)
           .create(
@@ -105,14 +104,14 @@ class KeycloakAdminRoleMappingEventListenerTest {
       KeycloakRoleRepresentation storeManagerRole =
           KeycloakRoleRepresentation.builder().name("STORE_MANAGER").build();
       User user = User.builder().keycloakUserId(userId).username("manager").build();
+      EmployeeProfile savedProfile = EmployeeProfile.builder().user(user).build();
+      savedProfile.setId(UUID.randomUUID());
 
       when(parser.parseListRepresentations(event, KeycloakRoleRepresentation.class))
           .thenReturn(List.of(customerRole, storeManagerRole));
       when(parser.extractUserId(event)).thenReturn(userId);
-      when(employeeProfileService.get(userId)).thenReturn(Optional.empty());
       when(userService.get(userId)).thenReturn(user);
-      when(employeeProfileService.create((EmployeeProfile) any()))
-          .thenAnswer(invocation -> invocation.getArgument(0));
+      when(employeeProfileService.create((EmployeeProfile) any())).thenReturn(savedProfile);
 
       // When
       listener.handle(event);
@@ -122,54 +121,55 @@ class KeycloakAdminRoleMappingEventListenerTest {
     }
 
     @Test
-    @DisplayName("Should skip creation when roles do not contain any trigger role")
-    void handle_WithNonTriggerRole_ShouldSkipCreation() {
+    @DisplayName("Should throw IllegalArgumentException when roles do not contain any trigger role")
+    void handle_WithNonTriggerRole_ShouldThrowIllegalArgumentException() {
       // Given
       KeycloakRoleRepresentation role =
           KeycloakRoleRepresentation.builder().name("CUSTOMER").build();
 
       when(parser.parseListRepresentations(event, KeycloakRoleRepresentation.class)).thenReturn(List.of(role));
 
-      // When
-      listener.handle(event);
+      // When & Then
+      assertThatThrownBy(() -> listener.handle(event))
+          .isInstanceOf(IllegalArgumentException.class);
 
-      // Then
       verify(parser).parseListRepresentations(event, KeycloakRoleRepresentation.class);
       verify(parser, never()).extractUserId(any());
-      verify(employeeProfileService, never()).get(any());
       verify(userService, never()).get(any());
       verify(employeeProfileService, never()).create((EmployeeProfile) any());
     }
 
     @Test
-    @DisplayName("Should skip creation when roles list is empty")
-    void handle_WithEmptyRolesList_ShouldSkipCreation() {
+    @DisplayName("Should throw IllegalArgumentException when roles list is empty")
+    void handle_WithEmptyRolesList_ShouldThrowIllegalArgumentException() {
       // Given
       when(parser.parseListRepresentations(event, KeycloakRoleRepresentation.class)).thenReturn(Collections.emptyList());
 
-      // When
-      listener.handle(event);
+      // When & Then
+      assertThatThrownBy(() -> listener.handle(event))
+          .isInstanceOf(IllegalArgumentException.class);
 
-      // Then
       verify(parser).parseListRepresentations(event, KeycloakRoleRepresentation.class);
       verify(parser, never()).extractUserId(any());
-      verify(employeeProfileService, never()).get(any());
       verify(userService, never()).get(any());
       verify(employeeProfileService, never()).create((EmployeeProfile) any());
     }
 
     @Test
-    @DisplayName("Should skip creation gracefully when employee profile already exists")
-    void handle_WhenProfileAlreadyExists_ShouldSkipCreation() {
+    @DisplayName("Should delegate to employeeProfileService.create when profile already exists (idempotency handled by service)")
+    void handle_WhenProfileAlreadyExists_ShouldDelegateToCreate() {
       // Given
       KeycloakRoleRepresentation role =
           KeycloakRoleRepresentation.builder().name("SUPER_ADMIN").build();
+      User user = User.builder().keycloakUserId(userId).build();
       EmployeeProfile existingProfile =
-          EmployeeProfile.builder().user(User.builder().keycloakUserId(userId).build()).build();
+          EmployeeProfile.builder().user(user).build();
+      existingProfile.setId(UUID.randomUUID());
 
       when(parser.parseListRepresentations(event, KeycloakRoleRepresentation.class)).thenReturn(List.of(role));
       when(parser.extractUserId(event)).thenReturn(userId);
-      when(employeeProfileService.get(userId)).thenReturn(Optional.of(existingProfile));
+      when(userService.get(userId)).thenReturn(user);
+      when(employeeProfileService.create((EmployeeProfile) any())).thenReturn(existingProfile);
 
       // When
       listener.handle(event);
@@ -177,9 +177,8 @@ class KeycloakAdminRoleMappingEventListenerTest {
       // Then
       verify(parser).parseListRepresentations(event, KeycloakRoleRepresentation.class);
       verify(parser).extractUserId(event);
-      verify(employeeProfileService).get(userId);
-      verify(userService, never()).get(any());
-      verify(employeeProfileService, never()).create((EmployeeProfile) any());
+      verify(userService).get(userId);
+      verify(employeeProfileService).create((EmployeeProfile) any());
     }
   }
 
