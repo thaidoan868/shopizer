@@ -3,6 +3,7 @@ package vn.io.oldmoon.shopizer.user.business.event.create;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -30,7 +31,11 @@ import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminAuthDetails;
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEvent;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
+import vn.io.oldmoon.shopizer.user.business.service.profile.EmployeeProfileService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
+import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileQueryDto;
+import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileRepository;
 import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
 
 @SpringBootTest
@@ -48,12 +53,15 @@ class KeycloakAdminEventListenerIT {
 
   @Autowired private RabbitTemplate rabbitTemplate;
   @Autowired private UserRepository userRepository;
+  @Autowired private EmployeeProfileRepository employeeProfileRepository;
   @MockitoSpyBean private UserService userService;
+  @MockitoSpyBean private EmployeeProfileService employeeProfileService;
 
   @MockitoSpyBean
   private KeycloakAdminUserCreatedEventListener keycloakAdminUserCreatedEventListener;
 
   private UUID keycloakUserId;
+  private UUID creatorId;
   private String username;
   private String email;
   private KeycloakAdminEvent event;
@@ -66,6 +74,7 @@ class KeycloakAdminEventListenerIT {
   @BeforeEach
   void setUp() {
     keycloakUserId = UUID.randomUUID();
+    creatorId = UUID.randomUUID();
     username = "napoleon_" + UUID.randomUUID().toString().substring(0, 8);
     email = "napoleon_" + UUID.randomUUID().toString().substring(0, 8) + "@france.com";
     KeycloakAdminAuthDetails authDetails =
@@ -73,7 +82,7 @@ class KeycloakAdminEventListenerIT {
             .realmId(UUID.randomUUID().toString())
             .realmName("master")
             .clientId("admin-cli")
-            .userId(UUID.randomUUID().toString())
+            .userId(creatorId.toString())
             .ipAddress("127.0.0.1")
             .build();
 
@@ -97,8 +106,8 @@ class KeycloakAdminEventListenerIT {
 
   @Test
   @DisplayName(
-      "Happy Path: Consume Keycloak admin user create event and insert user record into users table")
-  void handle_HappyPath_ShouldPersistUserInDatabase() {
+      "Happy Path: Consume Keycloak admin user create event and insert user and employee profile records")
+  void handle_HappyPath_ShouldPersistUserAndEmployeeProfileInDatabase() {
     // When
     rabbitTemplate.convertAndSend(
         RabbitMqConfig.userEventExchange, RabbitMqConfig.AdminUserCreatedBindingKey, event);
@@ -115,9 +124,21 @@ class KeycloakAdminEventListenerIT {
               assertThat(user.getKeycloakUserId()).isEqualTo(this.keycloakUserId);
               assertThat(user.getUsername()).isEqualTo(this.username); // From representation JSON
               assertThat(user.getEmail()).isEqualTo(this.email);
-
               assertThat(user.getVerified()).isFalse();
               assertThat(user.getRealm()).isEqualTo("shopizer");
+              assertThat(user.getCreatedBy()).isEqualTo(creatorId);
+
+              Optional<EmployeeProfileQueryDto> profileDto =
+                  employeeProfileRepository.findByKeycloakUserId(keycloakUserId);
+              assertThat(profileDto).isPresent();
+
+              Optional<EmployeeProfile> profileOptional =
+                  employeeProfileRepository.findById(profileDto.get().id());
+              assertThat(profileOptional).isPresent();
+
+              EmployeeProfile profile = profileOptional.get();
+              assertThat(profile.getUser().getId()).isEqualTo(user.getId());
+              assertThat(profile.getCreatedBy()).isEqualTo(creatorId);
             });
   }
 
@@ -136,6 +157,10 @@ class KeycloakAdminEventListenerIT {
             () -> {
               Optional<User> userOptional = userRepository.findByKeycloakUserId(keycloakUserId);
               assertThat(userOptional).isPresent();
+
+              Optional<EmployeeProfileQueryDto> profileDto =
+                  employeeProfileRepository.findByKeycloakUserId(keycloakUserId);
+              assertThat(profileDto).isPresent();
             });
 
     // When: Send duplicate event with same user ID
@@ -146,5 +171,34 @@ class KeycloakAdminEventListenerIT {
     await()
         .atMost(Duration.ofSeconds(5))
         .untilAsserted(() -> verify(keycloakAdminUserCreatedEventListener, times(2)).handle(any()));
+
+    // Verify only one employee profile exists for the user
+    Optional<EmployeeProfileQueryDto> profileDto =
+        employeeProfileRepository.findByKeycloakUserId(keycloakUserId);
+    assertThat(profileDto).isPresent();
+  }
+
+  @Test
+  @DisplayName(
+      "Transactional: When profile creation fails, the transaction rolls back and no user is persisted")
+  void handle_WhenProfileCreationFails_ShouldRollbackUserCreation() {
+    doThrow(new RuntimeException("Simulated profile creation failure"))
+        .when(employeeProfileService)
+        .create(any(EmployeeProfile.class));
+
+    // When: Send event
+    rabbitTemplate.convertAndSend(
+        RabbitMqConfig.userEventExchange, RabbitMqConfig.AdminUserCreatedBindingKey, event);
+
+    // Verify handler was invoked
+    await()
+        .atMost(Duration.ofSeconds(5))
+        .untilAsserted(
+            () -> verify(keycloakAdminUserCreatedEventListener, times(1)).handle(any()));
+
+    // Verify user was NOT persisted due to transaction rollback
+    Optional<User> userOptional = userRepository.findByKeycloakUserId(keycloakUserId);
+    assertThat(userOptional).isEmpty();
   }
 }
+
