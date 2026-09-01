@@ -66,4 +66,65 @@ class EmployeeMapperTest {
     EmployeeProfileDto dto = employeeMapper.toEmployeeProfileDto(null, null);
     assertThat(dto).isNull();
   }
+
+  @Test
+  @DisplayName("updateUserFromDto should update only non-null user fields from DTO")
+  void updateUserFromDto_ShouldUpdateNonNullFieldsOnly() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    UUID keycloakUserId = UUID.randomUUID();
+    User user =
+        User.builder()
+            .keycloakUserId(keycloakUserId)
+            .username("johndoe")
+            .email("johndoe@example.com")
+            .firstName("OldFirst")
+            .lastName("OldLast")
+            .verified(true)
+            .build();
+    user.setId(userId);
+
+    UpdateEmployeeDto dto =
+        UpdateEmployeeDto.builder().firstName("NewFirst").lastName("NewLast").build();
+
+    // When
+    employeeMapper.updateUserFromDto(dto, user);
+
+    // Then
+    assertThat(user.getFirstName()).isEqualTo("NewFirst");
+    assertThat(user.getLastName()).isEqualTo("NewLast");
+    assertThat(user.getId()).isEqualTo(userId);
+    assertThat(user.getKeycloakUserId()).isEqualTo(keycloakUserId);
+    assertThat(user.getUsername()).isEqualTo("johndoe");
+    assertThat(user.getEmail()).isEqualTo("johndoe@example.com");
+    assertThat(user.getVerified()).isTrue();
+  }
+
+  @Test
+  @DisplayName("updateEmployeeProfileFromDto should update non-null profile fields from DTO")
+  void updateEmployeeProfileFromDto_ShouldUpdateNonNullFieldsOnly() {
+    // Given
+    UUID profileId = UUID.randomUUID();
+    EmployeeProfile profile =
+        EmployeeProfile.builder()
+            .shift(Shift.MORNING)
+            .workPhone("+1234567890")
+            .build();
+    profile.setId(profileId);
+
+    UpdateEmployeeDto dto =
+        UpdateEmployeeDto.builder()
+            .shift(Shift.NIGHT)
+            .workPhone("+84987654321")
+            .build();
+
+    // When
+    employeeMapper.updateEmployeeProfileFromDto(dto, profile);
+
+    // Then
+    assertThat(profile.getId()).isEqualTo(profileId);
+    assertThat(profile.getShift()).isEqualTo(Shift.NIGHT);
+    assertThat(profile.getWorkPhone()).isEqualTo("+84987654321");
+  }
 }
+

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
@@ -201,4 +202,95 @@ class EmployeeProfileServiceTest {
     assertThatThrownBy(() -> employeeProfileService.create((User) null))
         .isInstanceOf(NullPointerException.class);
   }
+
+  @Test
+  @DisplayName("update(EmployeeProfile) should save and return updated profile when id is present")
+  void update_WithProfile_WhenIdPresent_ShouldSaveAndReturnProfile() {
+    // Given
+    UUID profileId = UUID.randomUUID();
+    UUID keycloakUserId = UUID.randomUUID();
+    User user = User.builder().keycloakUserId(keycloakUserId).build();
+    EmployeeProfile profile =
+        EmployeeProfile.builder().user(user).workPhone("+1234567890").build();
+    profile.setId(profileId);
+
+    when(employeeProfileRepository.existsById(profileId)).thenReturn(true);
+    when(employeeProfileRepository.save(profile)).thenReturn(profile);
+
+    // When
+    EmployeeProfile result = employeeProfileService.update(profile);
+
+    // Then
+    assertThat(result).isNotNull().isEqualTo(profile);
+  }
+
+  @Test
+  @DisplayName(
+      "update(EmployeeProfile) should throw InvalidInputException when profile has null id")
+  void update_WithProfile_WhenNullId_ShouldThrowInvalidInputException() {
+    // Given
+    EmployeeProfile profile = EmployeeProfile.builder().build();
+
+    // When & Then
+    assertThatThrownBy(() -> employeeProfileService.update(profile))
+        .isInstanceOf(InvalidInputException.class);
+  }
+
+  @Test
+  @DisplayName(
+      "update(EmployeeProfile) should throw InvalidInputException when profile not found in repo")
+  void update_WithProfile_WhenNotInRepo_ShouldThrowInvalidInputException() {
+    // Given
+    UUID profileId = UUID.randomUUID();
+    EmployeeProfile profile = EmployeeProfile.builder().build();
+    profile.setId(profileId);
+
+    when(employeeProfileRepository.existsById(profileId)).thenReturn(false);
+
+    // When & Then
+    assertThatThrownBy(() -> employeeProfileService.update(profile))
+        .isInstanceOf(InvalidInputException.class);
+  }
+
+  @Test
+  @DisplayName("update(EmployeeProfile) should throw NullPointerException when profile is null")
+  void update_WithProfile_WhenNull_ShouldThrowNpe() {
+    assertThatThrownBy(() -> employeeProfileService.update(null))
+        .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  @DisplayName(
+      "update(User, EmployeeProfile) should update user, associate with profile, and save profile")
+  void update_WithUserAndProfile_ShouldUpdateUserAndSaveProfile() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    UUID profileId = UUID.randomUUID();
+    UUID keycloakUserId = UUID.randomUUID();
+
+    User user = User.builder().keycloakUserId(keycloakUserId).firstName("Jane").build();
+    user.setId(userId);
+    User updatedUser =
+        User.builder().keycloakUserId(keycloakUserId).firstName("JaneUpdated").build();
+    updatedUser.setId(userId);
+
+    EmployeeProfile profile =
+        EmployeeProfile.builder().user(user).workPhone("+1234567890").build();
+    profile.setId(profileId);
+
+    when(userService.update(user)).thenReturn(updatedUser);
+    when(employeeProfileRepository.existsById(profileId)).thenReturn(true);
+    when(employeeProfileRepository.save(profile)).thenReturn(profile);
+
+    // When
+    EmployeeProfile result = employeeProfileService.update(user, profile);
+
+    // Then
+    assertThat(result).isNotNull().isEqualTo(profile);
+    assertThat(profile.getUser()).isEqualTo(updatedUser);
+    verify(userService).update(user);
+    verify(employeeProfileRepository).existsById(profileId);
+    verify(employeeProfileRepository).save(profile);
+  }
 }
+

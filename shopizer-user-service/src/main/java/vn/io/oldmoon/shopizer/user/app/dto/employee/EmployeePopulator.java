@@ -36,4 +36,25 @@ public class EmployeePopulator {
         user.getKeycloakUserId());
     return profileDto;
   }
+
+  /**
+   * Updates target User and EmployeeProfile entities in-place from an UpdateEmployeeDto.
+   *
+   * @param user the target User entity
+   * @param employeeProfile the target EmployeeProfile entity
+   * @param updateEmployeeDto the incoming update DTO
+   */
+  public void update(
+      User user, EmployeeProfile employeeProfile, UpdateEmployeeDto updateEmployeeDto) {
+    Objects.requireNonNull(user);
+    Objects.requireNonNull(employeeProfile);
+    Objects.requireNonNull(updateEmployeeDto);
+
+    employeeMapper.updateUserFromDto(updateEmployeeDto, user);
+    employeeMapper.updateEmployeeProfileFromDto(updateEmployeeDto, employeeProfile);
+    log.info(
+        "Updated User and EmployeeProfile entities in-place for keycloakUserId={}",
+        user.getKeycloakUserId());
+  }
 }
+

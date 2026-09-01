@@ -131,4 +131,55 @@ class EmployeePopulatorTest {
     assertThatThrownBy(() -> employeePopulator.toEmployeeProfileDto(user, null))
         .isInstanceOf(NullPointerException.class);
   }
+
+  @Test
+  @DisplayName("update should delegate to EmployeeMapper for both User and EmployeeProfile")
+  void update_ShouldDelegateToEmployeeMapper() {
+    // Given
+    User user = User.builder().firstName("OldFirst").lastName("OldLast").build();
+    EmployeeProfile profile =
+        EmployeeProfile.builder().shift(Shift.MORNING).workPhone("+1234567890").build();
+    UpdateEmployeeDto dto =
+        UpdateEmployeeDto.builder()
+            .firstName("NewFirst")
+            .lastName("NewLast")
+            .shift(Shift.NIGHT)
+            .workPhone("+84987654321")
+            .build();
+
+    // When
+    employeePopulator.update(user, profile, dto);
+
+    // Then
+    verify(employeeMapper).updateUserFromDto(dto, user);
+    verify(employeeMapper).updateEmployeeProfileFromDto(dto, profile);
+  }
+
+  @Test
+  @DisplayName("update should throw NullPointerException when user is null")
+  void update_WhenUserIsNull_ShouldThrowNpe() {
+    EmployeeProfile profile = EmployeeProfile.builder().build();
+    UpdateEmployeeDto dto = UpdateEmployeeDto.builder().build();
+    assertThatThrownBy(() -> employeePopulator.update(null, profile, dto))
+        .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  @DisplayName("update should throw NullPointerException when profile is null")
+  void update_WhenProfileIsNull_ShouldThrowNpe() {
+    User user = User.builder().build();
+    UpdateEmployeeDto dto = UpdateEmployeeDto.builder().build();
+    assertThatThrownBy(() -> employeePopulator.update(user, null, dto))
+        .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  @DisplayName("update should throw NullPointerException when dto is null")
+  void update_WhenDtoIsNull_ShouldThrowNpe() {
+    User user = User.builder().build();
+    EmployeeProfile profile = EmployeeProfile.builder().build();
+    assertThatThrownBy(() -> employeePopulator.update(user, profile, null))
+        .isInstanceOf(NullPointerException.class);
+  }
 }
+
