@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import vn.io.oldmoon.shopizer.common.core.exception.ApiException;
+import vn.io.oldmoon.shopizer.common.core.exception.AuthenticationException;
 import vn.io.oldmoon.shopizer.common.core.exception.DuplicateResourceException;
 import vn.io.oldmoon.shopizer.common.core.exception.ErrorCode;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
@@ -18,7 +19,7 @@ import vn.io.oldmoon.shopizer.common.web.model.ErrorResponse;
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
-public class BusinessExceptionHandler {
+public class ApplicationExceptionHandler {
 
   @ExceptionHandler(ApiException.class)
   public ResponseEntity<ErrorResponse> handleBusinessException(
@@ -29,6 +30,17 @@ public class BusinessExceptionHandler {
     log.error("ApiException", ex);
 
     return ResponseEntity.status(ex.getErrorCode().getHttpStatus()).body(body);
+  }
+
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ErrorResponse> handleAuthenticationException(
+      AuthenticationException ex, HttpServletRequest request) {
+    ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+    ErrorResponse body =
+        new ErrorResponse(errorCode.getError(), ex.getMessage(), request.getRequestURI());
+    log.error("AuthenticationException", ex);
+
+    return ResponseEntity.status(errorCode.getHttpStatus()).body(body);
   }
 
   @ExceptionHandler(ResourceNotFoundException.class)
@@ -75,4 +87,3 @@ public class BusinessExceptionHandler {
     return ResponseEntity.status(errorCode.getHttpStatus()).body(body);
   }
 }
-

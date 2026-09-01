@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
@@ -78,5 +79,39 @@ public class CustomerProfileService {
     User savedUser = userService.create(notSavedUser);
     CustomerProfile profile = CustomerProfile.builder().user(savedUser).build();
     return this.create(profile);
+  }
+
+  /**
+   * Updates an existing customer profile in the database.
+   *
+   * @param profile the customer profile to update
+   * @return the updated CustomerProfile entity
+   */
+  @Transactional
+  public CustomerProfile update(CustomerProfile profile) {
+    Objects.requireNonNull(profile);
+    if (profile.getId() == null || !customerProfileRepository.existsById(profile.getId())) {
+      throw new InvalidInputException("Tried to update customer profile with invalid id");
+    }
+    log.info(
+        "Updating customer profile for keycloakUserId={}",
+        profile.getUser() != null ? profile.getUser().getKeycloakUserId() : "null");
+    return customerProfileRepository.save(profile);
+  }
+
+  /**
+   * Updates existing User and CustomerProfile entities in a single transaction.
+   *
+   * @param user the existing User entity
+   * @param profile the existing CustomerProfile entity
+   * @return the updated CustomerProfile entity
+   */
+  @Transactional
+  public CustomerProfile update(User user, CustomerProfile profile) {
+    Objects.requireNonNull(user);
+    Objects.requireNonNull(profile);
+    User updatedUser = userService.update(user);
+    profile.setUser(updatedUser);
+    return this.update(profile);
   }
 }
