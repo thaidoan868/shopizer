@@ -23,7 +23,6 @@ import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminAuthDetails;
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEvent;
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEventParser;
-import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.business.service.profile.EmployeeProfileService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
@@ -32,8 +31,6 @@ import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 class KeycloakAdminEventListenerTest {
 
   @Mock private KeycloakAdminEventParser parser;
-
-  @Mock private UserService userService;
 
   @Mock private EmployeeProfileService employeeProfileService;
 
@@ -44,7 +41,7 @@ class KeycloakAdminEventListenerTest {
   class HandleTests {
 
     @Test
-    @DisplayName("handle should parse event, persist user entity, and create employee profile")
+    @DisplayName("handle should parse event and delegate to EmployeeProfileService.create(User)")
     void handle_ShouldParseAndPersistUserAndEmployeeProfile() {
       // Given
       UUID userId = UUID.randomUUID();
@@ -69,9 +66,8 @@ class KeycloakAdminEventListenerTest {
       when(parser.extractUserId(event)).thenReturn(userId);
       when(parser.parseRepresentation(event, KeycloakAdminUserCreatedRepresentation.class))
           .thenReturn(rep);
-      when(userService.create(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-      when(employeeProfileService.create(any(EmployeeProfile.class)))
-          .thenAnswer(invocation -> invocation.getArgument(0));
+      when(employeeProfileService.create(any(User.class)))
+          .thenReturn(EmployeeProfile.builder().build());
 
       // When
       listener.handle(event);
@@ -79,26 +75,19 @@ class KeycloakAdminEventListenerTest {
       // Then
       verify(parser).extractUserId(event);
       verify(parser).parseRepresentation(event, KeycloakAdminUserCreatedRepresentation.class);
-      verify(userService)
-          .create(
-              argThat(
-                  user ->
-                      user.getKeycloakUserId().equals(userId)
-                          && "napoleon".equals(user.getUsername())
-                          && "napoleon@france".equals(user.getEmail())
-                          && "Napoleon".equals(user.getFirstName())
-                          && "Bonaparte".equals(user.getLastName())
-                          && Boolean.TRUE.equals(user.getVerified())
-                          && creatorId.equals(user.getCreatedBy())));
       verify(employeeProfileService)
           .create(
-              (EmployeeProfile)
+              (User)
                   argThat(
-                      profile ->
-                          profile instanceof EmployeeProfile ep
-                              && ep.getUser() != null
-                              && ep.getUser().getKeycloakUserId().equals(userId)
-                              && creatorId.equals(ep.getCreatedBy())));
+                      u ->
+                          u instanceof User user
+                              && user.getKeycloakUserId().equals(userId)
+                              && "napoleon".equals(user.getUsername())
+                              && "napoleon@france".equals(user.getEmail())
+                              && "Napoleon".equals(user.getFirstName())
+                              && "Bonaparte".equals(user.getLastName())
+                              && Boolean.TRUE.equals(user.getVerified())
+                              && creatorId.equals(user.getCreatedBy())));
     }
   }
 
@@ -169,6 +158,7 @@ class KeycloakAdminEventListenerTest {
               .email("napoleon@france")
               .build();
 
+      when(parser.extractUserId(event)).thenReturn(userId);
       when(parser.parseRepresentation(event, KeycloakAdminUserCreatedRepresentation.class))
           .thenReturn(rep);
 
@@ -188,6 +178,7 @@ class KeycloakAdminEventListenerTest {
               .email(email)
               .build();
 
+      when(parser.extractUserId(event)).thenReturn(userId);
       when(parser.parseRepresentation(event, KeycloakAdminUserCreatedRepresentation.class))
           .thenReturn(rep);
 
@@ -248,87 +239,4 @@ class KeycloakAdminEventListenerTest {
       assertThat(user.getCreatedBy()).isNull();
     }
   }
-
-  @Nested
-  @DisplayName("toEmployeeProfileEntity mapping tests")
-  class ToEmployeeProfileEntityTests {
-
-    private UUID userId;
-    private UUID creatorId;
-    private KeycloakAdminEvent event;
-    private User user;
-
-    @BeforeEach
-    void setUp() {
-      userId = UUID.randomUUID();
-      creatorId = UUID.randomUUID();
-      KeycloakAdminAuthDetails authDetails =
-          KeycloakAdminAuthDetails.builder().userId(creatorId.toString()).build();
-      event =
-          KeycloakAdminEvent.builder()
-              .resourcePath("users/" + userId)
-              .authDetails(authDetails)
-              .build();
-      user = User.builder().keycloakUserId(userId).username("napoleon").email("napoleon@france").build();
-    }
-
-    @Test
-    @DisplayName("toEmployeeProfileEntity should map user and creatorId correctly")
-    void toEmployeeProfileEntity_WithValidEventAndUser_ShouldMapAllFields() {
-      EmployeeProfile profile = listener.toEmployeeProfileEntity(event, user);
-
-      assertThat(profile).isNotNull();
-      assertThat(profile.getUser()).isEqualTo(user);
-      assertThat(profile.getCreatedBy()).isEqualTo(creatorId);
-    }
-
-    @Test
-    @DisplayName("toEmployeeProfileEntity should throw NullPointerException when user is null")
-    void toEmployeeProfileEntity_WithNullUser_ShouldThrowNullPointerException() {
-      assertThatThrownBy(() -> listener.toEmployeeProfileEntity(event, null))
-          .isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
-    @DisplayName("toEmployeeProfileEntity should throw NullPointerException when event is null")
-    void toEmployeeProfileEntity_WithNullEvent_ShouldThrowNullPointerException() {
-      assertThatThrownBy(() -> listener.toEmployeeProfileEntity(null, user))
-          .isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
-    @DisplayName("toEmployeeProfileEntity should map without createdBy when authDetails is null")
-    void toEmployeeProfileEntity_WithNullAuthDetails_ShouldMapWithoutCreatedBy() {
-      KeycloakAdminEvent eventWithoutAuth =
-          KeycloakAdminEvent.builder()
-              .resourcePath("users/" + userId)
-              .authDetails(null)
-              .build();
-
-      EmployeeProfile profile = listener.toEmployeeProfileEntity(eventWithoutAuth, user);
-
-      assertThat(profile).isNotNull();
-      assertThat(profile.getUser()).isEqualTo(user);
-      assertThat(profile.getCreatedBy()).isNull();
-    }
-
-    @Test
-    @DisplayName("toEmployeeProfileEntity should handle invalid UUID in authDetails userId gracefully")
-    void toEmployeeProfileEntity_WithInvalidAuthDetailsUserId_ShouldHandleGracefully() {
-      KeycloakAdminAuthDetails invalidAuthDetails =
-          KeycloakAdminAuthDetails.builder().userId("not-a-uuid").build();
-      KeycloakAdminEvent eventWithInvalidAuth =
-          KeycloakAdminEvent.builder()
-              .resourcePath("users/" + userId)
-              .authDetails(invalidAuthDetails)
-              .build();
-
-      EmployeeProfile profile = listener.toEmployeeProfileEntity(eventWithInvalidAuth, user);
-
-      assertThat(profile).isNotNull();
-      assertThat(profile.getUser()).isEqualTo(user);
-      assertThat(profile.getCreatedBy()).isNull();
-    }
-  }
 }
-
