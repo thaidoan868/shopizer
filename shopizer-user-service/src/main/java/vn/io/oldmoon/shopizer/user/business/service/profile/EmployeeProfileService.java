@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
@@ -81,4 +82,39 @@ public class EmployeeProfileService {
     profile.setCreatedBy(savedUser.getCreatedBy());
     return this.create(profile);
   }
+
+  /**
+   * Updates an existing employee profile in the database.
+   *
+   * @param profile the employee profile to update
+   * @return the updated EmployeeProfile entity
+   */
+  @Transactional
+  public EmployeeProfile update(EmployeeProfile profile) {
+    Objects.requireNonNull(profile);
+    if (profile.getId() == null || !employeeProfileRepository.existsById(profile.getId())) {
+      throw new InvalidInputException("Tried to update employee profile with invalid id");
+    }
+    log.info(
+        "Updating employee profile for keycloakUserId={}",
+        profile.getUser() != null ? profile.getUser().getKeycloakUserId() : "null");
+    return employeeProfileRepository.save(profile);
+  }
+
+  /**
+   * Updates existing User and EmployeeProfile entities in a single transaction.
+   *
+   * @param user the existing User entity
+   * @param profile the existing EmployeeProfile entity
+   * @return the updated EmployeeProfile entity
+   */
+  @Transactional
+  public EmployeeProfile update(User user, EmployeeProfile profile) {
+    Objects.requireNonNull(user);
+    Objects.requireNonNull(profile);
+    User updatedUser = userService.update(user);
+    profile.setUser(updatedUser);
+    return this.update(profile);
+  }
 }
+
