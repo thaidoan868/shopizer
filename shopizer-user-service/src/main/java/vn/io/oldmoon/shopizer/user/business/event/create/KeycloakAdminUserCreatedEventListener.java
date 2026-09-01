@@ -11,7 +11,7 @@ import vn.io.oldmoon.shopizer.common.event.ApplicationEventListener;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEvent;
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEventParser;
-import vn.io.oldmoon.shopizer.user.business.service.UserService;
+import vn.io.oldmoon.shopizer.user.business.service.profile.EmployeeProfileService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 
 @Component
@@ -20,7 +20,7 @@ import vn.io.oldmoon.shopizer.user.infra.model.User;
 public class KeycloakAdminUserCreatedEventListener
     implements ApplicationEventListener<KeycloakAdminEvent> {
 
-  private final UserService userService;
+  private final EmployeeProfileService employeeProfileService;
   private final KeycloakAdminEventParser parser;
 
   @Override
@@ -33,12 +33,10 @@ public class KeycloakAdminUserCreatedEventListener
         event.resourceType());
 
     User user = toUserEntity(event);
-    User savedUser = userService.create(user);
+    employeeProfileService.create(user);
     log.info(
-        "Successfully synced user from admin create event: keycloakUserId={}, username={}, email={}",
-        savedUser.getKeycloakUserId(),
-        savedUser.getUsername(),
-        savedUser.getEmail());
+        "Successfully synced user from admin create event: keycloakUserId={}",
+        user.getCreatedBy() != null ? user.getCreatedBy() : null);
   }
 
   /**
@@ -77,8 +75,13 @@ public class KeycloakAdminUserCreatedEventListener
         user.getUsername(),
         user.getEmail());
     if (event.authDetails() != null && event.authDetails().userId() != null) {
-      UUID createdBy = UUID.fromString(event.authDetails().userId());
-      user.setCreatedBy(createdBy);
+      try {
+        UUID createdBy = UUID.fromString(event.authDetails().userId());
+        user.setCreatedBy(createdBy);
+      } catch (Exception e) {
+        log.warn(
+            "Could not parse createdBy UUID from authDetails: {}", event.authDetails().userId());
+      }
     }
     return user;
   }

@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
+import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileQueryDto;
@@ -26,6 +27,7 @@ import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileRepository;
 class EmployeeProfileServiceTest {
 
   @Mock private EmployeeProfileRepository employeeProfileRepository;
+  @Mock private UserService userService;
 
   @InjectMocks private EmployeeProfileService employeeProfileService;
 
@@ -159,5 +161,44 @@ class EmployeeProfileServiceTest {
     verify(employeeProfileRepository).findByKeycloakUserId(keycloakUserId);
     verify(employeeProfileRepository).findById(profileId);
     verify(employeeProfileRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("create(User) should save user and create employee profile")
+  void create_WithUser_ShouldSaveUserAndCreateProfile() {
+    // Given
+    UUID keycloakUserId = UUID.randomUUID();
+    UUID creatorId = UUID.randomUUID();
+    User notSavedUser =
+        User.builder().keycloakUserId(keycloakUserId).username("admin").build();
+    notSavedUser.setCreatedBy(creatorId);
+
+    User savedUser =
+        User.builder().keycloakUserId(keycloakUserId).username("admin").build();
+    savedUser.setId(UUID.randomUUID());
+    savedUser.setCreatedBy(creatorId);
+
+    when(userService.create(notSavedUser)).thenReturn(savedUser);
+    when(employeeProfileRepository.findByKeycloakUserId(keycloakUserId))
+        .thenReturn(Optional.empty());
+    when(employeeProfileRepository.save(any(EmployeeProfile.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    EmployeeProfile result = employeeProfileService.create(notSavedUser);
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result.getUser()).isEqualTo(savedUser);
+    assertThat(result.getCreatedBy()).isEqualTo(creatorId);
+    verify(userService).create(notSavedUser);
+    verify(employeeProfileRepository).save(any(EmployeeProfile.class));
+  }
+
+  @Test
+  @DisplayName("create(User) should throw NullPointerException when user is null")
+  void create_WithNullUser_ShouldThrowNullPointerException() {
+    assertThatThrownBy(() -> employeeProfileService.create((User) null))
+        .isInstanceOf(NullPointerException.class);
   }
 }

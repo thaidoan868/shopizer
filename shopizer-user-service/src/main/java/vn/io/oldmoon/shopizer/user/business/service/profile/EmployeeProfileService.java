@@ -1,5 +1,6 @@
 package vn.io.oldmoon.shopizer.user.business.service.profile;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
+import vn.io.oldmoon.shopizer.user.business.service.UserService;
+import vn.io.oldmoon.shopizer.user.infra.model.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileQueryDto;
 import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileRepository;
@@ -18,6 +21,7 @@ import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileRepository;
 @Slf4j
 public class EmployeeProfileService {
   private final EmployeeProfileRepository employeeProfileRepository;
+  private final UserService userService;
 
   @NonNull
   public EmployeeProfile get(UUID keycloakUserId) {
@@ -57,9 +61,24 @@ public class EmployeeProfileService {
       return existingProfile;
     } catch (ResourceNotFoundException e) {
       log.info(
-          "Persisting a customer profile with userKeycloakUserId={}",
+          "Persisting an employee profile with userKeycloakUserId={}",
           employeeProfile.getUser().getKeycloakUserId());
       return employeeProfileRepository.save(employeeProfile);
     }
+  }
+
+  /**
+   * Creates a new User and an initial EmployeeProfile in a single transaction.
+   *
+   * @return the created EmployeeProfile entity
+   */
+  @Transactional
+  public EmployeeProfile create(User user) {
+    Objects.requireNonNull(user);
+
+    User savedUser = userService.create(user);
+    EmployeeProfile profile = EmployeeProfile.builder().user(savedUser).build();
+    profile.setCreatedBy(savedUser.getCreatedBy());
+    return this.create(profile);
   }
 }

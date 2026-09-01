@@ -72,11 +72,16 @@ public class CustomerProfileService {
     }
   }
 
+  /**
+   * Creates a new User and an initial CustomerProfile in a single transaction.
+   *
+   * @return the created CustomerProfile entity
+   */
   @Transactional
-  public CustomerProfile create(User notSavedUser) {
-    Objects.requireNonNull(notSavedUser);
+  public CustomerProfile create(User user) {
+    Objects.requireNonNull(user);
 
-    User savedUser = userService.create(notSavedUser);
+    User savedUser = userService.create(user);
     CustomerProfile profile = CustomerProfile.builder().user(savedUser).build();
     return this.create(profile);
   }
