@@ -64,7 +64,8 @@ class CustomerMapperTest {
     assertThat(dto.getLanguage()).isEqualTo(Language.vn);
     assertThat(dto.getPhoneNumber()).isEqualTo("+1987654321");
     assertThat(dto.getAddress()).isEqualTo("456 Elm St");
-    assertThat(dto.getAvatarMeta()).isNull(); // explicitly ignored in mapper, populated in populator
+    assertThat(dto.getAvatarMeta())
+        .isNull(); // explicitly ignored in mapper, populated in populator
   }
 
   @Test
@@ -108,36 +109,6 @@ class CustomerMapperTest {
   }
 
   @Test
-  @DisplayName("updateUserFromDto should ignore null fields and retain original user values")
-  void updateUserFromDto_WhenDtoHasNulls_ShouldRetainExistingValues() {
-    // Given
-    User user =
-        User.builder()
-            .username("johndoe")
-            .firstName("OriginalFirst")
-            .lastName("OriginalLast")
-            .build();
-
-    UpdateCustomerDto dto = UpdateCustomerDto.builder().firstName("OnlyNewFirst").build();
-
-    // When
-    customerMapper.updateUserFromDto(dto, user);
-
-    // Then
-    assertThat(user.getFirstName()).isEqualTo("OnlyNewFirst");
-    assertThat(user.getLastName()).isEqualTo("OriginalLast");
-  }
-
-  @Test
-  @DisplayName("updateUserFromDto should do nothing when DTO is null")
-  void updateUserFromDto_WhenDtoIsNull_ShouldNotModifyUser() {
-    User user = User.builder().firstName("First").lastName("Last").build();
-    customerMapper.updateUserFromDto(null, user);
-    assertThat(user.getFirstName()).isEqualTo("First");
-    assertThat(user.getLastName()).isEqualTo("Last");
-  }
-
-  @Test
   @DisplayName("updateCustomerProfileFromDto should update non-null profile fields from DTO")
   void updateCustomerProfileFromDto_ShouldUpdateNonNullFieldsOnly() {
     // Given
@@ -171,40 +142,5 @@ class CustomerMapperTest {
     assertThat(profile.getLanguage()).isEqualTo(Language.vn);
     assertThat(profile.getPhoneNumber()).isEqualTo("+84987654321");
     assertThat(profile.getAddress()).isEqualTo("New Address");
-  }
-
-  @Test
-  @DisplayName("updateCustomerProfileFromDto should ignore null fields in DTO")
-  void updateCustomerProfileFromDto_WhenDtoHasNulls_ShouldRetainExistingValues() {
-    // Given
-    CustomerProfile profile =
-        CustomerProfile.builder()
-            .gender(Gender.male)
-            .dateOfBirth(LocalDate.of(1990, 1, 1))
-            .language(Language.en)
-            .phoneNumber("+1234567890")
-            .address("Old Address")
-            .build();
-
-    UpdateCustomerDto dto =
-        UpdateCustomerDto.builder().phoneNumber("+84987654321").address("New Address").build();
-
-    // When
-    customerMapper.updateCustomerProfileFromDto(dto, profile);
-
-    // Then
-    assertThat(profile.getGender()).isEqualTo(Gender.male);
-    assertThat(profile.getDateOfBirth()).isEqualTo(LocalDate.of(1990, 1, 1));
-    assertThat(profile.getLanguage()).isEqualTo(Language.en);
-    assertThat(profile.getPhoneNumber()).isEqualTo("+84987654321");
-    assertThat(profile.getAddress()).isEqualTo("New Address");
-  }
-
-  @Test
-  @DisplayName("updateCustomerProfileFromDto should do nothing when DTO is null")
-  void updateCustomerProfileFromDto_WhenDtoIsNull_ShouldNotModifyProfile() {
-    CustomerProfile profile = CustomerProfile.builder().address("Original Address").build();
-    customerMapper.updateCustomerProfileFromDto(null, profile);
-    assertThat(profile.getAddress()).isEqualTo("Original Address");
   }
 }

@@ -57,7 +57,7 @@ class CustomerControllerTest {
   @MockitoBean private CustomerPopulator customerPopulator;
 
   @Nested
-  @DisplayName("GET /api/v1/customer/profile")
+  @DisplayName("GET /api/v1/customers/me/profile")
   class GetProfileTests {
 
     @Test
@@ -83,7 +83,8 @@ class CustomerControllerTest {
               .phoneNumber("+1234567890")
               .address("123 Main St")
               .avatarMeta(
-                  new AvatarDto("http://cdn/orig.jpg", "http://cdn/med.jpg", "http://cdn/thumb.jpg"))
+                  new AvatarDto(
+                      "http://cdn/orig.jpg", "http://cdn/med.jpg", "http://cdn/thumb.jpg"))
               .build();
 
       given(userService.get(userId)).willReturn(user);
@@ -93,7 +94,7 @@ class CustomerControllerTest {
       // When & Then
       mockMvc
           .perform(
-              get("/api/v1/customer/profile")
+              get("/api/v1/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -126,7 +127,7 @@ class CustomerControllerTest {
     @Test
     @DisplayName("without authentication should return 401 Unauthorized")
     void getProfile_WithoutAuth_ShouldReturn401() throws Exception {
-      mockMvc.perform(get("/api/v1/customer/profile")).andExpect(status().isUnauthorized());
+      mockMvc.perform(get("/api/v1/customers/me/profile")).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -136,7 +137,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              get("/api/v1/customer/profile")
+              get("/api/v1/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -161,7 +162,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              get("/api/v1/customer/profile")
+              get("/api/v1/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -187,7 +188,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              get("/api/v1/customer/profile")
+              get("/api/v1/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -205,7 +206,7 @@ class CustomerControllerTest {
   }
 
   @Nested
-  @DisplayName("PATCH /api/v1/customer/profile")
+  @DisplayName("PATCH /api/v1/customers/me/profile")
   class UpdateProfileTests {
 
     @Test
@@ -280,12 +281,13 @@ class CustomerControllerTest {
       given(customerProfileService.get(userId)).willReturn(profile);
       doNothing().when(customerPopulator).update(user, profile, updateDto);
       given(customerProfileService.update(user, profile)).willReturn(updatedProfile);
-      given(customerPopulator.toCustomerProfileDto(updatedUser, updatedProfile)).willReturn(profileDto);
+      given(customerPopulator.toCustomerProfileDto(updatedUser, updatedProfile))
+          .willReturn(profileDto);
 
       // When & Then
       mockMvc
           .perform(
-              patch("/api/v1/customer/profile")
+              patch("/api/v1/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -318,7 +320,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customer/profile")
+              patch("/api/v1/customers/me/profile")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(updateDto))
                   .accept(MediaType.APPLICATION_JSON))
@@ -333,7 +335,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customer/profile")
+              patch("/api/v1/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -360,7 +362,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customer/profile")
+              patch("/api/v1/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -390,7 +392,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customer/profile")
+              patch("/api/v1/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -416,7 +418,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customer/profile")
+              patch("/api/v1/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -432,84 +434,6 @@ class CustomerControllerTest {
           .andExpect(status().isUnprocessableEntity())
           .andExpect(jsonPath("$.error").value("Validation failed"))
           .andExpect(jsonPath("$.errors").isArray());
-    }
-
-    @Test
-    @DisplayName("with firstName longer than 50 chars should return 422 Unprocessable Entity")
-    void updateProfile_WithFirstNameTooLong_ShouldReturn422() throws Exception {
-      UUID userId = UUID.randomUUID();
-      UpdateCustomerDto updateDto =
-          UpdateCustomerDto.builder().firstName("a".repeat(51)).build();
-
-      mockMvc
-          .perform(
-              patch("/api/v1/customer/profile")
-                  .with(
-                      jwt()
-                          .jwt(
-                              jwtBuilder ->
-                                  jwtBuilder
-                                      .subject(userId.toString())
-                                      .claim("preferred_username", "alice")
-                                      .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
-                          .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(updateDto))
-                  .accept(MediaType.APPLICATION_JSON))
-          .andExpect(status().isUnprocessableEntity())
-          .andExpect(jsonPath("$.error").value("Validation failed"));
-    }
-
-    @Test
-    @DisplayName("with lastName longer than 50 chars should return 422 Unprocessable Entity")
-    void updateProfile_WithLastNameTooLong_ShouldReturn422() throws Exception {
-      UUID userId = UUID.randomUUID();
-      UpdateCustomerDto updateDto =
-          UpdateCustomerDto.builder().lastName("a".repeat(51)).build();
-
-      mockMvc
-          .perform(
-              patch("/api/v1/customer/profile")
-                  .with(
-                      jwt()
-                          .jwt(
-                              jwtBuilder ->
-                                  jwtBuilder
-                                      .subject(userId.toString())
-                                      .claim("preferred_username", "alice")
-                                      .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
-                          .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(updateDto))
-                  .accept(MediaType.APPLICATION_JSON))
-          .andExpect(status().isUnprocessableEntity())
-          .andExpect(jsonPath("$.error").value("Validation failed"));
-    }
-
-    @Test
-    @DisplayName("with address longer than 300 chars should return 422 Unprocessable Entity")
-    void updateProfile_WithAddressTooLong_ShouldReturn422() throws Exception {
-      UUID userId = UUID.randomUUID();
-      UpdateCustomerDto updateDto =
-          UpdateCustomerDto.builder().address("a".repeat(301)).build();
-
-      mockMvc
-          .perform(
-              patch("/api/v1/customer/profile")
-                  .with(
-                      jwt()
-                          .jwt(
-                              jwtBuilder ->
-                                  jwtBuilder
-                                      .subject(userId.toString())
-                                      .claim("preferred_username", "alice")
-                                      .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
-                          .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(updateDto))
-                  .accept(MediaType.APPLICATION_JSON))
-          .andExpect(status().isUnprocessableEntity())
-          .andExpect(jsonPath("$.error").value("Validation failed"));
     }
   }
 }

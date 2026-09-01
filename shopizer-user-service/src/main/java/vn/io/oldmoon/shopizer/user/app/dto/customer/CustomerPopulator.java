@@ -56,12 +56,4 @@ public class CustomerPopulator {
         "Updated User and CustomerProfile entities in-place for keycloakUserId={}",
         user.getKeycloakUserId());
   }
-
-  /**
-   * Alias for update method.
-   */
-  public void populate(
-      User user, CustomerProfile customerProfile, UpdateCustomerDto updateCustomerDto) {
-    update(user, customerProfile, updateCustomerDto);
-  }
 }

@@ -167,22 +167,6 @@ class CustomerPopulatorTest {
   }
 
   @Test
-  @DisplayName("populate should delegate to update method")
-  void populate_ShouldDelegateToUpdate() {
-    // Given
-    User user = User.builder().firstName("OldFirst").build();
-    CustomerProfile profile = CustomerProfile.builder().phoneNumber("+1234567890").build();
-    UpdateCustomerDto dto = UpdateCustomerDto.builder().firstName("NewFirst").build();
-
-    // When
-    customerPopulator.populate(user, profile, dto);
-
-    // Then
-    verify(customerMapper).updateUserFromDto(dto, user);
-    verify(customerMapper).updateCustomerProfileFromDto(dto, profile);
-  }
-
-  @Test
   @DisplayName("update should throw NullPointerException when user is null")
   void update_WhenUserIsNull_ShouldThrowNpe() {
     CustomerProfile profile = CustomerProfile.builder().build();
