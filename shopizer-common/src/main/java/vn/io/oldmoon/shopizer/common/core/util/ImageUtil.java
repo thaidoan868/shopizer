@@ -35,15 +35,20 @@ public class ImageUtil {
   public static void validateContent(MultipartFile file) {
     validateBasic(file);
 
-    try (InputStream inputStream = new BufferedInputStream(file.getInputStream())) {
-
-      String detectedMime = TIKA.detect(inputStream, file.getOriginalFilename());
+    try {
+      String detectedMime;
+      try (InputStream mimeStream = new BufferedInputStream(file.getInputStream())) {
+        detectedMime = TIKA.detect(mimeStream, file.getOriginalFilename());
+      }
       if (detectedMime == null || !ALLOWED_IMAGE_TYPES.contains(detectedMime.toLowerCase())) {
         throw new InvalidInputException(
             "Invalid image file type. Detected format: " + detectedMime);
       }
 
-      BufferedImage img = ImageIO.read(inputStream);
+      BufferedImage img;
+      try (InputStream imgStream = new BufferedInputStream(file.getInputStream())) {
+        img = ImageIO.read(imgStream);
+      }
       if (img == null) {
         throw new InvalidInputException("Cannot decode image: " + file.getOriginalFilename());
       }
@@ -59,33 +64,24 @@ public class ImageUtil {
                     file.getOriginalFilename()));
       }
 
+    } catch (InvalidInputException e) {
+      throw e;
     } catch (Exception e) {
       throw new InvalidInputException(
           "Failed to process image file: " + file.getOriginalFilename());
     }
   }
 
-  public InputStream resizeImageToStream(MultipartFile file, int width, int height)
+  public static InputStream resizeImageToStream(InputStream in, int width, int height)
       throws IOException {
-    PipedInputStream in = new PipedInputStream();
-    PipedOutputStream out = new PipedOutputStream(in);
-
-    // Run Thumbnailator processing in a virtual thread / background task
-    Thread.ofVirtual()
-        .start(
-            () -> {
-              try (out;
-                  InputStream fileIn = file.getInputStream()) {
-                Thumbnails.of(fileIn)
-                    .size(width, height)
-                    .crop(Positions.CENTER)
-                    .outputFormat("jpg")
-                    .toOutputStream(out);
-              } catch (IOException e) {
-                log.error("Failed to resize image stream", e);
-              }
-            });
-
-    return in;
+    try (in) {
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      Thumbnails.of(in)
+          .size(width, height)
+          .crop(Positions.CENTER)
+          .outputFormat("jpg")
+          .toOutputStream(out);
+      return new ByteArrayInputStream(out.toByteArray());
+    }
   }
 }

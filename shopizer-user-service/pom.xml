@@ -114,6 +114,11 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.6.0</version>
+        </dependency>
 
         <!-- TESTING -->
         <dependency>

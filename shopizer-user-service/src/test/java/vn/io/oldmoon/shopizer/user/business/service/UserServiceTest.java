@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
+import vn.io.oldmoon.shopizer.user.infra.model.FileMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
 
@@ -23,6 +24,7 @@ import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
 class UserServiceTest {
 
   @Mock private UserRepository userRepository;
+  @Mock private FileMetaService fileMetaService;
 
   @InjectMocks private UserService userService;
 
@@ -223,6 +225,110 @@ class UserServiceTest {
     @DisplayName("should throw NullPointerException when user is null")
     void update_WhenUserIsNull_ShouldThrowNpe() {
       assertThatThrownBy(() -> userService.update(null)).isInstanceOf(NullPointerException.class);
+    }
+  }
+
+  @Nested
+  @DisplayName("updateAvatar(UUID userId, MultipartFile file)")
+  class UpdateAvatarTest {
+
+    private byte[] createValidImageBytes() {
+      try {
+        java.awt.image.BufferedImage img =
+            new java.awt.image.BufferedImage(50, 50, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(img, "png", baos);
+        return baos.toByteArray();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    @Test
+    @DisplayName("should save image variants and update user avatarMeta when input is valid")
+    void updateAvatar_WhenValidInput_ShouldUpdateAvatarAndSaveUser() {
+      // Given
+      UUID userId = UUID.randomUUID();
+      User user = User.builder().keycloakUserId(userId).username("avatarUser").build();
+      byte[] imageBytes = createValidImageBytes();
+      org.springframework.mock.web.MockMultipartFile file =
+          new org.springframework.mock.web.MockMultipartFile(
+              "file", "my-avatar.png", "image/png", imageBytes);
+
+      when(userRepository.findByKeycloakUserId(userId)).thenReturn(Optional.of(user));
+      when(userRepository.save(org.mockito.ArgumentMatchers.any(User.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+      when(fileMetaService.save(
+              org.mockito.ArgumentMatchers.any(byte[].class),
+              org.mockito.ArgumentMatchers.any(FileMeta.class)))
+          .thenAnswer(invocation -> invocation.getArgument(1));
+
+      // When
+      User updatedUser = userService.updateAvatar(userId, file);
+
+      // Then
+      assertThat(updatedUser).isNotNull();
+      assertThat(updatedUser.getAvatarMeta()).isNotNull();
+      assertThat(updatedUser.getAvatarMeta().bucket()).isEqualTo("public-assets");
+      assertThat(updatedUser.getAvatarMeta().originalObjectName()).contains(userId.toString());
+      assertThat(updatedUser.getAvatarMeta().originalObjectName()).endsWith(".png");
+      assertThat(updatedUser.getAvatarMeta().mediumObjectName()).contains("medium");
+      assertThat(updatedUser.getAvatarMeta().thumbnailObjectName()).contains("thumbnail");
+
+      verify(fileMetaService, org.mockito.Mockito.times(3))
+          .save(
+              org.mockito.ArgumentMatchers.any(byte[].class),
+              org.mockito.ArgumentMatchers.any(FileMeta.class));
+      verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("should throw NullPointerException when userId is null")
+    void updateAvatar_WhenUserIdIsNull_ShouldThrowNpe() {
+      byte[] imageBytes = createValidImageBytes();
+      org.springframework.mock.web.MockMultipartFile file =
+          new org.springframework.mock.web.MockMultipartFile(
+              "file", "avatar.png", "image/png", imageBytes);
+
+      assertThatThrownBy(() -> userService.updateAvatar(null, file))
+          .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("should throw NullPointerException when file is null")
+    void updateAvatar_WhenFileIsNull_ShouldThrowNpe() {
+      UUID userId = UUID.randomUUID();
+
+      assertThatThrownBy(() -> userService.updateAvatar(userId, null))
+          .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("should throw ResourceNotFoundException when user is not found")
+    void updateAvatar_WhenUserNotFound_ShouldThrowResourceNotFoundException() {
+      UUID userId = UUID.randomUUID();
+      byte[] imageBytes = createValidImageBytes();
+      org.springframework.mock.web.MockMultipartFile file =
+          new org.springframework.mock.web.MockMultipartFile(
+              "file", "avatar.png", "image/png", imageBytes);
+
+      when(userRepository.findByKeycloakUserId(userId)).thenReturn(Optional.empty());
+      when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+      assertThatThrownBy(() -> userService.updateAvatar(userId, file))
+          .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("should throw InvalidInputException when image content is empty")
+    void updateAvatar_WhenImageIsEmpty_ShouldThrowInvalidInputException() {
+      UUID userId = UUID.randomUUID();
+      org.springframework.mock.web.MockMultipartFile emptyFile =
+          new org.springframework.mock.web.MockMultipartFile(
+              "file", "avatar.png", "image/png", new byte[0]);
+
+      assertThatThrownBy(() -> userService.updateAvatar(userId, emptyFile))
+          .isInstanceOf(InvalidInputException.class);
     }
   }
 }
