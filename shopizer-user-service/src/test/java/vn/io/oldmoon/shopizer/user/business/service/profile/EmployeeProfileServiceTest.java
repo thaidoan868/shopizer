@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileQueryDto;
 import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileRepository;
@@ -170,12 +170,10 @@ class EmployeeProfileServiceTest {
     // Given
     UUID keycloakUserId = UUID.randomUUID();
     UUID creatorId = UUID.randomUUID();
-    User notSavedUser =
-        User.builder().keycloakUserId(keycloakUserId).username("admin").build();
+    User notSavedUser = User.builder().keycloakUserId(keycloakUserId).username("admin").build();
     notSavedUser.setCreatedBy(creatorId);
 
-    User savedUser =
-        User.builder().keycloakUserId(keycloakUserId).username("admin").build();
+    User savedUser = User.builder().keycloakUserId(keycloakUserId).username("admin").build();
     savedUser.setId(UUID.randomUUID());
     savedUser.setCreatedBy(creatorId);
 
@@ -210,8 +208,7 @@ class EmployeeProfileServiceTest {
     UUID profileId = UUID.randomUUID();
     UUID keycloakUserId = UUID.randomUUID();
     User user = User.builder().keycloakUserId(keycloakUserId).build();
-    EmployeeProfile profile =
-        EmployeeProfile.builder().user(user).workPhone("+1234567890").build();
+    EmployeeProfile profile = EmployeeProfile.builder().user(user).workPhone("+1234567890").build();
     profile.setId(profileId);
 
     when(employeeProfileRepository.existsById(profileId)).thenReturn(true);
@@ -274,8 +271,7 @@ class EmployeeProfileServiceTest {
         User.builder().keycloakUserId(keycloakUserId).firstName("JaneUpdated").build();
     updatedUser.setId(userId);
 
-    EmployeeProfile profile =
-        EmployeeProfile.builder().user(user).workPhone("+1234567890").build();
+    EmployeeProfile profile = EmployeeProfile.builder().user(user).workPhone("+1234567890").build();
     profile.setId(profileId);
 
     when(userService.update(user)).thenReturn(updatedUser);
@@ -293,4 +289,3 @@ class EmployeeProfileServiceTest {
     verify(employeeProfileRepository).save(profile);
   }
 }
-

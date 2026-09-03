@@ -17,9 +17,9 @@ import vn.io.oldmoon.shopizer.user.app.dto.user.AvatarDto;
 import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
-import vn.io.oldmoon.shopizer.user.infra.model.profile.AvatarMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.user.AvatarMeta;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerPopulatorTest {

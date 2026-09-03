@@ -22,7 +22,7 @@ import vn.io.oldmoon.shopizer.user.app.dto.customer.CustomerProfileDto;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.UpdateCustomerDto;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
 
 @RestController

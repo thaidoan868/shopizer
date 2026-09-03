@@ -47,7 +47,7 @@ public class AuthenticationUtil {
     user.setLastName(jwt.getClaimAsString("family_name"));
     user.setEmail(jwt.getClaimAsString("email"));
 
-    log.info("Fetched User from security context: userId={}", jwt.getSubject());
+    log.debug("Fetched User from security context: userId={}", jwt.getSubject());
     return Optional.of(user);
   }
 }

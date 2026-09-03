@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileQueryDto;
 import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileRepository;
@@ -117,4 +117,3 @@ public class EmployeeProfileService {
     return this.update(profile);
   }
 }
-

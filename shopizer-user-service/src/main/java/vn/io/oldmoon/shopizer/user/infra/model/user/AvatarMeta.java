@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.infra.model.profile;
+package vn.io.oldmoon.shopizer.user.infra.model.user;
 
 import jakarta.validation.constraints.NotBlank;
 

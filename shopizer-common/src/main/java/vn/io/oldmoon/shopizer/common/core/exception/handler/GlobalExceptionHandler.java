@@ -14,8 +14,11 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import vn.io.oldmoon.shopizer.common.core.exception.ErrorCode;
 import vn.io.oldmoon.shopizer.common.web.model.ErrorResponse;
@@ -24,6 +27,33 @@ import vn.io.oldmoon.shopizer.common.web.model.ErrorResponse;
 @Order(Ordered.LOWEST_PRECEDENCE)
 @Slf4j
 public class GlobalExceptionHandler {
+
+  @ExceptionHandler(MissingServletRequestPartException.class)
+  public ResponseEntity<ErrorResponse> handleMissingServletRequestPartException(
+      MissingServletRequestPartException ex, HttpServletRequest request) {
+    ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+    String detail = ex.getMessage();
+    ErrorResponse body = new ErrorResponse(errorCode.getError(), detail, request.getRequestURI());
+    return ResponseEntity.status(errorCode.getHttpStatus()).body(body);
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
+      MissingServletRequestParameterException ex, HttpServletRequest request) {
+    ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+    String detail = ex.getMessage();
+    ErrorResponse body = new ErrorResponse(errorCode.getError(), detail, request.getRequestURI());
+    return ResponseEntity.status(errorCode.getHttpStatus()).body(body);
+  }
+
+  @ExceptionHandler(MultipartException.class)
+  public ResponseEntity<ErrorResponse> handleMultipartException(
+      MultipartException ex, HttpServletRequest request) {
+    ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+    String detail = ex.getMessage();
+    ErrorResponse body = new ErrorResponse(errorCode.getError(), detail, request.getRequestURI());
+    return ResponseEntity.status(errorCode.getHttpStatus()).body(body);
+  }
 
   @ExceptionHandler(MissingPathVariableException.class)
   public ResponseEntity<ErrorResponse> handleMissingPathVariableException(
