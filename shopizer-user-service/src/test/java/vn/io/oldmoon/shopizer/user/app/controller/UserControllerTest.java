@@ -75,7 +75,7 @@ class UserControllerTest {
       // Given
       UUID userId = UUID.randomUUID();
       byte[] imageBytes = createValidImageBytes();
-      MockMultipartFile file = new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
+      MockMultipartFile file = new MockMultipartFile("avatar", "avatar.png", "image/png", imageBytes);
 
       AvatarMeta avatarMeta =
           new AvatarMeta(
@@ -145,7 +145,7 @@ class UserControllerTest {
     @DisplayName("without authentication should return 401 Unauthorized")
     void updateAvatar_WithoutAuth_ShouldReturn401() throws Exception {
       byte[] imageBytes = createValidImageBytes();
-      MockMultipartFile file = new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
+      MockMultipartFile file = new MockMultipartFile("avatar", "avatar.png", "image/png", imageBytes);
 
       MockMultipartHttpServletRequestBuilder builder =
           MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/users/me/avatar");
@@ -160,7 +160,7 @@ class UserControllerTest {
     void updateAvatar_WithEmptyFile_ShouldReturn400() throws Exception {
       UUID userId = UUID.randomUUID();
       MockMultipartFile emptyFile =
-          new MockMultipartFile("file", "avatar.png", "image/png", new byte[0]);
+          new MockMultipartFile("avatar", "avatar.png", "image/png", new byte[0]);
 
       MockMultipartHttpServletRequestBuilder builder =
           MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/users/me/avatar");
@@ -183,7 +183,7 @@ class UserControllerTest {
     void updateAvatar_WhenUserNotFound_ShouldReturn404() throws Exception {
       UUID userId = UUID.randomUUID();
       byte[] imageBytes = createValidImageBytes();
-      MockMultipartFile file = new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
+      MockMultipartFile file = new MockMultipartFile("avatar", "avatar.png", "image/png", imageBytes);
 
       given(userService.updateAvatar(eq(userId), any(MultipartFile.class)))
           .willThrow(new ResourceNotFoundException("User", "userId=" + userId));
@@ -202,6 +202,32 @@ class UserControllerTest {
                   .contentType(MediaType.MULTIPART_FORM_DATA))
           .andExpect(status().isNotFound())
           .andExpect(jsonPath("$.error").value("Resource not found"));
+    }
+
+    @Test
+    @DisplayName("when required part avatar is missing should return 400 Bad Request")
+    void updateAvatar_WhenMissingAvatarPart_ShouldReturn400() throws Exception {
+      UUID userId = UUID.randomUUID();
+      byte[] imageBytes = createValidImageBytes();
+      MockMultipartFile file =
+          new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
+
+      MockMultipartHttpServletRequestBuilder builder =
+          MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/users/me/avatar");
+
+      mockMvc
+          .perform(
+              builder
+                  .file(file)
+                  .with(
+                      jwt()
+                          .jwt(jwtBuilder -> jwtBuilder.subject(userId.toString()))
+                          .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
+                  .contentType(MediaType.MULTIPART_FORM_DATA))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.error").value("Bad request"))
+          .andExpect(jsonPath("$.message").value("Required part 'avatar' is not present."))
+          .andExpect(jsonPath("$.path").value("/api/v1/users/me/avatar"));
     }
 
     @Test
