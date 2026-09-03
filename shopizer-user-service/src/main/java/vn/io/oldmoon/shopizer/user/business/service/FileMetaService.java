@@ -48,19 +48,42 @@ public class FileMetaService {
               ? fileMeta.getSizeBytes()
               : -1L;
       long partSize = size < 0 ? 10485760L : -1L;
+      String rawContentType = fileMeta.getContentType();
+      String contentType;
+      if (rawContentType == null || rawContentType.isBlank()) {
+        contentType = "application/octet-stream";
+      } else if (!rawContentType.contains("/")) {
+        contentType =
+            switch (rawContentType.toLowerCase()) {
+              case "image" -> "image/jpeg";
+              case "video" -> "video/mp4";
+              case "audio" -> "audio/mpeg";
+              default -> "application/octet-stream";
+            };
+      } else {
+        contentType = rawContentType;
+      }
       PutObjectArgs.Builder builder =
           PutObjectArgs.builder()
               .bucket(fileMeta.getBucket())
               .object(fileMeta.getObjectName())
-              .contentType(fileMeta.getContentType())
+              .contentType(contentType)
               .stream(payload, size, partSize);
       minioClient.putObject(builder.build());
+      log.info(
+          "File uploaded to MinIO: bucket={}, objectName={}",
+          fileMeta.getBucket(),
+          fileMeta.getObjectName());
     } catch (Exception e) {
       log.error(
           "Failed to upload file to MinIO: bucket={}, objectName={}",
           fileMeta.getBucket(),
           fileMeta.getObjectName());
-      throw new ServiceException("Failed to upload file to MinIO", e);
+      throw new ServiceException("Failed to upload file to storage", e);
+    }
+
+    if (fileMeta.getStatus() == null) {
+      fileMeta.setStatus(FileStatus.ACTIVE);
     }
 
     FileMeta saved = fileMetaRepository.save(fileMeta);
@@ -93,5 +116,10 @@ public class FileMetaService {
                         "File metadata", "bucket=%s, objectName=%s".formatted(bucket, objectName)));
     fileMeta.setStatus(FileStatus.DELETED);
     fileMetaRepository.save(fileMeta);
+    log.info(
+        "Soft deleted file metadata id={}, bucket={}, objectName={}",
+        fileMeta.getId(),
+        fileMeta.getBucket(),
+        fileMeta.getObjectName());
   }
 }

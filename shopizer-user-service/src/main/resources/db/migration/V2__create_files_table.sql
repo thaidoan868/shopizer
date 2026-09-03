@@ -12,6 +12,7 @@ CREATE TABLE files (
     size_bytes       BIGINT,
     content_type     VARCHAR(50),
     visibility       VARCHAR(50),
+    status           VARCHAR(50),
 
     CONSTRAINT uq_files_bucket_object_name UNIQUE (bucket, object_name)
 );

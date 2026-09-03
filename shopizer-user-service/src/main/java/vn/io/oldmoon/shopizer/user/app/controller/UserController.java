@@ -18,14 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import vn.io.oldmoon.shopizer.common.core.util.ImageUtil;
 import vn.io.oldmoon.shopizer.common.web.controller.AbstractController;
-import vn.io.oldmoon.shopizer.user.app.dto.user.AvatarDto;
 import vn.io.oldmoon.shopizer.user.app.dto.user.UserDto;
 import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @RestController
-@RequestMapping(path = {"/api/v1/user", "/api/v1/users"})
+@RequestMapping("/api/v1/users/me")
 @PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
 @Slf4j
@@ -35,9 +34,7 @@ public class UserController extends AbstractController {
   private final UserService userService;
   private final UserPopulator userPopulator;
 
-  @PatchMapping(
-      value = {"/avatar", "/me/avatar"},
-      consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PatchMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(
       summary = "Upload user avatar",
       description = "Uploads and updates the avatar image for the authenticated user")
@@ -47,8 +44,8 @@ public class UserController extends AbstractController {
       content =
           @Content(
               mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = AvatarDto.class)))
-  public ResponseEntity<AvatarDto> updateAvatar(
+              schema = @Schema(implementation = UserDto.class)))
+  public ResponseEntity<UserDto> updateAvatar(
       @RequestParam(value = "avatar", required = true) MultipartFile avatarFile) {
     ImageUtil.validateBasic(avatarFile);
 

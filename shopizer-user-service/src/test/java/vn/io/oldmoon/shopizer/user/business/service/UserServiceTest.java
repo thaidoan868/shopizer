@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.user.infra.model.FileMeta;
+import vn.io.oldmoon.shopizer.user.infra.model.user.AvatarMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
 
@@ -259,7 +260,7 @@ class UserServiceTest {
       when(userRepository.save(org.mockito.ArgumentMatchers.any(User.class)))
           .thenAnswer(invocation -> invocation.getArgument(0));
       when(fileMetaService.save(
-              org.mockito.ArgumentMatchers.any(byte[].class),
+              org.mockito.ArgumentMatchers.any(java.io.InputStream.class),
               org.mockito.ArgumentMatchers.any(FileMeta.class)))
           .thenAnswer(invocation -> invocation.getArgument(1));
 
@@ -277,9 +278,45 @@ class UserServiceTest {
 
       verify(fileMetaService, org.mockito.Mockito.times(3))
           .save(
-              org.mockito.ArgumentMatchers.any(byte[].class),
+              org.mockito.ArgumentMatchers.any(java.io.InputStream.class),
               org.mockito.ArgumentMatchers.any(FileMeta.class));
       verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName("should delete old avatar files when user already has an avatar")
+    void updateAvatar_WhenOldAvatarExists_ShouldDeleteOldAvatarFiles() {
+      // Given
+      UUID userId = UUID.randomUUID();
+      AvatarMeta oldAvatar =
+          new AvatarMeta("public-assets", "old-orig.jpg", "old-med.jpg", "old-thumb.jpg");
+      User user =
+          User.builder()
+              .keycloakUserId(userId)
+              .username("avatarUser")
+              .avatarMeta(oldAvatar)
+              .build();
+      byte[] imageBytes = createValidImageBytes();
+      org.springframework.mock.web.MockMultipartFile file =
+          new org.springframework.mock.web.MockMultipartFile(
+              "file", "my-avatar.png", "image/png", imageBytes);
+
+      when(userRepository.findByKeycloakUserId(userId)).thenReturn(Optional.of(user));
+      when(userRepository.save(org.mockito.ArgumentMatchers.any(User.class)))
+          .thenAnswer(invocation -> invocation.getArgument(0));
+      when(fileMetaService.save(
+              org.mockito.ArgumentMatchers.any(java.io.InputStream.class),
+              org.mockito.ArgumentMatchers.any(FileMeta.class)))
+          .thenAnswer(invocation -> invocation.getArgument(1));
+
+      // When
+      User updatedUser = userService.updateAvatar(userId, file);
+
+      // Then
+      assertThat(updatedUser).isNotNull();
+      verify(fileMetaService).delete("public-assets", "old-orig.jpg");
+      verify(fileMetaService).delete("public-assets", "old-med.jpg");
+      verify(fileMetaService).delete("public-assets", "old-thumb.jpg");
     }
 
     @Test
@@ -313,7 +350,6 @@ class UserServiceTest {
               "file", "avatar.png", "image/png", imageBytes);
 
       when(userRepository.findByKeycloakUserId(userId)).thenReturn(Optional.empty());
-      when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> userService.updateAvatar(userId, file))
           .isInstanceOf(ResourceNotFoundException.class);

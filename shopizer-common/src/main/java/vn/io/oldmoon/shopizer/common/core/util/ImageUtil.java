@@ -81,6 +81,7 @@ public class ImageUtil {
           .crop(Positions.CENTER)
           .outputFormat("jpg")
           .toOutputStream(out);
+      log.info("Resized image to {}x{} and converted to JPEG format", width, height);
       return new ByteArrayInputStream(out.toByteArray());
     }
   }

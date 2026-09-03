@@ -28,8 +28,8 @@ public class UserService {
   private final UserRepository userRepository;
   private final FileMetaService fileMetaService;
 
-  @Value("${minio.bucket:avatar-public}")
-  private String avatarBucket;
+  @Value("${minio.bucket.avatar-public}")
+  private final String avatarBucket;
 
   /**
    * Fetches a user by their Keycloak user ID.
@@ -100,12 +100,12 @@ public class UserService {
     String mediumObjectName = "avatar-medium-" + keycloakUserId + "-" + uniqueId + ".jpg";
     String thumbnailObjectName = "avatar-thumbnail-" + keycloakUserId + "-" + uniqueId + ".jpg";
 
-    String contentType = "image/jpg";
+    String contentType = "image/jpeg";
     FileMeta originalFileMetaMeta =
         FileMeta.builder()
             .bucket(avatarBucket)
             .objectName(originalObjectName)
-            .contentType("image")
+            .contentType(file.getContentType() != null ? file.getContentType() : contentType)
             .visibility(Visibility.PUBLIC)
             .build();
 
@@ -124,12 +124,13 @@ public class UserService {
             .contentType(contentType)
             .visibility(Visibility.PUBLIC)
             .build();
+    try {
+      InputStream mediumImagePayload =
+          ImageUtil.resizeImageToStream(file.getInputStream(), 300, 300);
+      InputStream thumbnailImagePayload =
+          ImageUtil.resizeImageToStream(file.getInputStream(), 150, 150);
 
-    try (InputStream fileInputStream = file.getInputStream()) {
-      InputStream mediumImagePayload = ImageUtil.resizeImageToStream(fileInputStream, 300, 300);
-      InputStream thumbnailImagePayload = ImageUtil.resizeImageToStream(fileInputStream, 150, 150);
-
-      fileMetaService.save(fileInputStream, originalFileMetaMeta);
+      fileMetaService.save(file.getInputStream(), originalFileMetaMeta);
       fileMetaService.save(mediumImagePayload, mediumFileMetaMeta);
       fileMetaService.save(thumbnailImagePayload, thumbnailFileMetaMeta);
 
@@ -137,12 +138,14 @@ public class UserService {
       log.error("Failed to resize the avatar image for keycloakUserId={}", keycloakUserId, e);
       throw new InvalidInputException("Failed to process avatar image: " + e.getMessage());
     }
+
     User user = get(keycloakUserId);
     AvatarMeta avatarMeta =
         new AvatarMeta(avatarBucket, originalObjectName, mediumObjectName, thumbnailObjectName);
     AvatarMeta oldAvatarMeta = user.getAvatarMeta();
     user.setAvatarMeta(avatarMeta);
     User updatedUser = userRepository.save(user);
+    log.info("Updating avatar for user keycloakUserId={}", keycloakUserId);
 
     try {
       if (oldAvatarMeta != null && oldAvatarMeta.bucket() != null) {

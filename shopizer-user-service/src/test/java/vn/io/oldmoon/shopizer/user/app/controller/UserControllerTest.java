@@ -33,6 +33,7 @@ import vn.io.oldmoon.shopizer.common.core.exception.handler.ApplicationException
 import vn.io.oldmoon.shopizer.common.core.exception.handler.GlobalExceptionHandler;
 import vn.io.oldmoon.shopizer.user.app.config.SecurityConfig;
 import vn.io.oldmoon.shopizer.user.app.dto.user.AvatarDto;
+import vn.io.oldmoon.shopizer.user.app.dto.user.UserDto;
 import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
@@ -65,17 +66,16 @@ class UserControllerTest {
   }
 
   @Nested
-  @DisplayName("PATCH /api/v1/user/avatar")
+  @DisplayName("PATCH /api/v1/users/me/avatar")
   class UpdateAvatarTests {
 
     @Test
-    @DisplayName("with authenticated user and valid image should return 200 and AvatarDto")
-    void updateAvatar_WhenAuthenticatedAndValidImage_ShouldReturn200AndAvatarDto() throws Exception {
+    @DisplayName("with authenticated user and valid image should return 200 and UserDto")
+    void updateAvatar_WhenAuthenticatedAndValidImage_ShouldReturn200AndUserDto() throws Exception {
       // Given
       UUID userId = UUID.randomUUID();
       byte[] imageBytes = createValidImageBytes();
-      MockMultipartFile file =
-          new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
+      MockMultipartFile file = new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
 
       AvatarMeta avatarMeta =
           new AvatarMeta(
@@ -85,11 +85,7 @@ class UserControllerTest {
               "avatar-thumbnail-" + userId + "-thumb.jpg");
 
       User updatedUser =
-          User.builder()
-              .keycloakUserId(userId)
-              .username("testuser")
-              .avatarMeta(avatarMeta)
-              .build();
+          User.builder().keycloakUserId(userId).username("testuser").avatarMeta(avatarMeta).build();
 
       AvatarDto avatarDto =
           new AvatarDto(
@@ -97,11 +93,18 @@ class UserControllerTest {
               "http://localhost:9000/public-assets/avatar-medium-" + userId + "-med.jpg",
               "http://localhost:9000/public-assets/avatar-thumbnail-" + userId + "-thumb.jpg");
 
+      UserDto userDto =
+          UserDto.builder()
+              .keycloakUserId(userId)
+              .username("testuser")
+              .avatarMeta(avatarDto)
+              .build();
+
       given(userService.updateAvatar(eq(userId), any(MultipartFile.class))).willReturn(updatedUser);
-      given(userPopulator.toAvatarDto(avatarMeta)).willReturn(avatarDto);
+      given(userPopulator.toUserDto(updatedUser)).willReturn(userDto);
 
       MockMultipartHttpServletRequestBuilder builder =
-          MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/user/avatar");
+          MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/users/me/avatar");
 
       // When & Then
       mockMvc
@@ -121,14 +124,17 @@ class UserControllerTest {
                           .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
                   .contentType(MediaType.MULTIPART_FORM_DATA))
           .andExpect(status().isOk())
+          .andExpect(jsonPath("$.keycloakUserId").value(userId.toString()))
+          .andExpect(jsonPath("$.username").value("testuser"))
           .andExpect(
-              jsonPath("$.originalAvatarUrl")
+              jsonPath("$.avatarMeta.originalAvatarUrl")
                   .value("http://localhost:9000/public-assets/avatar-" + userId + "-orig.png"))
           .andExpect(
-              jsonPath("$.mediumAvatarUrl")
-                  .value("http://localhost:9000/public-assets/avatar-medium-" + userId + "-med.jpg"))
+              jsonPath("$.avatarMeta.mediumAvatarUrl")
+                  .value(
+                      "http://localhost:9000/public-assets/avatar-medium-" + userId + "-med.jpg"))
           .andExpect(
-              jsonPath("$.thumbnailAvatarUrl")
+              jsonPath("$.avatarMeta.thumbnailAvatarUrl")
                   .value(
                       "http://localhost:9000/public-assets/avatar-thumbnail-"
                           + userId
@@ -139,11 +145,10 @@ class UserControllerTest {
     @DisplayName("without authentication should return 401 Unauthorized")
     void updateAvatar_WithoutAuth_ShouldReturn401() throws Exception {
       byte[] imageBytes = createValidImageBytes();
-      MockMultipartFile file =
-          new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
+      MockMultipartFile file = new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
 
       MockMultipartHttpServletRequestBuilder builder =
-          MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/user/avatar");
+          MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/users/me/avatar");
 
       mockMvc
           .perform(builder.file(file).contentType(MediaType.MULTIPART_FORM_DATA))
@@ -158,7 +163,7 @@ class UserControllerTest {
           new MockMultipartFile("file", "avatar.png", "image/png", new byte[0]);
 
       MockMultipartHttpServletRequestBuilder builder =
-          MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/user/avatar");
+          MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/users/me/avatar");
 
       mockMvc
           .perform(
@@ -178,14 +183,13 @@ class UserControllerTest {
     void updateAvatar_WhenUserNotFound_ShouldReturn404() throws Exception {
       UUID userId = UUID.randomUUID();
       byte[] imageBytes = createValidImageBytes();
-      MockMultipartFile file =
-          new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
+      MockMultipartFile file = new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
 
       given(userService.updateAvatar(eq(userId), any(MultipartFile.class)))
           .willThrow(new ResourceNotFoundException("User", "userId=" + userId));
 
       MockMultipartHttpServletRequestBuilder builder =
-          MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/user/avatar");
+          MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/users/me/avatar");
 
       mockMvc
           .perform(
@@ -201,66 +205,28 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("with avatar field name should return 200 and AvatarDto")
+    @DisplayName("with avatar field name should return 200 and UserDto")
     void updateAvatar_WithAvatarFieldName_ShouldReturn200() throws Exception {
       UUID userId = UUID.randomUUID();
       byte[] imageBytes = createValidImageBytes();
       MockMultipartFile file =
           new MockMultipartFile("avatar", "avatar.png", "image/png", imageBytes);
 
-      AvatarMeta avatarMeta =
-          new AvatarMeta("public-assets", "orig.png", "med.jpg", "thumb.jpg");
+      AvatarMeta avatarMeta = new AvatarMeta("public-assets", "orig.png", "med.jpg", "thumb.jpg");
       User updatedUser =
-          User.builder()
-              .keycloakUserId(userId)
-              .username("testuser")
-              .avatarMeta(avatarMeta)
-              .build();
+          User.builder().keycloakUserId(userId).username("testuser").avatarMeta(avatarMeta).build();
 
       AvatarDto avatarDto =
           new AvatarDto("http://cdn/orig.png", "http://cdn/med.jpg", "http://cdn/thumb.jpg");
-
-      given(userService.updateAvatar(eq(userId), any(MultipartFile.class))).willReturn(updatedUser);
-      given(userPopulator.toAvatarDto(avatarMeta)).willReturn(avatarDto);
-
-      MockMultipartHttpServletRequestBuilder builder =
-          MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/user/avatar");
-
-      mockMvc
-          .perform(
-              builder
-                  .file(file)
-                  .with(
-                      jwt()
-                          .jwt(jwtBuilder -> jwtBuilder.subject(userId.toString()))
-                          .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
-                  .contentType(MediaType.MULTIPART_FORM_DATA))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.originalAvatarUrl").value("http://cdn/orig.png"));
-    }
-
-    @Test
-    @DisplayName("PATCH /api/v1/users/me/avatar should also be supported")
-    void updateAvatar_AlternatePath_ShouldReturn200() throws Exception {
-      UUID userId = UUID.randomUUID();
-      byte[] imageBytes = createValidImageBytes();
-      MockMultipartFile file =
-          new MockMultipartFile("file", "avatar.png", "image/png", imageBytes);
-
-      AvatarMeta avatarMeta =
-          new AvatarMeta("public-assets", "orig.png", "med.jpg", "thumb.jpg");
-      User updatedUser =
-          User.builder()
+      UserDto userDto =
+          UserDto.builder()
               .keycloakUserId(userId)
               .username("testuser")
-              .avatarMeta(avatarMeta)
+              .avatarMeta(avatarDto)
               .build();
 
-      AvatarDto avatarDto =
-          new AvatarDto("http://cdn/orig.png", "http://cdn/med.jpg", "http://cdn/thumb.jpg");
-
       given(userService.updateAvatar(eq(userId), any(MultipartFile.class))).willReturn(updatedUser);
-      given(userPopulator.toAvatarDto(avatarMeta)).willReturn(avatarDto);
+      given(userPopulator.toUserDto(updatedUser)).willReturn(userDto);
 
       MockMultipartHttpServletRequestBuilder builder =
           MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/users/me/avatar");
@@ -275,7 +241,8 @@ class UserControllerTest {
                           .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
                   .contentType(MediaType.MULTIPART_FORM_DATA))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.originalAvatarUrl").value("http://cdn/orig.png"));
+          .andExpect(jsonPath("$.keycloakUserId").value(userId.toString()))
+          .andExpect(jsonPath("$.avatarMeta.originalAvatarUrl").value("http://cdn/orig.png"));
     }
   }
 }

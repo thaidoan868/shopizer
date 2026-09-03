@@ -13,9 +13,12 @@ public class MinioConfig {
       @Value("${minio.endpoint}") String endpoint,
       @Value("${minio.access-key}") String accessKey,
       @Value("${minio.secret-key}") String secretKey) {
-    return MinioClient.builder()
-        .endpoint(endpoint)
-        .credentials(accessKey, secretKey)
-        .build();
+    return MinioClient.builder().endpoint(endpoint).credentials(accessKey, secretKey).build();
+  }
+
+  @Bean(name = "avatarBucketName")
+  public String getAvatarBucketName(
+      @Value("${minio.bucket.avatar-public}") String avatarBucketName) {
+    return avatarBucketName;
   }
 }

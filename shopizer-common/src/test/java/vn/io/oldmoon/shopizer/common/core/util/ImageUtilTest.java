@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
 import org.junit.jupiter.api.DisplayName;
@@ -16,15 +18,12 @@ import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 
 class ImageUtilTest {
 
-  private byte[] createValidImageBytes(int width, int height, String format) {
-    try {
-      BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ImageIO.write(img, format, baos);
-      return baos.toByteArray();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  private static byte[] createValidImageBytes(int width, int height, String format)
+      throws IOException {
+    BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ImageIO.write(img, format, baos);
+    return baos.toByteArray();
   }
 
   @Nested
@@ -33,7 +32,7 @@ class ImageUtilTest {
 
     @Test
     @DisplayName("should throw InvalidInputException when file is null")
-    void validateBasic_WhenNull_ShouldThrow() {
+    void validateBasic_WhenFileIsNull_ShouldThrowException() {
       assertThatThrownBy(() -> ImageUtil.validateBasic(null))
           .isInstanceOf(InvalidInputException.class)
           .hasMessage("The file is empty.");
@@ -41,28 +40,32 @@ class ImageUtilTest {
 
     @Test
     @DisplayName("should throw InvalidInputException when file is empty")
-    void validateBasic_WhenEmpty_ShouldThrow() {
-      MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png", new byte[0]);
-      assertThatThrownBy(() -> ImageUtil.validateBasic(file))
+    void validateBasic_WhenFileIsEmpty_ShouldThrowException() {
+      MockMultipartFile emptyFile =
+          new MockMultipartFile("file", "test.png", "image/png", new byte[0]);
+      assertThatThrownBy(() -> ImageUtil.validateBasic(emptyFile))
           .isInstanceOf(InvalidInputException.class)
           .hasMessage("The file is empty.");
     }
 
     @Test
-    @DisplayName("should throw InvalidInputException when file size exceeds 5MB")
-    void validateBasic_WhenTooLarge_ShouldThrow() {
-      byte[] large = new byte[5 * 1024 * 1024 + 1];
-      MockMultipartFile file = new MockMultipartFile("file", "large.png", "image/png", large);
-      assertThatThrownBy(() -> ImageUtil.validateBasic(file))
+    @DisplayName("should throw InvalidInputException when file exceeds 5MB")
+    void validateBasic_WhenFileExceeds5Mb_ShouldThrowException() {
+      byte[] largeContent = new byte[5 * 1024 * 1024 + 1];
+      MockMultipartFile largeFile =
+          new MockMultipartFile("file", "large.png", "image/png", largeContent);
+
+      assertThatThrownBy(() -> ImageUtil.validateBasic(largeFile))
           .isInstanceOf(InvalidInputException.class)
           .hasMessageContaining("Image exceeds maximum size of 5MB");
     }
 
     @Test
-    @DisplayName("should pass when file size is valid")
-    void validateBasic_WhenValid_ShouldNotThrow() {
-      MockMultipartFile file = new MockMultipartFile("file", "ok.png", "image/png", new byte[100]);
-      assertThatCode(() -> ImageUtil.validateBasic(file)).doesNotThrowAnyException();
+    @DisplayName("should pass validation when file is valid and within size limit")
+    void validateBasic_WhenFileIsValid_ShouldPass() {
+      MockMultipartFile validFile =
+          new MockMultipartFile("file", "valid.png", "image/png", new byte[100]);
+      assertThatCode(() -> ImageUtil.validateBasic(validFile)).doesNotThrowAnyException();
     }
   }
 
@@ -71,60 +74,66 @@ class ImageUtilTest {
   class ValidateContentTest {
 
     @Test
-    @DisplayName("should throw InvalidInputException when content is text/plain")
-    void validateContent_WhenNotImage_ShouldThrow() {
-      MockMultipartFile file =
-          new MockMultipartFile("file", "test.txt", "text/plain", "Hello world".getBytes());
+    @DisplayName("should pass validation for valid PNG image")
+    void validateContent_WhenValidPng_ShouldPass() throws Exception {
+      byte[] bytes = createValidImageBytes(100, 100, "png");
+      MockMultipartFile file = new MockMultipartFile("file", "image.png", "image/png", bytes);
+
+      assertThatCode(() -> ImageUtil.validateContent(file)).doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("should pass validation for valid JPEG image")
+    void validateContent_WhenValidJpeg_ShouldPass() throws Exception {
+      byte[] bytes = createValidImageBytes(100, 100, "jpg");
+      MockMultipartFile file = new MockMultipartFile("file", "image.jpg", "image/jpeg", bytes);
+
+      assertThatCode(() -> ImageUtil.validateContent(file)).doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("should throw InvalidInputException when file is not an allowed image type")
+    void validateContent_WhenNotImage_ShouldThrowException() {
+      byte[] textBytes = "This is a plain text file pretending to be image".getBytes();
+      MockMultipartFile file = new MockMultipartFile("file", "doc.txt", "text/plain", textBytes);
+
       assertThatThrownBy(() -> ImageUtil.validateContent(file))
-          .isInstanceOf(InvalidInputException.class);
+          .isInstanceOf(InvalidInputException.class)
+          .hasMessageContaining("Invalid image file type");
     }
 
     @Test
-    @DisplayName("should pass when content is valid PNG")
-    void validateContent_WhenValidPng_ShouldPass() {
-      byte[] pngBytes = createValidImageBytes(100, 100, "png");
-      MockMultipartFile file = new MockMultipartFile("file", "photo.png", "image/png", pngBytes);
-      assertThatCode(() -> ImageUtil.validateContent(file)).doesNotThrowAnyException();
-    }
+    @DisplayName("should throw InvalidInputException when image dimensions exceed 4096")
+    void validateContent_WhenDimensionsExceedLimit_ShouldThrowException() throws Exception {
+      byte[] largeDimensionBytes = createValidImageBytes(4097, 100, "png");
+      MockMultipartFile file =
+          new MockMultipartFile("file", "oversized.png", "image/png", largeDimensionBytes);
 
-    @Test
-    @DisplayName("should pass when content is valid JPEG")
-    void validateContent_WhenValidJpeg_ShouldPass() {
-      byte[] jpgBytes = createValidImageBytes(100, 100, "jpg");
-      MockMultipartFile file = new MockMultipartFile("file", "photo.jpg", "image/jpeg", jpgBytes);
-      assertThatCode(() -> ImageUtil.validateContent(file)).doesNotThrowAnyException();
+      assertThatThrownBy(() -> ImageUtil.validateContent(file))
+          .isInstanceOf(InvalidInputException.class)
+          .hasMessageContaining("Image dimensions");
     }
   }
 
   @Nested
-  @DisplayName("resize(MultipartFile file, int width, int height)")
-  class ResizeTest {
+  @DisplayName("resizeImageToStream(InputStream in, int width, int height)")
+  class ResizeImageToStreamTest {
 
     @Test
-    @DisplayName("should resize valid image to requested dimensions")
-    void resize_WhenValidImage_ShouldReturnResizedBytes() throws Exception {
-      byte[] pngBytes = createValidImageBytes(400, 400, "png");
-      MockMultipartFile file = new MockMultipartFile("file", "photo.png", "image/png", pngBytes);
-
-      byte[] resized = ImageUtil.resize(file, 100, 100);
-
-      assertThat(resized).isNotEmpty();
-      BufferedImage resultImg = ImageIO.read(new java.io.ByteArrayInputStream(resized));
-      assertThat(resultImg).isNotNull();
-      assertThat(resultImg.getWidth()).isEqualTo(100);
-      assertThat(resultImg.getHeight()).isEqualTo(100);
-    }
-
-    @Test
-    @DisplayName("resizeImageToStream should return non-null readable stream")
-    void resizeImageToStream_ShouldReturnReadableStream() throws Exception {
+    @DisplayName("should resize image and return readable stream")
+    void resizeImageToStream_WhenValidInput_ShouldReturnResizedStream() throws Exception {
       byte[] pngBytes = createValidImageBytes(200, 200, "png");
-      MockMultipartFile file = new MockMultipartFile("file", "photo.png", "image/png", pngBytes);
+      InputStream in = new ByteArrayInputStream(pngBytes);
 
-      try (InputStream stream = ImageUtil.resizeImageToStream(file, 50, 50)) {
-        assertThat(stream).isNotNull();
-        byte[] readBytes = stream.readAllBytes();
-        assertThat(readBytes).isNotEmpty();
+      try (InputStream resizedStream = ImageUtil.resizeImageToStream(in, 50, 50)) {
+        assertThat(resizedStream).isNotNull();
+        byte[] outputBytes = resizedStream.readAllBytes();
+        assertThat(outputBytes).isNotEmpty();
+
+        BufferedImage resizedImage = ImageIO.read(new ByteArrayInputStream(outputBytes));
+        assertThat(resizedImage).isNotNull();
+        assertThat(resizedImage.getWidth()).isEqualTo(50);
+        assertThat(resizedImage.getHeight()).isEqualTo(50);
       }
     }
   }
