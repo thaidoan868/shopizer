@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,8 +64,7 @@ class UserServiceTest {
     @Test
     @DisplayName("should throw NullPointerException when keycloakUserId is null")
     void get_WhenKeycloakUserIdIsNull_ShouldThrowNpe() {
-      assertThatThrownBy(() -> userService.get(null))
-          .isInstanceOf(NullPointerException.class);
+      assertThatThrownBy(() -> userService.get(null)).isInstanceOf(NullPointerException.class);
     }
   }
 
@@ -104,7 +103,8 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("should return existing user without saving when user with keycloakUserId already exists")
+    @DisplayName(
+        "should return existing user without saving when user with keycloakUserId already exists")
     void create_WhenUserAlreadyExists_ShouldReturnExistingUser() {
       // Given
       UUID keycloakUserId = UUID.randomUUID();
@@ -121,7 +121,8 @@ class UserServiceTest {
               .email("jane@example.com")
               .build();
 
-      when(userRepository.findByKeycloakUserId(keycloakUserId)).thenReturn(Optional.of(existingUser));
+      when(userRepository.findByKeycloakUserId(keycloakUserId))
+          .thenReturn(Optional.of(existingUser));
 
       // When
       User result = userService.create(inputUser);
@@ -135,8 +136,7 @@ class UserServiceTest {
     @Test
     @DisplayName("should throw NullPointerException when user is null")
     void create_WhenUserIsNull_ShouldThrowNpe() {
-      assertThatThrownBy(() -> userService.create(null))
-          .isInstanceOf(NullPointerException.class);
+      assertThatThrownBy(() -> userService.create(null)).isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -154,7 +154,8 @@ class UserServiceTest {
       // Then
       assertThat(result).isNotNull().isEqualTo(savedUser);
       verify(userRepository).save(inputUser);
-      verify(userRepository, org.mockito.Mockito.never()).findByKeycloakUserId(org.mockito.ArgumentMatchers.any());
+      verify(userRepository, org.mockito.Mockito.never())
+          .findByKeycloakUserId(org.mockito.ArgumentMatchers.any());
     }
   }
 
@@ -221,8 +222,7 @@ class UserServiceTest {
     @Test
     @DisplayName("should throw NullPointerException when user is null")
     void update_WhenUserIsNull_ShouldThrowNpe() {
-      assertThatThrownBy(() -> userService.update(null))
-          .isInstanceOf(NullPointerException.class);
+      assertThatThrownBy(() -> userService.update(null)).isInstanceOf(NullPointerException.class);
     }
   }
 }

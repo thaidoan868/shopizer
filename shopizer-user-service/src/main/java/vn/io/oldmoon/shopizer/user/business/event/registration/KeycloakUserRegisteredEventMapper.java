@@ -3,7 +3,7 @@ package vn.io.oldmoon.shopizer.user.business.event.registration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface KeycloakUserRegisteredEventMapper {

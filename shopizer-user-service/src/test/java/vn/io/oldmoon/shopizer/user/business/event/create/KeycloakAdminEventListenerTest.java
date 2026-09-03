@@ -24,7 +24,7 @@ import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminAut
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEvent;
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEventParser;
 import vn.io.oldmoon.shopizer.user.business.service.profile.EmployeeProfileService;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 
 @ExtendWith(MockitoExtension.class)
@@ -205,7 +205,8 @@ class KeycloakAdminEventListenerTest {
               .build();
 
       when(parser.extractUserId(eventWithInvalidAuth)).thenReturn(userId);
-      when(parser.parseRepresentation(eventWithInvalidAuth, KeycloakAdminUserCreatedRepresentation.class))
+      when(parser.parseRepresentation(
+              eventWithInvalidAuth, KeycloakAdminUserCreatedRepresentation.class))
           .thenReturn(rep);
 
       User user = listener.toUserEntity(eventWithInvalidAuth);
@@ -218,10 +219,7 @@ class KeycloakAdminEventListenerTest {
     @DisplayName("toUserEntity should map fields without createdBy when authDetails is null")
     void toUserEntity_WithNullAuthDetails_ShouldMapWithoutCreatedBy() {
       KeycloakAdminEvent eventWithoutAuth =
-          KeycloakAdminEvent.builder()
-              .resourcePath("users/" + userId)
-              .authDetails(null)
-              .build();
+          KeycloakAdminEvent.builder().resourcePath("users/" + userId).authDetails(null).build();
 
       KeycloakAdminUserCreatedRepresentation rep =
           KeycloakAdminUserCreatedRepresentation.builder()
@@ -230,7 +228,8 @@ class KeycloakAdminEventListenerTest {
               .build();
 
       when(parser.extractUserId(eventWithoutAuth)).thenReturn(userId);
-      when(parser.parseRepresentation(eventWithoutAuth, KeycloakAdminUserCreatedRepresentation.class))
+      when(parser.parseRepresentation(
+              eventWithoutAuth, KeycloakAdminUserCreatedRepresentation.class))
           .thenReturn(rep);
 
       User user = listener.toUserEntity(eventWithoutAuth);

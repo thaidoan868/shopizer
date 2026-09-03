@@ -6,10 +6,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
-import vn.io.oldmoon.shopizer.user.infra.model.profile.AvatarMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.Shift;
+import vn.io.oldmoon.shopizer.user.infra.model.user.AvatarMeta;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 class EmployeeMapperTest {
 
@@ -36,11 +36,7 @@ class EmployeeMapperTest {
     user.setId(userId);
 
     EmployeeProfile profile =
-        EmployeeProfile.builder()
-            .user(user)
-            .shift(Shift.MORNING)
-            .workPhone("+1987654321")
-            .build();
+        EmployeeProfile.builder().user(user).shift(Shift.MORNING).workPhone("+1987654321").build();
 
     // When
     EmployeeProfileDto dto = employeeMapper.toEmployeeProfileDto(user, profile);
@@ -106,17 +102,11 @@ class EmployeeMapperTest {
     // Given
     UUID profileId = UUID.randomUUID();
     EmployeeProfile profile =
-        EmployeeProfile.builder()
-            .shift(Shift.MORNING)
-            .workPhone("+1234567890")
-            .build();
+        EmployeeProfile.builder().shift(Shift.MORNING).workPhone("+1234567890").build();
     profile.setId(profileId);
 
     UpdateEmployeeDto dto =
-        UpdateEmployeeDto.builder()
-            .shift(Shift.NIGHT)
-            .workPhone("+84987654321")
-            .build();
+        UpdateEmployeeDto.builder().shift(Shift.NIGHT).workPhone("+84987654321").build();
 
     // When
     employeeMapper.updateEmployeeProfileFromDto(dto, profile);
@@ -127,4 +117,3 @@ class EmployeeMapperTest {
     assertThat(profile.getWorkPhone()).isEqualTo("+84987654321");
   }
 }
-

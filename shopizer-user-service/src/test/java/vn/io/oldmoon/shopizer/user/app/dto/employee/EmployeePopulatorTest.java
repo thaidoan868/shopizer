@@ -14,10 +14,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.user.app.dto.user.AvatarDto;
 import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
-import vn.io.oldmoon.shopizer.user.infra.model.profile.AvatarMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.Shift;
+import vn.io.oldmoon.shopizer.user.infra.model.user.AvatarMeta;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeePopulatorTest {
@@ -182,4 +182,3 @@ class EmployeePopulatorTest {
         .isInstanceOf(NullPointerException.class);
   }
 }
-

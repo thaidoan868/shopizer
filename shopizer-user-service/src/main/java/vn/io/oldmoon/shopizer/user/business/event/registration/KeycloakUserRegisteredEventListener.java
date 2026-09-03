@@ -8,7 +8,7 @@ import vn.io.oldmoon.shopizer.common.event.ApplicationEventListener;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.event.RabbitMqEventPublisher;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @Component
 @RequiredArgsConstructor

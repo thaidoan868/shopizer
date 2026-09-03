@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.user.business.service.UrlConvertService;
-import vn.io.oldmoon.shopizer.user.infra.model.profile.AvatarMeta;
+import vn.io.oldmoon.shopizer.user.infra.model.user.AvatarMeta;
 
 @ExtendWith(MockitoExtension.class)
 class UserPopulatorTest {

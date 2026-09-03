@@ -12,7 +12,7 @@ import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEvent;
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEventParser;
 import vn.io.oldmoon.shopizer.user.business.service.profile.EmployeeProfileService;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @Component
 @RequiredArgsConstructor

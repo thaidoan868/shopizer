@@ -37,7 +37,7 @@ import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileServi
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
 
 @WebMvcTest(controllers = CustomerController.class)

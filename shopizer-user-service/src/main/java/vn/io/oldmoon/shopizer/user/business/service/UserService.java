@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
 
 @Service
@@ -75,4 +75,6 @@ public class UserService {
         user.getKeycloakUserId() != null ? user.getKeycloakUserId() : "null");
     return userRepository.save(user);
   }
+
+  // updateAvatar method to update the avatar of a user
 }

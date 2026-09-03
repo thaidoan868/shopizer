@@ -32,7 +32,7 @@ import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminAut
 import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEvent;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.business.service.profile.EmployeeProfileService;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileQueryDto;
 import vn.io.oldmoon.shopizer.user.infra.repository.EmployeeProfileRepository;
@@ -193,12 +193,10 @@ class KeycloakAdminEventListenerIT {
     // Verify handler was invoked
     await()
         .atMost(Duration.ofSeconds(5))
-        .untilAsserted(
-            () -> verify(keycloakAdminUserCreatedEventListener, times(1)).handle(any()));
+        .untilAsserted(() -> verify(keycloakAdminUserCreatedEventListener, times(1)).handle(any()));
 
     // Verify user was NOT persisted due to transaction rollback
     Optional<User> userOptional = userRepository.findByKeycloakUserId(keycloakUserId);
     assertThat(userOptional).isEmpty();
   }
 }
-

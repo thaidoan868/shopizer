@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.infra.model;
+package vn.io.oldmoon.shopizer.user.infra.model.user;
 
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
@@ -9,7 +9,6 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
-import vn.io.oldmoon.shopizer.user.infra.model.profile.AvatarMeta;
 
 @Builder
 @AllArgsConstructor

@@ -3,7 +3,7 @@ package vn.io.oldmoon.shopizer.user.infra.model.profile;
 import jakarta.persistence.*;
 import lombok.*;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @Builder
 @AllArgsConstructor

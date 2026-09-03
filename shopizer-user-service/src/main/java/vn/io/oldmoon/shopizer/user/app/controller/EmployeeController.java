@@ -22,12 +22,11 @@ import vn.io.oldmoon.shopizer.user.app.dto.employee.EmployeeProfileDto;
 import vn.io.oldmoon.shopizer.user.app.dto.employee.UpdateEmployeeDto;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.business.service.profile.EmployeeProfileService;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 
 @RestController
-@PreAuthorize(
-    "hasAnyRole('STORE_MANAGER', 'SUPER_ADMIN', 'SUPPORT_AGENT', 'WAREHOUSE_STAFF')")
+@PreAuthorize("hasAnyRole('STORE_MANAGER', 'SUPER_ADMIN', 'SUPPORT_AGENT', 'WAREHOUSE_STAFF')")
 @RequestMapping("/api/v1/employees/me")
 @RequiredArgsConstructor
 @Slf4j

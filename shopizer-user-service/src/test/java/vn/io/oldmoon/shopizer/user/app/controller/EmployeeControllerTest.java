@@ -36,7 +36,7 @@ import vn.io.oldmoon.shopizer.user.app.dto.user.AvatarDto;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.business.service.profile.EmployeeProfileService;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
-import vn.io.oldmoon.shopizer.user.infra.model.User;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.Shift;
 
@@ -65,12 +65,17 @@ class EmployeeControllerTest {
         value = Role.class,
         names = {"STORE_MANAGER", "SUPER_ADMIN", "SUPPORT_AGENT", "WAREHOUSE_STAFF"})
     @DisplayName("with allowed employee role should return 200 and EmployeeProfileDto")
-    void getProfile_WithAllowedEmployeeRole_ShouldReturn200AndProfileDto(Role role) throws Exception {
+    void getProfile_WithAllowedEmployeeRole_ShouldReturn200AndProfileDto(Role role)
+        throws Exception {
       // Given
       UUID userId = UUID.randomUUID();
       User user = User.builder().keycloakUserId(userId).username("emp_user").build();
       EmployeeProfile profile =
-          EmployeeProfile.builder().user(user).shift(Shift.MORNING).workPhone("+1234567890").build();
+          EmployeeProfile.builder()
+              .user(user)
+              .shift(Shift.MORNING)
+              .workPhone("+1234567890")
+              .build();
 
       EmployeeProfileDto profileDto =
           EmployeeProfileDto.builder()
@@ -215,7 +220,8 @@ class EmployeeControllerTest {
     @EnumSource(
         value = Role.class,
         names = {"STORE_MANAGER", "SUPER_ADMIN", "SUPPORT_AGENT", "WAREHOUSE_STAFF"})
-    @DisplayName("with valid payload and allowed employee role should return 200 and updated profile")
+    @DisplayName(
+        "with valid payload and allowed employee role should return 200 and updated profile")
     void updateProfile_WithValidPayloadAndAllowedRole_ShouldReturn200AndUpdatedProfile(Role role)
         throws Exception {
       // Given
@@ -436,4 +442,3 @@ class EmployeeControllerTest {
     }
   }
 }
-
