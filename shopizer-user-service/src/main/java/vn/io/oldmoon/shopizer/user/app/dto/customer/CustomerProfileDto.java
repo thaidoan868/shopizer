@@ -7,6 +7,7 @@ import lombok.*;
 import vn.io.oldmoon.shopizer.user.app.dto.user.AvatarDto;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.Address;
 
 @Data
 @Builder
@@ -46,8 +47,7 @@ public class CustomerProfileDto {
   @Schema(example = "+84901234567")
   private String phoneNumber;
 
-  @Schema(example = "No. 123 Ly Thai To, Phuong Hoa Hung, Tp HCM, VN")
-  private String address;
+  private Address address;
 
   private AvatarDto avatarMeta;
 }

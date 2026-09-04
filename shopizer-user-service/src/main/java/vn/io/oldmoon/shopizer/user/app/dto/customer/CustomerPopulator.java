@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
-import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +52,12 @@ public class CustomerPopulator {
 
     customerMapper.updateUserFromDto(updateCustomerDto, user);
     customerMapper.updateCustomerProfileFromDto(updateCustomerDto, customerProfile);
+
+    // replace the old address with the new one without null.ignore strategy
+    if (updateCustomerDto.getAddress() != null) {
+      customerProfile.setAddress(updateCustomerDto.getAddress());
+    }
+    
     log.info(
         "Updated User and CustomerProfile entities in-place for keycloakUserId={}",
         user.getKeycloakUserId());

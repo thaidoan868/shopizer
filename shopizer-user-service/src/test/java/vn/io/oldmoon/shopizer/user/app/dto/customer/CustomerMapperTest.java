@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.Address;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
 import vn.io.oldmoon.shopizer.user.infra.model.user.AvatarMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.user.User;
@@ -44,7 +45,6 @@ class CustomerMapperTest {
             .dateOfBirth(LocalDate.of(1990, 1, 15))
             .language(Language.vn)
             .phoneNumber("+1987654321")
-            .address("456 Elm St")
             .build();
 
     // When
@@ -63,7 +63,7 @@ class CustomerMapperTest {
     assertThat(dto.getDateOfBirth()).isEqualTo(LocalDate.of(1990, 1, 15));
     assertThat(dto.getLanguage()).isEqualTo(Language.vn);
     assertThat(dto.getPhoneNumber()).isEqualTo("+1987654321");
-    assertThat(dto.getAddress()).isEqualTo("456 Elm St");
+    assertThat(dto.getAddress()).isNull();
     assertThat(dto.getAvatarMeta())
         .isNull(); // explicitly ignored in mapper, populated in populator
   }
@@ -109,8 +109,11 @@ class CustomerMapperTest {
   }
 
   @Test
-  @DisplayName("updateCustomerProfileFromDto should update non-null profile fields from DTO")
+  @DisplayName(
+      "updateCustomerProfileFromDto should update non-null profile fields from DTO and ignore avatar and address")
   void updateCustomerProfileFromDto_ShouldUpdateNonNullFieldsOnly() {
+    Address newAddress =
+        Address.builder().detailsAddress("Ly thai to").wardOrCommune("Phu nhuan").build();
     // Given
     UUID profileId = UUID.randomUUID();
     CustomerProfile profile =
@@ -119,7 +122,7 @@ class CustomerMapperTest {
             .dateOfBirth(LocalDate.of(1990, 1, 1))
             .language(Language.en)
             .phoneNumber("+1234567890")
-            .address("Old Address")
+            .address(null)
             .build();
     profile.setId(profileId);
 
@@ -129,7 +132,7 @@ class CustomerMapperTest {
             .dateOfBirth(LocalDate.of(1995, 5, 20))
             .language(Language.vn)
             .phoneNumber("+84987654321")
-            .address("New Address")
+            .address(newAddress)
             .build();
 
     // When
@@ -141,6 +144,6 @@ class CustomerMapperTest {
     assertThat(profile.getDateOfBirth()).isEqualTo(LocalDate.of(1995, 5, 20));
     assertThat(profile.getLanguage()).isEqualTo(Language.vn);
     assertThat(profile.getPhoneNumber()).isEqualTo("+84987654321");
-    assertThat(profile.getAddress()).isEqualTo("New Address");
+    assertThat(profile.getAddress()).isNull(); // address is ignored in the mapper
   }
 }

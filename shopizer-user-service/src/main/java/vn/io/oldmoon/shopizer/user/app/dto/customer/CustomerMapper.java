@@ -6,8 +6,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @Mapper(
     componentModel = MappingConstants.ComponentModel.SPRING,
@@ -46,6 +46,7 @@ public interface CustomerMapper {
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "user", ignore = true)
+  @Mapping(target = "address", ignore = true)
   @Mapping(target = "created", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "modified", ignore = true)

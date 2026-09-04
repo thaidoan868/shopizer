@@ -14,7 +14,7 @@ public class RabbitMqConfig {
   // 1. User Registered Queue & DLQ
   public static final String userRegisteredQueue = "user-registered-queue";
   public static final String userRegisteredBindingKey =
-      "KK.EVENT.CLIENT.shopizer.SUCCESS.account-console.REGISTER";
+      "KK.EVENT.CLIENT.shopizer.SUCCESS.*.REGISTER";
   public static final String userRegisteredBySecurityConsoleBindingKey =
       "KK.EVENT.CLIENT.shopizer.SUCCESS.security-admin-console.REGISTER";
   public static final String userRegisteredDlq = "user-registered-dlq";

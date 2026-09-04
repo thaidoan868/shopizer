@@ -33,7 +33,7 @@ CREATE TABLE customer_profiles (
     user_id          UUID NOT NULL,
     language         VARCHAR(50) NOT NULL DEFAULT 'en',
     phone_number     VARCHAR(50),
-    address          VARCHAR(255),
+    address          JSONB,
     date_of_birth    DATE,
     gender           VARCHAR(20),
 

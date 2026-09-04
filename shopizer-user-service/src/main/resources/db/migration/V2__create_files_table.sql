@@ -1,4 +1,4 @@
-CREATE TABLE files (
+CREATE TABLE file_metas (
     -- BaseEntity fields
     id               UUID PRIMARY KEY,
     created          TIMESTAMP WITH TIME ZONE,
@@ -14,7 +14,7 @@ CREATE TABLE files (
     visibility       VARCHAR(50),
     status           VARCHAR(50),
 
-    CONSTRAINT uq_files_bucket_object_name UNIQUE (bucket, object_name)
+    CONSTRAINT uq_file_metas_bucket_object_name UNIQUE (bucket, object_name)
 );
 
-CREATE INDEX idx_files_bucket_object_name ON files (bucket, object_name);
+CREATE INDEX idx_file_metas_bucket_object_name ON files (bucket, object_name);
