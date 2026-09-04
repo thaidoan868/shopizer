@@ -18,11 +18,11 @@ public class AuthenticationUtil {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     if (auth == null || !(auth.getPrincipal() instanceof Jwt jwt)) {
-      log.warn("Trying to get the current user id but there is no authentication provided");
+      log.debug("Trying to get the current user id but there is no authentication provided");
       return Optional.empty();
     }
 
-    log.info("Fetched UserId: userId={}", jwt.getSubject());
+    log.debug("Fetched UserId: userId={}", jwt.getSubject());
     UUID userId = UUID.fromString(jwt.getSubject());
     return Optional.of(userId);
   }
@@ -35,7 +35,7 @@ public class AuthenticationUtil {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     if (auth == null || !(auth.getPrincipal() instanceof Jwt jwt)) {
-      log.warn("Trying to get the current user but there is no authentication provided");
+      log.debug("Trying to get the current user but there is no authentication provided");
       return Optional.empty();
     }
 
