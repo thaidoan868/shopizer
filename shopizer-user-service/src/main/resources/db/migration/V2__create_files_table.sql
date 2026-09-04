@@ -14,7 +14,7 @@ CREATE TABLE file_metas (
     visibility       VARCHAR(50),
     status           VARCHAR(50),
 
-    CONSTRAINT uq_file_metas_bucket_object_name UNIQUE (bucket, object_name)
+    CONSTRAINT uq_file_metas UNIQUE (bucket, object_name)
 );
 
-CREATE INDEX idx_file_metas_bucket_object_name ON files (bucket, object_name);
+CREATE INDEX idx_file_metas_bucket_object_name ON file_metas (bucket, object_name);

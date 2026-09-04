@@ -44,6 +44,12 @@ public class RabbitMqConfig {
       "user.events.admin.realm-role-mapping-created.dlq";
   public static final String AdminRoleMappingCreatedDlqBindingKey =
       adminRoleMappingCreatedDlqBindingKey;
+  // 5. Verify Email Queue & DLQ
+  public static final String verifyEmailQueue = "verify-email-queue";
+  public static final String verifyEmailBindingKey =
+      "KK.EVENT.CLIENT.shopizer.SUCCESS.*.VERIFY_EMAIL";
+  public static final String verifyEmailDlq = "verify-email-dlq";
+  public static final String verifyEmailDlqBindingKey = "verify-email.dlq";
 
   private final String xDeadLetterExchange = "x-dead-letter-exchange";
   private final String xDeadLetterRoutingKey = "x-dead-letter-routing-key";
@@ -176,5 +182,33 @@ public class RabbitMqConfig {
     return BindingBuilder.bind(adminRoleMappingCreatedDlq())
         .to(deadLetterExchange())
         .with(adminRoleMappingCreatedDlqBindingKey);
+  }
+
+  // --- 5. Verify Email Configuration ---
+  @Bean
+  public Queue verifyEmailQueue() {
+    return QueueBuilder.durable(verifyEmailQueue)
+        .withArgument(xDeadLetterExchange, deadLetterExchange)
+        .withArgument(xDeadLetterRoutingKey, verifyEmailDlqBindingKey)
+        .build();
+  }
+
+  @Bean
+  public Binding verifyEmailBinding() {
+    return BindingBuilder.bind(verifyEmailQueue())
+        .to(userEventExchange())
+        .with(verifyEmailBindingKey);
+  }
+
+  @Bean
+  public Queue verifyEmailDlq() {
+    return QueueBuilder.durable(verifyEmailDlq).build();
+  }
+
+  @Bean
+  public Binding verifyEmailDlqBinding() {
+    return BindingBuilder.bind(verifyEmailDlq())
+        .to(deadLetterExchange())
+        .with(verifyEmailDlqBindingKey);
   }
 }

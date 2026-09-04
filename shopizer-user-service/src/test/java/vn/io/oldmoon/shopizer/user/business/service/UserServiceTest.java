@@ -232,6 +232,93 @@ class UserServiceTest {
   }
 
   @Nested
+  @DisplayName("verifyEmail(UUID keycloakUserId, String verifiedEmail)")
+  class VerifyEmailTest {
+
+    @Test
+    @DisplayName("should update verified to true when user exists and email matches")
+    void verifyEmail_WhenUserExistsAndEmailMatches_ShouldUpdateVerified() {
+      // Given
+      UUID keycloakUserId = UUID.randomUUID();
+      User user =
+          User.builder()
+              .keycloakUserId(keycloakUserId)
+              .username("johndoe")
+              .email("user@example.com")
+              .verified(false)
+              .build();
+
+      when(userRepository.findByKeycloakUserId(keycloakUserId)).thenReturn(Optional.of(user));
+      when(userRepository.save(user)).thenReturn(user);
+
+      // When
+      User result = userService.verifyEmail(keycloakUserId, "user@example.com");
+
+      // Then
+      assertThat(result.getVerified()).isTrue();
+      verify(userRepository).save(user);
+    }
+
+    @Test
+    @DisplayName(
+        "should throw ResourceConflictException when verified email does not match user email")
+    void verifyEmail_WhenEmailMismatch_ShouldThrowResourceConflictException() {
+      // Given
+      UUID keycloakUserId = UUID.randomUUID();
+      User user =
+          User.builder()
+              .keycloakUserId(keycloakUserId)
+              .username("johndoe")
+              .email("user@example.com")
+              .verified(false)
+              .build();
+
+      when(userRepository.findByKeycloakUserId(keycloakUserId)).thenReturn(Optional.of(user));
+
+      // When & Then
+      assertThatThrownBy(() -> userService.verifyEmail(keycloakUserId, "mismatch@example.com"))
+          .isInstanceOf(vn.io.oldmoon.shopizer.common.core.exception.ResourceConflictException.class)
+          .hasMessageContaining("does not match the existing email");
+    }
+
+    @Test
+    @DisplayName("should throw InvalidInputException when verified email is blank")
+    void verifyEmail_WhenEmailBlank_ShouldThrowInvalidInputException() {
+      UUID keycloakUserId = UUID.randomUUID();
+      assertThatThrownBy(() -> userService.verifyEmail(keycloakUserId, "   "))
+          .isInstanceOf(InvalidInputException.class)
+          .hasMessageContaining("Verified email must not be blank");
+    }
+
+    @Test
+    @DisplayName("should throw NullPointerException when verifiedEmail is null")
+    void verifyEmail_WhenVerifiedEmailNull_ShouldThrowNpe() {
+      UUID keycloakUserId = UUID.randomUUID();
+      assertThatThrownBy(() -> userService.verifyEmail(keycloakUserId, null))
+          .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("should throw NullPointerException when keycloakUserId is null")
+    void verifyEmail_WhenUserIdNull_ShouldThrowNpe() {
+      assertThatThrownBy(() -> userService.verifyEmail(null, "user@example.com"))
+          .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("should throw ResourceNotFoundException when user does not exist")
+    void verifyEmail_WhenUserNotFound_ShouldThrowResourceNotFoundException() {
+      // Given
+      UUID keycloakUserId = UUID.randomUUID();
+      when(userRepository.findByKeycloakUserId(keycloakUserId)).thenReturn(Optional.empty());
+
+      // When & Then
+      assertThatThrownBy(() -> userService.verifyEmail(keycloakUserId, "user@example.com"))
+          .isInstanceOf(ResourceNotFoundException.class);
+    }
+  }
+
+  @Nested
   @DisplayName("updateAvatar(UUID userId, MultipartFile file)")
   class UpdateAvatarTest {
 

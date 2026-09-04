@@ -20,12 +20,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
-import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminAuthDetails;
-import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEvent;
-import vn.io.oldmoon.shopizer.user.business.event.keycloakadmin.KeycloakAdminEventParser;
+import vn.io.oldmoon.shopizer.user.business.event.admin.KeycloakAdminAuthDetails;
+import vn.io.oldmoon.shopizer.user.business.event.admin.KeycloakAdminEvent;
+import vn.io.oldmoon.shopizer.user.business.event.admin.KeycloakAdminEventParser;
 import vn.io.oldmoon.shopizer.user.business.service.profile.EmployeeProfileService;
-import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.EmployeeProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @ExtendWith(MockitoExtension.class)
 class KeycloakAdminEventListenerTest {

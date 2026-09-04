@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import vn.io.oldmoon.shopizer.common.core.constant.Visibility;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
+import vn.io.oldmoon.shopizer.common.core.exception.ResourceConflictException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.common.core.util.ImageUtil;
 import vn.io.oldmoon.shopizer.user.infra.model.FileMeta;
@@ -85,6 +86,39 @@ public class UserService {
     log.info(
         "Updating user entity userKeycloakUserId={}",
         user.getKeycloakUserId() != null ? user.getKeycloakUserId() : "null");
+    return userRepository.save(user);
+  }
+
+  /**
+   * Updates a user's email verification status (verified field) to true, and optionally updates the
+   * email address if provided.
+   *
+   * @param keycloakUserId the Keycloak user ID
+   * @param verifiedEmail the verified email address
+   * @return the updated User entity
+   * @throws ResourceNotFoundException if user not found
+   */
+  @Transactional
+  public User verifyEmail(UUID keycloakUserId, String verifiedEmail) {
+    Objects.requireNonNull(keycloakUserId);
+    Objects.requireNonNull(verifiedEmail);
+    if (verifiedEmail.isBlank()) {
+      throw new InvalidInputException("Verified email must not be blank");
+    }
+
+    User user = get(keycloakUserId);
+    if (!user.getEmail().equals(verifiedEmail.trim())) {
+      log.warn(
+          "User email mismatch for keycloakUserId={}. Existing email: {}, Verified email: {}",
+          keycloakUserId,
+          user.getEmail(),
+          verifiedEmail);
+      throw new ResourceConflictException(
+          "Verified email does not match the existing email for user");
+    }
+
+    user.setVerified(Boolean.TRUE);
+    log.info("Updating email verification status to true for keycloakUserId={}", keycloakUserId);
     return userRepository.save(user);
   }
 

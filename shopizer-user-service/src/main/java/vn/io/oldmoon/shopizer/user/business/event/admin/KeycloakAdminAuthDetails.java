@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.event.keycloakadmin;
+package vn.io.oldmoon.shopizer.user.business.event.admin;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
