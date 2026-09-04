@@ -50,6 +50,12 @@ public class RabbitMqConfig {
       "KK.EVENT.CLIENT.shopizer.SUCCESS.*.VERIFY_EMAIL";
   public static final String verifyEmailDlq = "verify-email-dlq";
   public static final String verifyEmailDlqBindingKey = "verify-email.dlq";
+  // 6. Update Email Queue & DLQ
+  public static final String updateEmailQueue = "update-email-queue";
+  public static final String updateEmailBindingKey =
+      "KK.EVENT.CLIENT.shopizer.SUCCESS.*.UPDATE_PROFILE";
+  public static final String updateEmailDlq = "update-email-dlq";
+  public static final String updateEmailDlqBindingKey = "update-email.dlq";
 
   private final String xDeadLetterExchange = "x-dead-letter-exchange";
   private final String xDeadLetterRoutingKey = "x-dead-letter-routing-key";
@@ -210,5 +216,33 @@ public class RabbitMqConfig {
     return BindingBuilder.bind(verifyEmailDlq())
         .to(deadLetterExchange())
         .with(verifyEmailDlqBindingKey);
+  }
+
+  // --- 6. Update Email Configuration ---
+  @Bean
+  public Queue updateEmailQueue() {
+    return QueueBuilder.durable(updateEmailQueue)
+        .withArgument(xDeadLetterExchange, deadLetterExchange)
+        .withArgument(xDeadLetterRoutingKey, updateEmailDlqBindingKey)
+        .build();
+  }
+
+  @Bean
+  public Binding updateEmailBinding() {
+    return BindingBuilder.bind(updateEmailQueue())
+        .to(userEventExchange())
+        .with(updateEmailBindingKey);
+  }
+
+  @Bean
+  public Queue updateEmailDlq() {
+    return QueueBuilder.durable(updateEmailDlq).build();
+  }
+
+  @Bean
+  public Binding updateEmailDlqBinding() {
+    return BindingBuilder.bind(updateEmailDlq())
+        .to(deadLetterExchange())
+        .with(updateEmailDlqBindingKey);
   }
 }
