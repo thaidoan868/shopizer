@@ -37,8 +37,9 @@ import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileServi
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
-import vn.io.oldmoon.shopizer.user.infra.model.user.User;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.Address;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @WebMvcTest(controllers = CustomerController.class)
 @ContextConfiguration(
@@ -68,6 +69,14 @@ class CustomerControllerTest {
       User user = User.builder().keycloakUserId(userId).username("alice").build();
       CustomerProfile profile = CustomerProfile.builder().user(user).build();
 
+      Address address =
+          Address.builder()
+              .detailsAddress("123 Main St")
+              .wardOrCommune("Ward 1")
+              .cityOrProvince("HCMC")
+              .country("VN")
+              .build();
+
       CustomerProfileDto profileDto =
           CustomerProfileDto.builder()
               .id(UUID.randomUUID())
@@ -81,7 +90,7 @@ class CustomerControllerTest {
               .dateOfBirth(LocalDate.of(1995, 5, 20))
               .language(Language.en)
               .phoneNumber("+1234567890")
-              .address("123 Main St")
+              .address(address)
               .avatarMeta(
                   new AvatarDto(
                       "http://cdn/orig.jpg", "http://cdn/med.jpg", "http://cdn/thumb.jpg"))
@@ -118,7 +127,10 @@ class CustomerControllerTest {
           .andExpect(jsonPath("$.dateOfBirth").value("1995-05-20"))
           .andExpect(jsonPath("$.language").value("en"))
           .andExpect(jsonPath("$.phoneNumber").value("+1234567890"))
-          .andExpect(jsonPath("$.address").value("123 Main St"))
+          .andExpect(jsonPath("$.address.detailsAddress").value("123 Main St"))
+          .andExpect(jsonPath("$.address.wardOrCommune").value("Ward 1"))
+          .andExpect(jsonPath("$.address.cityOrProvince").value("HCMC"))
+          .andExpect(jsonPath("$.address.country").value("VN"))
           .andExpect(jsonPath("$.avatarMeta.originalAvatarUrl").value("http://cdn/orig.jpg"))
           .andExpect(jsonPath("$.avatarMeta.mediumAvatarUrl").value("http://cdn/med.jpg"))
           .andExpect(jsonPath("$.avatarMeta.thumbnailAvatarUrl").value("http://cdn/thumb.jpg"));
@@ -223,11 +235,27 @@ class CustomerControllerTest {
               .lastName("Smith")
               .build();
 
+      Address initialAddress =
+          Address.builder()
+              .detailsAddress("123 Main St")
+              .wardOrCommune("Ward 1")
+              .cityOrProvince("HCMC")
+              .country("VN")
+              .build();
+
+      Address updatedAddress =
+          Address.builder()
+              .detailsAddress("456 Nguyen Hue")
+              .wardOrCommune("Ben Nghe")
+              .cityOrProvince("HCM")
+              .country("VN")
+              .build();
+
       CustomerProfile profile =
           CustomerProfile.builder()
               .user(user)
               .phoneNumber("+1234567890")
-              .address("123 Main St")
+              .address(initialAddress)
               .language(Language.en)
               .build();
 
@@ -236,7 +264,7 @@ class CustomerControllerTest {
               .firstName("AliceUpdated")
               .lastName("SmithUpdated")
               .phoneNumber("+84987654321")
-              .address("456 Nguyen Hue")
+              .address(updatedAddress)
               .language(Language.vn)
               .gender(Gender.female)
               .dateOfBirth(LocalDate.of(1995, 5, 20))
@@ -255,7 +283,7 @@ class CustomerControllerTest {
           CustomerProfile.builder()
               .user(updatedUser)
               .phoneNumber("+84987654321")
-              .address("456 Nguyen Hue")
+              .address(updatedAddress)
               .language(Language.vn)
               .gender(Gender.female)
               .dateOfBirth(LocalDate.of(1995, 5, 20))
@@ -274,7 +302,7 @@ class CustomerControllerTest {
               .dateOfBirth(LocalDate.of(1995, 5, 20))
               .language(Language.vn)
               .phoneNumber("+84987654321")
-              .address("456 Nguyen Hue")
+              .address(updatedAddress)
               .build();
 
       given(userService.get(userId)).willReturn(user);
@@ -307,7 +335,10 @@ class CustomerControllerTest {
           .andExpect(jsonPath("$.firstName").value("AliceUpdated"))
           .andExpect(jsonPath("$.lastName").value("SmithUpdated"))
           .andExpect(jsonPath("$.phoneNumber").value("+84987654321"))
-          .andExpect(jsonPath("$.address").value("456 Nguyen Hue"))
+          .andExpect(jsonPath("$.address.detailsAddress").value("456 Nguyen Hue"))
+          .andExpect(jsonPath("$.address.wardOrCommune").value("Ben Nghe"))
+          .andExpect(jsonPath("$.address.cityOrProvince").value("HCM"))
+          .andExpect(jsonPath("$.address.country").value("VN"))
           .andExpect(jsonPath("$.language").value("vn"))
           .andExpect(jsonPath("$.gender").value("female"))
           .andExpect(jsonPath("$.dateOfBirth").value("1995-05-20"));
@@ -415,6 +446,33 @@ class CustomerControllerTest {
       UUID userId = UUID.randomUUID();
       UpdateCustomerDto updateDto =
           UpdateCustomerDto.builder().phoneNumber("invalid-phone-123").build();
+
+      mockMvc
+          .perform(
+              patch("/api/v1/customers/me/profile")
+                  .with(
+                      jwt()
+                          .jwt(
+                              jwtBuilder ->
+                                  jwtBuilder
+                                      .subject(userId.toString())
+                                      .claim("preferred_username", "alice")
+                                      .claim("realm_access", Map.of("roles", List.of("CUSTOMER"))))
+                          .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(updateDto))
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isUnprocessableEntity())
+          .andExpect(jsonPath("$.error").value("Validation failed"))
+          .andExpect(jsonPath("$.errors").isArray());
+    }
+
+    @Test
+    @DisplayName("with invalid address details length should return 422 Unprocessable Entity")
+    void updateProfile_WithInvalidAddress_ShouldReturn422() throws Exception {
+      UUID userId = UUID.randomUUID();
+      Address invalidAddress = Address.builder().detailsAddress("a".repeat(256)).build();
+      UpdateCustomerDto updateDto = UpdateCustomerDto.builder().address(invalidAddress).build();
 
       mockMvc
           .perform(

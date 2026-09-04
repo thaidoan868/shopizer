@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.event.keycloakadmin;
+package vn.io.oldmoon.shopizer.user.business.event.admin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

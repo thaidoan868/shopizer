@@ -17,6 +17,7 @@ import vn.io.oldmoon.shopizer.user.app.dto.user.AvatarDto;
 import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.Address;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
 import vn.io.oldmoon.shopizer.user.infra.model.user.AvatarMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.user.User;
@@ -50,6 +51,14 @@ class CustomerPopulatorTest {
             .build();
     user.setId(userId);
 
+    Address address =
+        Address.builder()
+            .detailsAddress("123 Main Street")
+            .wardOrCommune("Ward Sai Gon")
+            .cityOrProvince("HCM")
+            .country("VN")
+            .build();
+
     CustomerProfile profile =
         CustomerProfile.builder()
             .user(user)
@@ -57,7 +66,7 @@ class CustomerPopulatorTest {
             .dateOfBirth(LocalDate.of(1995, 5, 20))
             .language(Language.en)
             .phoneNumber("+1234567890")
-            .address("123 Main Street")
+            .address(address)
             .build();
 
     CustomerProfileDto mockDto =
@@ -73,7 +82,7 @@ class CustomerPopulatorTest {
             .dateOfBirth(LocalDate.of(1995, 5, 20))
             .language(Language.en)
             .phoneNumber("+1234567890")
-            .address("123 Main Street")
+            .address(address)
             .build();
 
     AvatarDto avatarDto =
@@ -101,7 +110,7 @@ class CustomerPopulatorTest {
     assertThat(result.getDateOfBirth()).isEqualTo(LocalDate.of(1995, 5, 20));
     assertThat(result.getLanguage()).isEqualTo(Language.en);
     assertThat(result.getPhoneNumber()).isEqualTo("+1234567890");
-    assertThat(result.getAddress()).isEqualTo("123 Main Street");
+    assertThat(result.getAddress()).isEqualTo(address);
     assertThat(result.getAvatarMeta()).isEqualTo(avatarDto);
 
     verify(customerMapper).toCustomerProfileDto(user, profile);
@@ -147,15 +156,18 @@ class CustomerPopulatorTest {
   @DisplayName("update should delegate to CustomerMapper for both User and CustomerProfile")
   void update_ShouldDelegateToCustomerMapper() {
     // Given
+    Address oldAddress = Address.builder().detailsAddress("Old Address").build();
+    Address newAddress = Address.builder().detailsAddress("New Address").build();
+
     User user = User.builder().firstName("OldFirst").lastName("OldLast").build();
     CustomerProfile profile =
-        CustomerProfile.builder().phoneNumber("+1234567890").address("Old Address").build();
+        CustomerProfile.builder().phoneNumber("+1234567890").address(oldAddress).build();
     UpdateCustomerDto dto =
         UpdateCustomerDto.builder()
             .firstName("NewFirst")
             .lastName("NewLast")
             .phoneNumber("+84987654321")
-            .address("New Address")
+            .address(newAddress)
             .build();
 
     // When
@@ -164,6 +176,7 @@ class CustomerPopulatorTest {
     // Then
     verify(customerMapper).updateUserFromDto(dto, user);
     verify(customerMapper).updateCustomerProfileFromDto(dto, profile);
+    assertThat(profile.getAddress()).isEqualTo(newAddress);
   }
 
   @Test

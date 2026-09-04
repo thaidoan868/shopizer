@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.event.keycloakadmin;
+package vn.io.oldmoon.shopizer.user.business.event.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.user.business.event.create.KeycloakAdminUserCreatedRepresentation;
-import vn.io.oldmoon.shopizer.user.business.event.rolemapping.KeycloakRoleRepresentation;
+import vn.io.oldmoon.shopizer.user.business.event.role.KeycloakRoleRepresentation;
 
 class KeycloakAdminEventParserTest {
 

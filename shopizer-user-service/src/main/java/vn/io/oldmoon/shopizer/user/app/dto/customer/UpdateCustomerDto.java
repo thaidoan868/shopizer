@@ -1,6 +1,7 @@
 package vn.io.oldmoon.shopizer.user.app.dto.customer;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
+import vn.io.oldmoon.shopizer.user.infra.model.profile.Address;
 
 @Data
 @Builder
@@ -41,7 +43,6 @@ public class UpdateCustomerDto {
       message = "Phone number must be a valid international number")
   private String phoneNumber;
 
-  @Schema(example = "No. 123 Ly Thai To, Phuong Hoa Hung, Tp HCM, VN")
-  @Length(max = 300, message = "Address must be 300 characters or fewer")
-  private String address;
+  @Valid
+  private Address address;
 }

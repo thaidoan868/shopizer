@@ -1,9 +1,12 @@
 package vn.io.oldmoon.shopizer.user.infra.model.profile;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Gender;
 import vn.io.oldmoon.shopizer.user.infra.data.constant.Language;
@@ -31,7 +34,12 @@ public class CustomerProfile extends BaseEntity {
   private User user;
 
   private String phoneNumber;
-  private String address;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(columnDefinition = "jsonb")
+  @Valid
+  private Address address;
+
   private LocalDate dateOfBirth;
 
   @Enumerated(EnumType.STRING)

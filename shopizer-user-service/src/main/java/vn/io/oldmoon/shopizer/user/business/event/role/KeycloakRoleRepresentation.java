@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.user.business.event.rolemapping;
+package vn.io.oldmoon.shopizer.user.business.event.role;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;

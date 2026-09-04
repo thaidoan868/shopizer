@@ -14,7 +14,7 @@ public class RabbitMqConfig {
   // 1. User Registered Queue & DLQ
   public static final String userRegisteredQueue = "user-registered-queue";
   public static final String userRegisteredBindingKey =
-      "KK.EVENT.CLIENT.shopizer.SUCCESS.account-console.REGISTER";
+      "KK.EVENT.CLIENT.shopizer.SUCCESS.*.REGISTER";
   public static final String userRegisteredBySecurityConsoleBindingKey =
       "KK.EVENT.CLIENT.shopizer.SUCCESS.security-admin-console.REGISTER";
   public static final String userRegisteredDlq = "user-registered-dlq";
@@ -44,6 +44,18 @@ public class RabbitMqConfig {
       "user.events.admin.realm-role-mapping-created.dlq";
   public static final String AdminRoleMappingCreatedDlqBindingKey =
       adminRoleMappingCreatedDlqBindingKey;
+  // 5. Verify Email Queue & DLQ
+  public static final String verifyEmailQueue = "verify-email-queue";
+  public static final String verifyEmailBindingKey =
+      "KK.EVENT.CLIENT.shopizer.SUCCESS.*.VERIFY_EMAIL";
+  public static final String verifyEmailDlq = "verify-email-dlq";
+  public static final String verifyEmailDlqBindingKey = "verify-email.dlq";
+  // 6. Update Email Queue & DLQ
+  public static final String updateEmailQueue = "update-email-queue";
+  public static final String updateEmailBindingKey =
+      "KK.EVENT.CLIENT.shopizer.SUCCESS.*.UPDATE_PROFILE";
+  public static final String updateEmailDlq = "update-email-dlq";
+  public static final String updateEmailDlqBindingKey = "update-email.dlq";
 
   private final String xDeadLetterExchange = "x-dead-letter-exchange";
   private final String xDeadLetterRoutingKey = "x-dead-letter-routing-key";
@@ -176,5 +188,61 @@ public class RabbitMqConfig {
     return BindingBuilder.bind(adminRoleMappingCreatedDlq())
         .to(deadLetterExchange())
         .with(adminRoleMappingCreatedDlqBindingKey);
+  }
+
+  // --- 5. Verify Email Configuration ---
+  @Bean
+  public Queue verifyEmailQueue() {
+    return QueueBuilder.durable(verifyEmailQueue)
+        .withArgument(xDeadLetterExchange, deadLetterExchange)
+        .withArgument(xDeadLetterRoutingKey, verifyEmailDlqBindingKey)
+        .build();
+  }
+
+  @Bean
+  public Binding verifyEmailBinding() {
+    return BindingBuilder.bind(verifyEmailQueue())
+        .to(userEventExchange())
+        .with(verifyEmailBindingKey);
+  }
+
+  @Bean
+  public Queue verifyEmailDlq() {
+    return QueueBuilder.durable(verifyEmailDlq).build();
+  }
+
+  @Bean
+  public Binding verifyEmailDlqBinding() {
+    return BindingBuilder.bind(verifyEmailDlq())
+        .to(deadLetterExchange())
+        .with(verifyEmailDlqBindingKey);
+  }
+
+  // --- 6. Update Email Configuration ---
+  @Bean
+  public Queue updateEmailQueue() {
+    return QueueBuilder.durable(updateEmailQueue)
+        .withArgument(xDeadLetterExchange, deadLetterExchange)
+        .withArgument(xDeadLetterRoutingKey, updateEmailDlqBindingKey)
+        .build();
+  }
+
+  @Bean
+  public Binding updateEmailBinding() {
+    return BindingBuilder.bind(updateEmailQueue())
+        .to(userEventExchange())
+        .with(updateEmailBindingKey);
+  }
+
+  @Bean
+  public Queue updateEmailDlq() {
+    return QueueBuilder.durable(updateEmailDlq).build();
+  }
+
+  @Bean
+  public Binding updateEmailDlqBinding() {
+    return BindingBuilder.bind(updateEmailDlq())
+        .to(deadLetterExchange())
+        .with(updateEmailDlqBindingKey);
   }
 }

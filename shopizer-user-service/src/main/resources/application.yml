@@ -99,7 +99,7 @@ springdoc:
 logging:
   level:
     root: INFO
-    vn.io.oldmoon.shopizer: TRACE
+    vn.io.oldmoon.shopizer: info
   pattern:
     level: "%5p"
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{correlationId}] - %msg%n"
@@ -111,9 +111,6 @@ keycloak:
   client-id: user-service
   client-secret: qr8Qw6vQodFh3ipb1uNUBiaRo6JtkQwB
 
-# Application Custom Settings
-application:
-  token-expiration: 15m
 
 # Object Storage (MinIO)
 minio:
