@@ -112,7 +112,9 @@ jobs:
           check_name: Test Report (${{ matrix.service }})
           require_tests: false
           fail_on_failure: false
-
+          comment: true
+          updateComment: true
+      
       # Check if service has a Dockerfile
       - name: Check Dockerfile Existence
         id: check_dockerfile
