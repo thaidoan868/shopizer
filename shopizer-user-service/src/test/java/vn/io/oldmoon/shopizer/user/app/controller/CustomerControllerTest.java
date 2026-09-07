@@ -58,7 +58,7 @@ class CustomerControllerTest {
   @MockitoBean private CustomerPopulator customerPopulator;
 
   @Nested
-  @DisplayName("GET /api/v1/customers/me/profile")
+  @DisplayName("GET /api/v1/users/customers/me/profile")
   class GetProfileTests {
 
     @Test
@@ -103,7 +103,7 @@ class CustomerControllerTest {
       // When & Then
       mockMvc
           .perform(
-              get("/api/v1/customers/me/profile")
+              get("/api/v1/users/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -139,7 +139,7 @@ class CustomerControllerTest {
     @Test
     @DisplayName("without authentication should return 401 Unauthorized")
     void getProfile_WithoutAuth_ShouldReturn401() throws Exception {
-      mockMvc.perform(get("/api/v1/customers/me/profile")).andExpect(status().isUnauthorized());
+      mockMvc.perform(get("/api/v1/users/customers/me/profile")).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -149,7 +149,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              get("/api/v1/customers/me/profile")
+              get("/api/v1/users/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -174,7 +174,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              get("/api/v1/customers/me/profile")
+              get("/api/v1/users/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -200,7 +200,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              get("/api/v1/customers/me/profile")
+              get("/api/v1/users/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -218,7 +218,7 @@ class CustomerControllerTest {
   }
 
   @Nested
-  @DisplayName("PATCH /api/v1/customers/me/profile")
+  @DisplayName("PATCH /api/v1/users/customers/me/profile")
   class UpdateProfileTests {
 
     @Test
@@ -315,7 +315,7 @@ class CustomerControllerTest {
       // When & Then
       mockMvc
           .perform(
-              patch("/api/v1/customers/me/profile")
+              patch("/api/v1/users/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -351,7 +351,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customers/me/profile")
+              patch("/api/v1/users/customers/me/profile")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(updateDto))
                   .accept(MediaType.APPLICATION_JSON))
@@ -366,7 +366,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customers/me/profile")
+              patch("/api/v1/users/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -393,7 +393,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customers/me/profile")
+              patch("/api/v1/users/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -423,7 +423,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customers/me/profile")
+              patch("/api/v1/users/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -449,7 +449,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customers/me/profile")
+              patch("/api/v1/users/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -476,7 +476,7 @@ class CustomerControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/customers/me/profile")
+              patch("/api/v1/users/customers/me/profile")
                   .with(
                       jwt()
                           .jwt(

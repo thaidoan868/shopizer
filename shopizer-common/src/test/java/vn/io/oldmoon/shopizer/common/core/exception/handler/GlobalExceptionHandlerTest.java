@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -70,6 +71,23 @@ class GlobalExceptionHandlerTest {
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getError()).isEqualTo(ErrorCode.BAD_REQUEST.getError());
     assertThat(response.getBody().getMessage()).isEqualTo("Current request is not a multipart request");
+    assertThat(response.getBody().getPath()).isEqualTo("/api/v1/users/me/avatar");
+    assertThat(response.getBody().getTimestamp()).isNotNull();
+  }
+
+  @Test
+  @DisplayName("handleHttpMediaTypeNotSupported should return 415 Unsupported Media Type with proper ErrorResponse")
+  void handleHttpMediaTypeNotSupported_ShouldReturn415() {
+    HttpMediaTypeNotSupportedException ex =
+        new HttpMediaTypeNotSupportedException("Content-Type 'application/json' is not supported");
+
+    ResponseEntity<ErrorResponse> response = handler.handleHttpMediaTypeNotSupported(ex, request);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getError()).isEqualTo(ErrorCode.UNSUPPORTED_MEDIA_TYPE.getError());
+    assertThat(response.getBody().getMessage())
+        .isEqualTo("Content-Type 'application/json' is not supported");
     assertThat(response.getBody().getPath()).isEqualTo("/api/v1/users/me/avatar");
     assertThat(response.getBody().getTimestamp()).isNotNull();
   }

@@ -55,7 +55,6 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/shopizer
           jwk-set-uri: http://localhost:8080/realms/shopizer/protocol/openid-connect/certs
 
   # JSON Serialization
@@ -117,6 +116,7 @@ minio:
   bucket:
     avatar-public: "avatar-public"
   endpoint: http://localhost:9000
+  accessEndpoint: http://localhost:9000
   access-key: "shopizer-access-key"
   secret-key: "shopizer-secret-key"
   secure: false

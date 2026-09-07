@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
@@ -79,6 +80,17 @@ public class GlobalExceptionHandler {
     ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
     ErrorResponse body =
         new ErrorResponse(errorCode.getError(), e.getMessage(), request.getRequestURI());
+
+    return ResponseEntity.status(errorCode.getHttpStatus()).body(body);
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+  public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupported(
+      HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
+    ErrorCode errorCode = ErrorCode.UNSUPPORTED_MEDIA_TYPE;
+    String message = ex.getMessage() != null ? ex.getMessage() : "Content-Type is not supported";
+    ErrorResponse body =
+        new ErrorResponse(errorCode.getError(), message, request.getRequestURI());
 
     return ResponseEntity.status(errorCode.getHttpStatus()).body(body);
   }

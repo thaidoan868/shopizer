@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.common.event;
+package vn.io.oldmoon.shopizer.common.core.event;
 
 public interface ApplicationEventListener<T extends ApplicationEvent> {
   /**

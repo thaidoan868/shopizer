@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
-import vn.io.oldmoon.shopizer.common.event.EventPublisher;
+import vn.io.oldmoon.shopizer.common.core.event.EventPublisher;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 
 @Component

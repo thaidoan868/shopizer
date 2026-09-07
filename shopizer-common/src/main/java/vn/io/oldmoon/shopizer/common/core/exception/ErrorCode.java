@@ -17,6 +17,7 @@ public enum ErrorCode {
   FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden"),
 
   METHOD_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "Method not allowed"),
+  UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported media type"),
   INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
 
   private final HttpStatus httpStatus;
