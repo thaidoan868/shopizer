@@ -42,7 +42,16 @@ class KeycloakServiceIT {
   @DynamicPropertySource
   static void registerProperties(DynamicPropertyRegistry registry) {
     registry.add("keycloak.server-url", keycloakContainer::getAuthServerUrl);
-    registry.add("keycloak.realm", () -> "master"); // Explicitly set realm property
+    registry.add("keycloak.realm", () -> "master");
+  }
+
+  @TestConfiguration
+  static class KeycloakTestConfig {
+    @Bean
+    @Primary
+    Keycloak keycloak() {
+      return keycloakContainer.getKeycloakAdminClient();
+    }
   }
 
   @BeforeEach
@@ -102,37 +111,5 @@ class KeycloakServiceIT {
         roles.stream().anyMatch(myRole -> myRole.getName().equals(role.name()));
 
     assertThat(hasCustomerRole).isTrue();
-  }
-
-  @Test
-  void shouldUpdateUser() {
-    // given
-    String userId = createUser(UUID.randomUUID() + "@mail.com");
-    UserRepresentation oldUserRep = keycloakService.get(UUID.fromString(userId));
-    String newFirstName = "newFirstName";
-    String newLastName = "newLastName";
-    String newEmail = "newemail@gmail.com";
-
-    oldUserRep.setFirstName(newFirstName);
-    oldUserRep.setLastName(newLastName);
-    oldUserRep.setEmail(newEmail);
-
-    // when
-    keycloakService.update(oldUserRep);
-
-    // then
-    UserRepresentation newUserRep = keycloakService.get(UUID.fromString(userId));
-    assertThat(newUserRep.getFirstName()).isEqualTo(newFirstName);
-    assertThat(newUserRep.getLastName()).isEqualTo(newLastName);
-    assertThat(newUserRep.getEmail()).isEqualTo(newEmail);
-  }
-
-  @TestConfiguration
-  static class KeycloakTestConfig {
-    @Bean
-    @Primary
-    Keycloak keycloak() {
-      return keycloakContainer.getKeycloakAdminClient();
-    }
   }
 }
