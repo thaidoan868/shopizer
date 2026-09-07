@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import vn.io.oldmoon.shopizer.common.core.constant.Visibility;
 import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
-import vn.io.oldmoon.shopizer.common.core.util.ImageUtil;
+import vn.io.oldmoon.shopizer.common.core.utility.ImageUtil;
 import vn.io.oldmoon.shopizer.user.infra.model.FileMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.user.AvatarMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.user.User;

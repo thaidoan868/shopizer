@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.common.core.util;
+package vn.io.oldmoon.shopizer.common.core.utility;
 
 import java.util.Optional;
 import java.util.UUID;

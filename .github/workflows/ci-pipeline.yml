@@ -1,0 +1,163 @@
+name: Microservice CI Pipeline
+
+on:
+  pull_request:
+    branches: [ "dev" ]
+    types: [ opened, synchronize, reopened ]
+  push:
+    branches: [ "dev" ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Step 1: Path Filtering (Detect affected microservices)
+  # ---------------------------------------------------------------------------
+  detect-changes:
+    name: Detect Changed Microservices
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+      has_changes: ${{ steps.filter.outputs.changes != '[]' && steps.filter.outputs.changes != '' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Filter Changed Paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            shopizer-api-gateway:
+              - 'shopizer-api-gateway/**'
+              - 'pom.xml'
+              - '.github/workflows/**'
+            shopizer-user-service:
+              - 'shopizer-user-service/**'
+              - 'shopizer-common/**'
+              - 'pom.xml'
+              - '.github/workflows/**'
+            shopizer-product-service:
+              - 'shopizer-product-service/**'
+              - 'shopizer-common/**'
+              - 'pom.xml'
+              - '.github/workflows/**'
+
+  # ---------------------------------------------------------------------------
+  # Step 2 & 3: Build, Test, Quality Checks & Docker Build (Matrix Strategy)
+  # ---------------------------------------------------------------------------
+  build-and-test:
+    name: Build & Test (${{ matrix.service }})
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.detect-changes.outputs.services) }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      # Build, Compile, and Run Unit/Integration Tests for affected service and its dependencies
+      - name: Build and Test with Maven
+        env:
+          MAVEN_OPTS: "-Xmx2g"
+        run: mvn -B clean verify -pl ${{ matrix.service }} -am
+
+      # Generate & Attach Coverage Report to Workflow Run
+      - name: Upload JaCoCo Coverage Report
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: jacoco-report-${{ matrix.service }}
+          path: |
+            ${{ matrix.service }}/target/site/jacoco/
+            ${{ matrix.service }}/target/site/jacoco-it/
+            ${{ matrix.service }}/target/jacoco-report/
+          if-no-files-found: ignore
+
+      # Post JaCoCo Coverage Comment directly to the PR
+      - name: Add JaCoCo PR Comment
+        uses: Madrapps/jacoco-report@v1.7.1
+        if: (success() || failure()) && github.event_name == 'pull_request'
+        with:
+          paths: |
+            ${{ github.workspace }}/${{ matrix.service }}/target/site/jacoco/jacoco.xml
+            ${{ github.workspace }}/${{ matrix.service }}/target/site/jacoco-it/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 80
+          min-coverage-changed-files: 80
+          title: 'JaCoCo Coverage Report (${{ matrix.service }})'
+          update-comment: true
+
+      # Post Test Results to Pull Request Context (Surefire & Failsafe reports)
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure()
+        with:
+          report_paths: '${{ matrix.service }}/target/*-reports/TEST-*.xml'
+          check_name: Test Report (${{ matrix.service }})
+          require_tests: false
+          fail_on_failure: false
+
+      # Check if service has a Dockerfile
+      - name: Check Dockerfile Existence
+        id: check_dockerfile
+        run: |
+          if [ -f "${{ matrix.service }}/Dockerfile" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "No Dockerfile found for ${{ matrix.service }}, skipping Docker build."
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check_dockerfile.outputs.exists == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      # Build Docker Image locally for PR validation
+      - name: Build Docker Image (PR Validation)
+        if: steps.check_dockerfile.outputs.exists == 'true' && github.event_name == 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.service }}/Dockerfile
+          push: false
+          tags: ${{ secrets.DOCKER_HUB_USERNAME || 'shopizer' }}/${{ matrix.service }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Log in to Docker Hub ONLY when merged to `dev`
+      - name: Log in to Docker Hub
+        if: steps.check_dockerfile.outputs.exists == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      # Build and Push Docker Image (Dev Branch)
+      - name: Build and Push Docker Image (Dev Branch)
+        if: steps.check_dockerfile.outputs.exists == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.service }}/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:${{ github.sha }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.service }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

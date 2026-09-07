@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import vn.io.oldmoon.shopizer.common.core.util.AuthenticationUtil;
+import vn.io.oldmoon.shopizer.common.core.utility.AuthenticationUtil;
 
 @Configuration
 @EnableJpaAuditing
