@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import vn.io.oldmoon.shopizer.common.core.util.ImageUtil;
+import vn.io.oldmoon.shopizer.common.core.utility.ImageUtil;
 import vn.io.oldmoon.shopizer.common.web.controller.AbstractController;
 import vn.io.oldmoon.shopizer.user.app.dto.user.UserDto;
 import vn.io.oldmoon.shopizer.user.app.dto.user.UserPopulator;

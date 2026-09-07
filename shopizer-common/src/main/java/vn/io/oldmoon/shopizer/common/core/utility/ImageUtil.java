@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.common.core.util;
+package vn.io.oldmoon.shopizer.common.core.utility;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -72,6 +72,16 @@ public class ImageUtil {
     }
   }
 
+  /**
+   * Resizes an image from the input stream to the specified width and height, crops it to center,
+   * and converts it to JPEG format. Returns a new InputStream containing the resized image.
+   *
+   * @param in the input stream of the original image
+   * @param width the desired width of the resized image
+   * @param height the desired height of the resized image
+   * @return an InputStream containing the resized JPEG image
+   * @throws IOException if an error occurs during reading or writing the image
+   */
   public static InputStream resizeImageToStream(InputStream in, int width, int height)
       throws IOException {
     try (in) {

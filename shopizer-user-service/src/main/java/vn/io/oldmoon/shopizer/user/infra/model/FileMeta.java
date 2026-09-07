@@ -22,7 +22,7 @@ import vn.io.oldmoon.shopizer.user.infra.data.constant.FileStatus;
 @Setter
 @ToString(callSuper = true)
 @Entity
-@Table(name = "files")
+@Table(name = "file_metas")
 public class FileMeta extends BaseEntity {
 
   @NotBlank private String bucket;

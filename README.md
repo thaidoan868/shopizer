@@ -75,9 +75,27 @@ Ensure you have the following installed on your environment before running the p
 
 ## Getting Started
 
-### 1. Build and Run via Docker Compose
+### Staging environment
+
+1. Basic setup
 
 ```bash
-# bring all services up. It may take 15 minutes to build and run docker images
-docker compose up -d  
+git clone https://github.com/thaidoan868/shopizer.git
+cd shopizer
+docker compose up -d
+ufw allow 8080/tcp # Keycloak
+ufw allow 8082/tcp # Shopizer user service
 ```
+
+2. Manual setup
+   MinIo setup
+
+```bash
+# install minio client first then run the following command
+bash ./infra/minio/setup.sh
+```
+
+Keycloak setup:
+
+- clients set up
+- Email set up

@@ -145,6 +145,8 @@
 
     <build>
         <plugins>
+            <!--            spring-boot:repackage takes that standard JAR or WAR file and repackages it into a standalone Fat JAR-->
+            <!--            undles All Dependencies: It packages all third-party library dependencies inside the nested /BOOT-INF/lib/ directory.-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

@@ -3,7 +3,7 @@ package vn.io.oldmoon.shopizer.common.web.controller;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import vn.io.oldmoon.shopizer.common.core.exception.AuthenticationException;
-import vn.io.oldmoon.shopizer.common.core.util.AuthenticationUtil;
+import vn.io.oldmoon.shopizer.common.core.utility.AuthenticationUtil;
 import vn.io.oldmoon.shopizer.common.web.model.UserRepresentation;
 
 @Slf4j

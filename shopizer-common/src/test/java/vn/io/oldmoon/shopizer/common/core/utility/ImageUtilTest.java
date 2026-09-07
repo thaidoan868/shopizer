@@ -1,4 +1,4 @@
-package vn.io.oldmoon.shopizer.common.core.util;
+package vn.io.oldmoon.shopizer.common.core.utility;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
