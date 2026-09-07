@@ -2,7 +2,7 @@ package vn.io.oldmoon.shopizer.user.business.event.admin;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
-import vn.io.oldmoon.shopizer.common.event.ApplicationEvent;
+import vn.io.oldmoon.shopizer.common.core.event.ApplicationEvent;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder

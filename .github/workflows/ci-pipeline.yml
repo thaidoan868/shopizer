@@ -106,7 +106,7 @@ jobs:
       # Post Test Results to Pull Request Context (Surefire & Failsafe reports)
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v6.5.0
-        if: success() || failure()
+        if: (success() || failure()) && github.event_name == 'pull_request'
         with:
           report_paths: '${{ matrix.service }}/target/*-reports/TEST-*.xml'
           check_name: Test Report (${{ matrix.service }})

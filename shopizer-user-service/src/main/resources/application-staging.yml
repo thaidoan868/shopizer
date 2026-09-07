@@ -1,0 +1,27 @@
+spring:
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://postgres:5432/shopizer
+
+  # Message Broker
+  rabbitmq:
+    host: rabbitmq
+
+  # Security Configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          #issuer-uri: http://keycloak:8080/realms/shopizer
+          jwk-set-uri: http://keycloak:8080/realms/shopizer/protocol/openid-connect/certs
+
+# Keycloak Configuration
+keycloak:
+  server-url: http://keycloak:8080
+  client-id: user-service
+  client-secret: ${KEYCLOAK_USER_SERVICE_CLIENT_SECRET}
+
+# Object Storage (MinIO)
+minio:
+  endpoint: http://minio:9000
+  accessEndpoint: http://localhost:9000

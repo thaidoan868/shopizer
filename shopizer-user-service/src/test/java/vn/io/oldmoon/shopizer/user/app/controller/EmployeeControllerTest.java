@@ -57,7 +57,7 @@ class EmployeeControllerTest {
   @MockitoBean private EmployeePopulator employeePopulator;
 
   @Nested
-  @DisplayName("GET /api/v1/employees/me/profile")
+  @DisplayName("GET /api/v1/users/employees/me/profile")
   class GetProfileTests {
 
     @ParameterizedTest
@@ -100,7 +100,7 @@ class EmployeeControllerTest {
       // When & Then
       mockMvc
           .perform(
-              get("/api/v1/employees/me/profile")
+              get("/api/v1/users/employees/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -130,7 +130,7 @@ class EmployeeControllerTest {
     @Test
     @DisplayName("without authentication should return 401 Unauthorized")
     void getProfile_WithoutAuth_ShouldReturn401() throws Exception {
-      mockMvc.perform(get("/api/v1/employees/me/profile")).andExpect(status().isUnauthorized());
+      mockMvc.perform(get("/api/v1/users/employees/me/profile")).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -140,7 +140,7 @@ class EmployeeControllerTest {
 
       mockMvc
           .perform(
-              get("/api/v1/employees/me/profile")
+              get("/api/v1/users/employees/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -165,7 +165,7 @@ class EmployeeControllerTest {
 
       mockMvc
           .perform(
-              get("/api/v1/employees/me/profile")
+              get("/api/v1/users/employees/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -193,7 +193,7 @@ class EmployeeControllerTest {
 
       mockMvc
           .perform(
-              get("/api/v1/employees/me/profile")
+              get("/api/v1/users/employees/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -213,7 +213,7 @@ class EmployeeControllerTest {
   }
 
   @Nested
-  @DisplayName("PATCH /api/v1/employees/me/profile")
+  @DisplayName("PATCH /api/v1/users/employees/me/profile")
   class UpdateProfileTests {
 
     @ParameterizedTest
@@ -289,7 +289,7 @@ class EmployeeControllerTest {
       // When & Then
       mockMvc
           .perform(
-              patch("/api/v1/employees/me/profile")
+              patch("/api/v1/users/employees/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -319,7 +319,7 @@ class EmployeeControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/employees/me/profile")
+              patch("/api/v1/users/employees/me/profile")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(updateDto))
                   .accept(MediaType.APPLICATION_JSON))
@@ -334,7 +334,7 @@ class EmployeeControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/employees/me/profile")
+              patch("/api/v1/users/employees/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -361,7 +361,7 @@ class EmployeeControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/employees/me/profile")
+              patch("/api/v1/users/employees/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -393,7 +393,7 @@ class EmployeeControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/employees/me/profile")
+              patch("/api/v1/users/employees/me/profile")
                   .with(
                       jwt()
                           .jwt(
@@ -421,7 +421,7 @@ class EmployeeControllerTest {
 
       mockMvc
           .perform(
-              patch("/api/v1/employees/me/profile")
+              patch("/api/v1/users/employees/me/profile")
                   .with(
                       jwt()
                           .jwt(

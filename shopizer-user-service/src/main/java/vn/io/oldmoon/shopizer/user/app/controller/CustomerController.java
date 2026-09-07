@@ -22,12 +22,12 @@ import vn.io.oldmoon.shopizer.user.app.dto.customer.CustomerProfileDto;
 import vn.io.oldmoon.shopizer.user.app.dto.customer.UpdateCustomerDto;
 import vn.io.oldmoon.shopizer.user.business.service.UserService;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
-import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 import vn.io.oldmoon.shopizer.user.infra.model.profile.CustomerProfile;
+import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
 @RestController
 @PreAuthorize("hasRole('CUSTOMER')")
-@RequestMapping("/api/v1/customers/me")
+@RequestMapping("/api/v1/users/customers/me")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Customer Endpoints")

@@ -3,8 +3,9 @@ package vn.io.oldmoon.shopizer.user.app.dto.user;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import vn.io.oldmoon.shopizer.user.business.service.UrlConvertService;
+import vn.io.oldmoon.shopizer.common.core.utility.ConverterUtil;
 import vn.io.oldmoon.shopizer.user.infra.model.user.AvatarMeta;
 import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 
@@ -14,7 +15,9 @@ import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 public class UserPopulator {
 
   private final UserMapper userMapper;
-  private final UrlConvertService urlConvertService;
+
+  @Value("${minio.accessEndpoint}")
+  private String mediaEndpoint;
 
   /**
    * Converts a User entity into a UserDto using UserMapper.
@@ -44,9 +47,9 @@ public class UserPopulator {
 
     AvatarDto avatarDto =
         new AvatarDto(
-            urlConvertService.media(avatar.bucket(), avatar.originalObjectName()),
-            urlConvertService.media(avatar.bucket(), avatar.mediumObjectName()),
-            urlConvertService.media(avatar.bucket(), avatar.thumbnailObjectName()));
+            ConverterUtil.toMediaUrl(mediaEndpoint, avatar.bucket(), avatar.originalObjectName()),
+            ConverterUtil.toMediaUrl(mediaEndpoint, avatar.bucket(), avatar.mediumObjectName()),
+            ConverterUtil.toMediaUrl(mediaEndpoint, avatar.bucket(), avatar.thumbnailObjectName()));
     log.info(
         "Converted AvatarMeta to AvatarDto for bucket={}, originalObjectName={}",
         avatar.bucket(),

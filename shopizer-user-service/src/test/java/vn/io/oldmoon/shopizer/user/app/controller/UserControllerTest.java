@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -269,6 +270,25 @@ class UserControllerTest {
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.keycloakUserId").value(userId.toString()))
           .andExpect(jsonPath("$.avatarMeta.originalAvatarUrl").value("http://cdn/orig.png"));
+    }
+
+    @Test
+    @DisplayName("with unsupported media type should return 415 Unsupported Media Type")
+    void updateAvatar_WithUnsupportedMediaType_ShouldReturn415() throws Exception {
+      UUID userId = UUID.randomUUID();
+
+      mockMvc
+          .perform(
+              patch("/api/v1/users/me/avatar")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{}")
+                  .with(
+                      jwt()
+                          .jwt(jwtBuilder -> jwtBuilder.subject(userId.toString()))
+                          .authorities(new SimpleGrantedAuthority("ROLE_CUSTOMER"))))
+          .andExpect(status().isUnsupportedMediaType())
+          .andExpect(jsonPath("$.error").value("Unsupported media type"))
+          .andExpect(jsonPath("$.path").value("/api/v1/users/me/avatar"));
     }
   }
 }
