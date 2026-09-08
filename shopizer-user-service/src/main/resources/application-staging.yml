@@ -25,4 +25,3 @@ keycloak:
 minio:
   endpoint: http://minio:9000
   accessEndpoint: ${MINIO_ACCESS_ENDPOINT:http://localhost:9000}
-}
