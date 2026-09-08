@@ -1,12 +1,13 @@
 services:
   shopizer-user-service:
     container_name: shopizer-user-service
-    image: thaidoan868/shopizer-user-service:0.1
+    image: thaidoan868/shopizer-user-service:latest
 
     environment:
       SPRING_PROFILES_ACTIVE: staging
       # update the following environment variable with your actual Keycloak client secret
       KEYCLOAK_USER_SERVICE_CLIENT_SECRET: ${KEYCLOAK_USER_SERVICE_CLIENT_SECRET}
+      MINIO_ACCESS_ENDPOINT: ${MINIO_ACCESS_ENDPOINT}
 
     ports:
       - "8082:8082"

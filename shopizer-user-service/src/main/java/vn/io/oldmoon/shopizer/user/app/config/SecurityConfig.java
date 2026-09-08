@@ -64,7 +64,7 @@ public class SecurityConfig {
   @Bean
   @Order(2)
   SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
-    return http.securityMatcher("/api/v1/public/**")
+    return http.securityMatcher("/api/v1/public/**", "/actuator/**")
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
         .build();
@@ -76,9 +76,7 @@ public class SecurityConfig {
       HttpSecurity http, Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthConverter)
       throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(
-            auth -> auth.anyRequest()
-                    .authenticated())
+        .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
         .oauth2ResourceServer(
             oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)));
 

@@ -131,7 +131,9 @@ Then restart docker to apply the new secret.
 bash ./infra/minio/setup.sh
 ```
 
-### 4. Firewall:
+### 4. Update the minio endpoint in the .env file to match your local setup (e.g., `http://localhost:9000`).
+
+### 5. Firewall:
 
 ```bash
 sudo ufw allow 8080/tcp  # Keycloak

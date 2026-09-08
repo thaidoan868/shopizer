@@ -24,4 +24,5 @@ keycloak:
 # Object Storage (MinIO)
 minio:
   endpoint: http://minio:9000
-  accessEndpoint: http://localhost:9000
+  accessEndpoint: ${MINIO_ACCESS_ENDPOINT:http://localhost:9000}
+}
