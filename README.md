@@ -112,9 +112,11 @@ Before running the project locally or in staging, ensure you have:
 ### 1. Spin up all services using Docker Compose:
 
 ```bash
+git clone https://github.com/thaidoan868/shopizer
+cd shopizer
+
 # Using Makefile
 make up
-
 # Or using Docker Compose directly
 docker compose up -d
 ```
@@ -131,9 +133,11 @@ Then restart docker to apply the new secret.
 bash ./infra/minio/setup.sh
 ```
 
-### 4. Update the minio endpoint in the .env file to match your local setup (e.g., `http://localhost:9000`).
+Then update the minio endpoint(MINIO_ACCESS_ENDPOINT) in the .env file to match your local setup (e.g.,
+`http://storage.shopizer:9000`).
+Be aware that the endpoint that the system uploads files to is different from the endpoint you use to access them.
 
-### 5. Firewall:
+### 4. Firewall:
 
 ```bash
 sudo ufw allow 8080/tcp  # Keycloak
