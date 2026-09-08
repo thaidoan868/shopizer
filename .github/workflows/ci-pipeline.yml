@@ -35,17 +35,14 @@ jobs:
             shopizer-api-gateway:
               - 'shopizer-api-gateway/**'
               - 'pom.xml'
-              - '.github/workflows/**'
             shopizer-user-service:
               - 'shopizer-user-service/**'
               - 'shopizer-common/**'
               - 'pom.xml'
-              - '.github/workflows/**'
             shopizer-product-service:
               - 'shopizer-product-service/**'
               - 'shopizer-common/**'
               - 'pom.xml'
-              - '.github/workflows/**'
 
   # ---------------------------------------------------------------------------
   # Step 2 & 3: Build, Test, Quality Checks & Docker Build (Matrix Strategy)

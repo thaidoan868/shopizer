@@ -1,10 +1,7 @@
 services:
   shopizer-user-service:
     container_name: shopizer-user-service
-    #image: thaidoan868/shopizer-user-service:0.1
-    build:
-      context: .
-      dockerfile: shopizer-user-service/Dockerfile
+    image: thaidoan868/shopizer-user-service:0.1
 
     environment:
       SPRING_PROFILES_ACTIVE: staging
