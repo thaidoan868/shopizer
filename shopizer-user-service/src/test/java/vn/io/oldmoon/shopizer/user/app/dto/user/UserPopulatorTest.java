@@ -86,9 +86,12 @@ class UserPopulatorTest {
     assertThat(userDto.getLastName()).isEqualTo("Doe");
     assertThat(userDto.getVerified()).isTrue();
     assertThat(userDto.getAvatarMeta()).isNotNull();
-    assertThat(userDto.getAvatarMeta().originalAvatarUrl()).isEqualTo("http://cdn/bucket/o.png");
-    assertThat(userDto.getAvatarMeta().mediumAvatarUrl()).isEqualTo("http://cdn/bucket/m.png");
-    assertThat(userDto.getAvatarMeta().thumbnailAvatarUrl()).isEqualTo("http://cdn/bucket/t.png");
+    assertThat(userDto.getAvatarMeta().originalAvatarUrl())
+        .isEqualTo(MEDIA_ENDPOINT + "/bucket/o.png");
+    assertThat(userDto.getAvatarMeta().mediumAvatarUrl())
+        .isEqualTo(MEDIA_ENDPOINT + "/bucket/m.png");
+    assertThat(userDto.getAvatarMeta().thumbnailAvatarUrl())
+        .isEqualTo(MEDIA_ENDPOINT + "/bucket/t.png");
   }
 
   @Test
