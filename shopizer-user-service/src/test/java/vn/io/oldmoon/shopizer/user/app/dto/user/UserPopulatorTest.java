@@ -18,7 +18,7 @@ import vn.io.oldmoon.shopizer.user.infra.model.user.User;
 @ExtendWith(MockitoExtension.class)
 class UserPopulatorTest {
 
-  private static final String MEDIA_ENDPOINT = "http://cdn";
+  private static final String MEDIA_ENDPOINT = "http://minio";
 
   @Mock private UserMapper userMapper;
 
@@ -32,14 +32,16 @@ class UserPopulatorTest {
   @Test
   @DisplayName("toAvatarDto should convert non-null AvatarMeta correctly")
   void toAvatarDto_ValidAvatar_ShouldReturnAvatarDto() {
-    AvatarMeta avatarMeta = new AvatarMeta("bucket", "o.png", "m.png", "t.png");
+    AvatarMeta avatarMeta =
+        new AvatarMeta("bucket", "avatars/john doe profile (2024).jpg", "m.png", "t.png");
 
     AvatarDto avatarDto = userPopulator.toAvatarDto(avatarMeta);
 
     assertThat(avatarDto).isNotNull();
-    assertThat(avatarDto.originalAvatarUrl()).isEqualTo("http://cdn/bucket/o.png");
-    assertThat(avatarDto.mediumAvatarUrl()).isEqualTo("http://cdn/bucket/m.png");
-    assertThat(avatarDto.thumbnailAvatarUrl()).isEqualTo("http://cdn/bucket/t.png");
+    assertThat(avatarDto.originalAvatarUrl())
+        .isEqualTo("http://minio/bucket/avatars%2Fjohn%20doe%20profile%20%282024%29.jpg");
+    assertThat(avatarDto.mediumAvatarUrl()).isEqualTo("http://minio/bucket/m.png");
+    assertThat(avatarDto.thumbnailAvatarUrl()).isEqualTo("http://minio/bucket/t.png");
   }
 
   @Test

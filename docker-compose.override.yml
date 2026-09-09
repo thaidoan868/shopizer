@@ -5,19 +5,16 @@ services:
     #    build:
     #      context: .
     #      dockerfile: shopizer-user-service/Dockerfile
-
-    environment:
-      SPRING_PROFILES_ACTIVE: staging
-      # update the following environment variable with your actual Keycloak client secret
-      KEYCLOAK_USER_SERVICE_CLIENT_SECRET: ${KEYCLOAK_USER_SERVICE_CLIENT_SECRET}
-      MINIO_ACCESS_ENDPOINT: ${MINIO_ACCESS_ENDPOINT}
-      MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+    env_file:
+      - .env.staging.example
+      - .env
 
     ports:
       - "8082:8082"
+      - "9100:9100"
 
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9100/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:9100/actuator/health/liveness" ]
       interval: 5s
       timeout: 5s
       retries: 10

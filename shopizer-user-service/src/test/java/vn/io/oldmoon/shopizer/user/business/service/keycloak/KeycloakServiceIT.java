@@ -14,9 +14,9 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -27,6 +27,7 @@ import vn.io.oldmoon.shopizer.user.infra.data.constant.Role;
 
 @Testcontainers
 @SpringBootTest
+@Import(KeycloakServiceIT.KeycloakTestConfig.class)
 class KeycloakServiceIT {
   @Container @ServiceConnection
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
@@ -43,15 +44,6 @@ class KeycloakServiceIT {
   static void registerProperties(DynamicPropertyRegistry registry) {
     registry.add("keycloak.server-url", keycloakContainer::getAuthServerUrl);
     registry.add("keycloak.realm", () -> "master");
-  }
-
-  @TestConfiguration
-  static class KeycloakTestConfig {
-    @Bean
-    @Primary
-    Keycloak keycloak() {
-      return keycloakContainer.getKeycloakAdminClient();
-    }
   }
 
   @BeforeEach
@@ -111,5 +103,13 @@ class KeycloakServiceIT {
         roles.stream().anyMatch(myRole -> myRole.getName().equals(role.name()));
 
     assertThat(hasCustomerRole).isTrue();
+  }
+
+  static class KeycloakTestConfig {
+    @Bean
+    @Primary
+    Keycloak keycloak() {
+      return keycloakContainer.getKeycloakAdminClient();
+    }
   }
 }

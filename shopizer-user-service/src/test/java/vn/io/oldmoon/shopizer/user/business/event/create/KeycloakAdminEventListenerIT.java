@@ -13,7 +13,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.keycloak.admin.client.Keycloak;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,7 +48,7 @@ class KeycloakAdminEventListenerIT {
   static RabbitMQContainer rabbitmq = new RabbitMQContainer("rabbitmq:3.13-management");
 
   @MockitoBean private JwtDecoder jwtDecoder;
-  @MockitoBean private Keycloak keycloak;
+//  @MockitoBean private Keycloak keycloak;
 
   @Autowired private RabbitTemplate rabbitTemplate;
   @Autowired private UserRepository userRepository;

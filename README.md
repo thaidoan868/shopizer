@@ -123,8 +123,8 @@ docker compose up -d
 
 ### 2. Set up keycloak client and email credentials manually.
 
-Go to: keycloak -> clients -> user-service client -> credentials -> regenerate the access-secret and copy it to the .env
-file as KEYCLOAK_USER_SERVICE_CLIENT_SECRET
+Go to: keycloak -> clients -> user-service client -> credentials -> regenerate the access-secret and copy it to the
+.env file as KEYCLOAK_CLIENT_SECRET variable
 Then restart docker to apply the new secret.
 
 ### 3. Initialize required S3 buckets and access policies:
@@ -133,11 +133,20 @@ Then restart docker to apply the new secret.
 bash ./infra/minio/setup.sh
 ```
 
-Then update the minio endpoint(MINIO_ACCESS_ENDPOINT) in the .env file to match your local setup (e.g.,
-`http://storage.shopizer:9000`).
-Be aware that the endpoint that the system uploads files to is different from the endpoint you use to access them.
+### 4. Ready check
 
-### 4. Firewall:
+Check if the system is ready to receive traffic
+
+```bash
+if ! which curl >/dev/null 2>&1 || ! which jq >/dev/null 2>&1; then
+    echo "Error: Required dependencies 'curl' and 'jq' are missing."
+    exit 1
+fi
+
+curl -s "http://localhost:9100/actuator/health" | jq
+```
+
+### Firewall(optional):
 
 ```bash
 sudo ufw allow 8080/tcp  # Keycloak

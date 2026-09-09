@@ -1,5 +1,7 @@
 package vn.io.oldmoon.shopizer.user.app.dto.user;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +18,7 @@ public class UserPopulator {
 
   private final UserMapper userMapper;
 
-  @Value("${minio.accessEndpoint}")
+  @Value("${minio.access-endpoint}")
   private String mediaEndpoint;
 
   /**
@@ -45,15 +47,29 @@ public class UserPopulator {
   public AvatarDto toAvatarDto(AvatarMeta avatar) {
     Objects.requireNonNull(avatar);
 
+    String encodedBucket = encodeForUrl(avatar.bucket());
+
     AvatarDto avatarDto =
         new AvatarDto(
-            ConverterUtil.toMediaUrl(mediaEndpoint, avatar.bucket(), avatar.originalObjectName()),
-            ConverterUtil.toMediaUrl(mediaEndpoint, avatar.bucket(), avatar.mediumObjectName()),
-            ConverterUtil.toMediaUrl(mediaEndpoint, avatar.bucket(), avatar.thumbnailObjectName()));
+            ConverterUtil.toMediaUrl(
+                mediaEndpoint, encodedBucket, encodeForUrl(avatar.originalObjectName())),
+            ConverterUtil.toMediaUrl(
+                mediaEndpoint, encodedBucket, encodeForUrl(avatar.mediumObjectName())),
+            ConverterUtil.toMediaUrl(
+                mediaEndpoint, encodedBucket, encodeForUrl(avatar.thumbnailObjectName())));
+
     log.info(
         "Converted AvatarMeta to AvatarDto for bucket={}, originalObjectName={}",
         avatar.bucket(),
         avatar.originalObjectName());
+
     return avatarDto;
+  }
+
+  private String encodeForUrl(String value) {
+    if (value == null) {
+      return null;
+    }
+    return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
   }
 }

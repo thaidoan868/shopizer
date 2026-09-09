@@ -55,6 +55,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
+          issuer-uri: http://localhost:8080/realms/shopizer
           jwk-set-uri: http://localhost:8080/realms/shopizer/protocol/openid-connect/certs
 
   # JSON Serialization
@@ -80,10 +81,20 @@ management:
     web:
       base-path: /actuator
       exposure:
-        include: health, prometheus
+        include: health, prometheus, configprops
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
+      ping:
+        enabled: false
+      refresh:
+        enabled: false
+      ssl:
+        enabled: false
+      discovery:
+        enabled: false
 #  otlp:
 #    tracing:
 #      endpoint: http://jaeger:4318/v1/traces
@@ -116,7 +127,7 @@ minio:
   bucket:
     avatar-public: "avatar-public"
   endpoint: http://localhost:9000
-  accessEndpoint: http://localhost:9000
+  access-endpoint: http://localhost:9000
   access-key: "shopizer-access-key"
   secret-key: "shopizer-secret-key"
   secure: false
