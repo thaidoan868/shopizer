@@ -60,3 +60,12 @@ keycloak:
   realm: shopizer
   client-id: backend
   client-secret: backendclientsecret
+
+sentry:
+  dsn: "https://your-public-key@o0.ingest.sentry.io/0"
+
+  send-default-pii: true
+
+  traces-sample-rate: 0.2
+
+  exception-resolver-order: -2147483647
