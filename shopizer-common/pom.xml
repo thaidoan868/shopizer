@@ -73,6 +73,11 @@
             <artifactId>thumbnailator</artifactId>
             <version>0.4.21</version>
         </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>

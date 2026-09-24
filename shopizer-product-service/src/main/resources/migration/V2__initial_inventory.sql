@@ -49,7 +49,9 @@ CREATE INDEX idx_inv_tx_sku_warehouse ON inventory_transactions(sku_id, warehous
 
 CREATE TABLE inventory_serial_transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    inventory_serial_id UUID NOT NULL REFERENCES inventory_serials(id),
+    sku_id UUID NOT NULL REFERENCES skus(id),
+    serial_number VARCHAR(100) NOT NULL,
+    warehouse_id UUID NOT NULL REFERENCES warehouses(id),
     transaction_type VARCHAR(50) NOT NULL , -- 'RECEIPT', 'INTERNAL_OUTBOUND', 'RETURN', 'SALE',
     status_change VARCHAR(50) NOT NULL , -- 'AVAILABLE', 'RESERVED', 'SOLD', 'DEFECTIVE', 'RETURNED'
     reference_type VARCHAR(50) NOT NULL,

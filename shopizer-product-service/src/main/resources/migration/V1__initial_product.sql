@@ -49,8 +49,8 @@ CREATE TABLE products (
 CREATE TABLE skus (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    sku_code VARCHAR(100) UNIQUE NOT NULL,
-    barcode VARCHAR(100) UNIQUE,
+    sku_code VARCHAR(100) UNIQUE,
+    barcode VARCHAR(100) UNIQUE NOT NULL,
     price NUMERIC(15, 2) NOT NULL CHECK (price > 0),
     cost NUMERIC(15, 2) NOT NULL CHECK (cost > 0),
     status VARCHAR(25) NOT NULL CHECK (status IN ('active', 'draft', 'discontinued')),
