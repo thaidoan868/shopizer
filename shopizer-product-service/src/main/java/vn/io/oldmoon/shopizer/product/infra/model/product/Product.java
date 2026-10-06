@@ -44,15 +44,11 @@ public class Product extends BaseEntity {
   @NotNull
   private Boolean serialized = false;
 
+  @Enumerated(EnumType.STRING)
   @Column(length = 25, nullable = false)
   @NotNull
   @Builder.Default
   private ProductStatus status = ProductStatus.ACTIVE;
-
-  @Builder.Default
-  @Column(nullable = false)
-  @NotNull
-  private Boolean deleted = false;
 
   @Builder.Default
   @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

@@ -42,8 +42,7 @@ CREATE TABLE products (
     created TIMESTAMPTZ DEFAULT NOW(),
     created_by UUID,
     modified TIMESTAMPTZ DEFAULT NOW(),
-    modified_by UUID,
-    deleted BOOLEAN NOT NULL DEFAULT false
+    modified_by UUID
 );
 
 CREATE TABLE skus (
