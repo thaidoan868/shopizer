@@ -6,12 +6,11 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@EntityScan(basePackages = {"vn.io.oldmoon.shopizer"})
+@EntityScan(basePackages = {"vn.io.oldmoon.shopizer.product"})
 @ComponentScan(basePackages = {"vn.io.oldmoon.shopizer.common", "vn.io.oldmoon.shopizer"})
 public class ShopizerProductServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ShopizerProductServiceApplication.class, args);
-	}
-
+  public static void main(String[] args) {
+    SpringApplication.run(ShopizerProductServiceApplication.class, args);
+  }
 }
