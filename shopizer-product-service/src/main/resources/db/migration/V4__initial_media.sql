@@ -38,6 +38,7 @@ CREATE TABLE product_articles (
     created_by UUID,
     modified TIMESTAMPTZ DEFAULT NOW(),
     modified_by UUID,
+    CONSTRAINT uq_product_articles_product_article_type UNIQUE (product_id, article_id, type)
 );
 CREATE INDEX idx_product_articles_product ON product_articles(product_id);
 
@@ -52,5 +53,6 @@ CREATE TABLE product_files (
     created_by UUID,
     modified TIMESTAMPTZ DEFAULT NOW(),
     modified_by UUID,
+    CONSTRAINT uq_product_files_product_file_type UNIQUE (product_id, file_id, type)
 );
 CREATE INDEX idx_product_files_product ON product_files(product_id);

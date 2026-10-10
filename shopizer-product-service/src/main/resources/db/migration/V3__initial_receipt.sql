@@ -39,7 +39,7 @@ CREATE TABLE internal_outbound_shipments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     source_warehouse_id UUID NOT NULL REFERENCES warehouses(id) ON DELETE RESTRICT,
     destination_warehouse_id UUID REFERENCES warehouses(id) ON DELETE RESTRICT,
-    status VARCHAR(50) NOT NULL), -- 'DRAFT', 'SHIPPED', 'COMPLETED', 'CANCELLED'
+    status VARCHAR(50) NOT NULL, -- 'DRAFT', 'SHIPPED', 'COMPLETED', 'CANCELLED'
     created TIMESTAMPTZ DEFAULT NOW(),
     created_by UUID,
     modified TIMESTAMPTZ DEFAULT NOW(),
@@ -75,8 +75,7 @@ CREATE TABLE return_shipments (
     warehouse_id UUID NOT NULL REFERENCES warehouses(id) ON DELETE RESTRICT,
     vendor_name VARCHAR(255) NOT NULL,
     reason TEXT NOT NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'PENDING'
-        CHECK (status IN ('PENDING', 'SHIPPED', 'COMPLETED', 'CANCELLED')),
+    status VARCHAR(50) NOT NULL,
     created TIMESTAMPTZ DEFAULT NOW(),
     created_by UUID,
     modified TIMESTAMPTZ DEFAULT NOW(),

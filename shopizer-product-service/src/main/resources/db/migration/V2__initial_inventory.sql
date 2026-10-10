@@ -61,4 +61,4 @@ CREATE TABLE inventory_serial_transactions (
     modified TIMESTAMPTZ DEFAULT NOW(),
     modified_by UUID
 );
-CREATE INDEX idx_inv_serial_tx_serial_id ON inventory_serial_transactions(inventory_serial_id);
+CREATE INDEX idx_inv_serial_tx_sku_serial ON inventory_serial_transactions(sku_id, serial_number);

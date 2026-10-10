@@ -52,7 +52,7 @@ CREATE TABLE skus (
     barcode VARCHAR(100) UNIQUE NOT NULL,
     price NUMERIC(15, 2) NOT NULL CHECK (price > 0),
     cost NUMERIC(15, 2) NOT NULL CHECK (cost > 0),
-    status VARCHAR(25) NOT NULL CHECK (status IN ('active', 'draft', 'discontinued')),
+    status VARCHAR(25) NOT NULL,
     created TIMESTAMPTZ DEFAULT NOW(),
     created_by UUID,
     modified TIMESTAMPTZ DEFAULT NOW(),

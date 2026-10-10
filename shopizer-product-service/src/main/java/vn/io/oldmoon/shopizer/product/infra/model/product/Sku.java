@@ -38,6 +38,7 @@ public class Sku extends BaseEntity {
   @NotNull
   private BigDecimal cost;
 
+  @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 25)
   @NotNull
   @Builder.Default

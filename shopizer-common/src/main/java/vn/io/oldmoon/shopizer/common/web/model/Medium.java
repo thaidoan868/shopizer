@@ -8,7 +8,6 @@ import vn.io.oldmoon.shopizer.common.core.constant.MediaType;
 import vn.io.oldmoon.shopizer.common.core.constant.Visibility;
 import vn.io.oldmoon.shopizer.common.web.model.BaseEntity;
 
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
