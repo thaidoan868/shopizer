@@ -110,13 +110,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Error tracing-->
-        <dependency>
-            <groupId>io.sentry</groupId>
-            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
-            <version>8.3.0</version>
-        </dependency>
-
         <!-- TESTING -->
         <dependency>
             <groupId>com.h2database</groupId>

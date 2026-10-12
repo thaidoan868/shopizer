@@ -14,7 +14,7 @@ import vn.io.oldmoon.shopizer.product.app.dto.product.AttributeDto;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateAttributeTemplateDto {
+public class UpdateAttributeTemplateRequest {
 
   @Size(max = 255, message = "Template name must be 255 characters or fewer")
   @Schema(example = "GPU Specification Template Updated", description = "Attribute template name")

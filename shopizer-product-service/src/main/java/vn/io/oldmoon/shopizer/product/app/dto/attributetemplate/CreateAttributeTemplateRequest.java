@@ -15,7 +15,7 @@ import vn.io.oldmoon.shopizer.product.app.dto.product.AttributeDto;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateAttributeTemplateDto {
+public class CreateAttributeTemplateRequest {
 
   @NotBlank(message = "Template name must not be blank")
   @Size(max = 255, message = "Template name must be 255 characters or fewer")

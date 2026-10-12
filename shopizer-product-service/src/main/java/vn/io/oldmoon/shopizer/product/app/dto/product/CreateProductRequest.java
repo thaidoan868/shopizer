@@ -16,7 +16,7 @@ import vn.io.oldmoon.shopizer.product.infra.model.product.ProductStatus;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateProductDto {
+public class CreateProductRequest {
 
   @NotBlank(message = "Product name must not be blank")
   @Size(max = 255, message = "Product name must be 255 characters or fewer")

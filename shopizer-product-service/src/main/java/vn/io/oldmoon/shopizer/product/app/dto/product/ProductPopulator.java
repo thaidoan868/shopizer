@@ -24,7 +24,7 @@ public class ProductPopulator {
    * @param dto the incoming CreateProductDto
    * @return the populated Product domain entity
    */
-  public Product toEntity(CreateProductDto dto) {
+  public Product toEntity(CreateProductRequest dto) {
     Objects.requireNonNull(dto);
 
     Product product = productMapper.toEntity(dto);
@@ -59,10 +59,10 @@ public class ProductPopulator {
    * @param product the Product domain entity
    * @return the corresponding ProductDto
    */
-  public ProductDto toDto(Product product) {
+  public CreateProductResponse toDto(Product product) {
     Objects.requireNonNull(product);
 
-    ProductDto dto = productMapper.toDto(product);
+    CreateProductResponse dto = productMapper.toDto(product);
     log.debug("Mapped Product to ProductDto: id='{}'", product.getId());
     return dto;
   }
@@ -73,10 +73,10 @@ public class ProductPopulator {
    * @param products the list of Product domain entities
    * @return the list of corresponding ProductDto
    */
-  public List<ProductDto> toDtoList(List<Product> products) {
+  public List<CreateProductResponse> toDtoList(List<Product> products) {
     Objects.requireNonNull(products);
 
-    List<ProductDto> dtos = productMapper.toDtoList(products);
+    List<CreateProductResponse> dtos = productMapper.toDtoList(products);
     log.debug("Mapped {} Product entities to ProductDto list", products.size());
     return dtos;
   }
