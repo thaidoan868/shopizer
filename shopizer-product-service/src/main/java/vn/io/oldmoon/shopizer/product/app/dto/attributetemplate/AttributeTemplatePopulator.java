@@ -20,11 +20,12 @@ public class AttributeTemplatePopulator {
    * @param dto the incoming CreateAttributeTemplateDto
    * @return the populated AttributeTemplate domain entity
    */
-  public AttributeTemplate toEntity(CreateAttributeTemplateDto dto) {
+  public AttributeTemplate toEntity(CreateAttributeTemplateRequest dto) {
     Objects.requireNonNull(dto);
 
     AttributeTemplate template = attributeTemplateMapper.toEntity(dto);
-    log.debug("Mapped CreateAttributeTemplateDto to AttributeTemplate for code={}", template.getCode());
+    log.debug(
+        "Mapped CreateAttributeTemplateDto to AttributeTemplate for code={}", template.getCode());
     return template;
   }
 
@@ -34,7 +35,7 @@ public class AttributeTemplatePopulator {
    * @param template the target AttributeTemplate domain entity
    * @param dto the incoming update DTO
    */
-  public void update(AttributeTemplate template, UpdateAttributeTemplateDto dto) {
+  public void update(AttributeTemplate template, UpdateAttributeTemplateRequest dto) {
     Objects.requireNonNull(template, "AttributeTemplate must not be null");
     Objects.requireNonNull(dto, "UpdateAttributeTemplateDto must not be null");
 
@@ -48,25 +49,31 @@ public class AttributeTemplatePopulator {
    * @param template the AttributeTemplate domain entity
    * @return the corresponding AttributeTemplateDto
    */
-  public AttributeTemplateDto toDto(AttributeTemplate template) {
+  public AttributeTemplateResponse toDto(AttributeTemplate template) {
     Objects.requireNonNull(template);
 
-    AttributeTemplateDto dto = attributeTemplateMapper.toDto(template);
+    AttributeTemplateResponse dto = attributeTemplateMapper.toDto(template);
     log.debug("Mapped AttributeTemplate to AttributeTemplateDto for id={}", template.getId());
     return dto;
   }
 
   /**
-   * Converts a list of AttributeTemplate domain entities to a list of AttributeTemplateDto.
+   * Converts a list of AttributeTemplate domain entities to a ListAttributeTemplateResponse.
    *
    * @param templates the list of AttributeTemplate domain entities
-   * @return the list of corresponding AttributeTemplateDto
+   * @return the ListAttributeTemplateResponse containing short DTOs and total count
    */
-  public List<AttributeTemplateDto> toDtoList(List<AttributeTemplate> templates) {
+  public ListAttributeTemplateResponse toListResponse(List<AttributeTemplate> templates) {
     Objects.requireNonNull(templates);
 
-    List<AttributeTemplateDto> dtos = attributeTemplateMapper.toDtoList(templates);
-    log.debug("Mapped AttributeTemplate list to AttributeTemplateDto list for size={}", templates.size());
-    return dtos;
+    List<ShortAttributeTemplateResponse> shortDtos =
+        attributeTemplateMapper.toShortDtoList(templates);
+    log.debug(
+        "Mapped AttributeTemplate list to ListAttributeTemplateResponse for size={}",
+        templates.size());
+    return ListAttributeTemplateResponse.builder()
+        .templates(shortDtos)
+        .totalCount(templates.size())
+        .build();
   }
 }

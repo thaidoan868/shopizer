@@ -20,11 +20,11 @@ public interface ProductMapper {
   @Mapping(target = "modified", ignore = true)
   @Mapping(target = "modifiedBy", ignore = true)
   @Mapping(target = "skus", ignore = true)
-  Product toEntity(CreateProductDto dto);
+  Product toEntity(CreateProductRequest dto);
 
-  ProductDto toDto(Product product);
+  CreateProductResponse toDto(Product product);
 
-  List<ProductDto> toDtoList(List<Product> products);
+  List<CreateProductResponse> toDtoList(List<Product> products);
 
   Attribute toAttribute(AttributeDto dto);
 

@@ -15,7 +15,7 @@ import vn.io.oldmoon.shopizer.product.infra.model.product.ProductStatus;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductDto {
+public class CreateProductResponse {
 
   @Schema(
       example = "550e8400-e29b-41d4-a716-446655440000",

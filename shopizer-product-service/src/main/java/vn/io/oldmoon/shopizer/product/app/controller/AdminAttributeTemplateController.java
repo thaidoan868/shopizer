@@ -1,7 +1,6 @@
 package vn.io.oldmoon.shopizer.product.app.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,19 +23,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.io.oldmoon.shopizer.common.web.controller.AbstractController;
-import vn.io.oldmoon.shopizer.product.app.dto.attributetemplate.AttributeTemplateDto;
 import vn.io.oldmoon.shopizer.product.app.dto.attributetemplate.AttributeTemplatePopulator;
-import vn.io.oldmoon.shopizer.product.app.dto.attributetemplate.CreateAttributeTemplateDto;
-import vn.io.oldmoon.shopizer.product.app.dto.attributetemplate.UpdateAttributeTemplateDto;
+import vn.io.oldmoon.shopizer.product.app.dto.attributetemplate.AttributeTemplateResponse;
+import vn.io.oldmoon.shopizer.product.app.dto.attributetemplate.CreateAttributeTemplateRequest;
+import vn.io.oldmoon.shopizer.product.app.dto.attributetemplate.ListAttributeTemplateResponse;
+import vn.io.oldmoon.shopizer.product.app.dto.attributetemplate.UpdateAttributeTemplateRequest;
 import vn.io.oldmoon.shopizer.product.business.service.AttributeTemplateService;
 import vn.io.oldmoon.shopizer.product.infra.model.product.AttributeTemplate;
 
 @RestController
-@RequestMapping("/api/v1/product-service/products/attribute-templates")
+@PreAuthorize("hasRole('SUPER_ADMIN')")
+@RequestMapping("/api/v1/attribute-templates")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Attribute Template Endpoints", description = "Endpoints for managing attribute templates")
-public class AttributeTemplateController extends AbstractController {
+@Tag(
+    name = "Attribute Template Endpoints",
+    description = "Endpoints for managing attribute templates")
+public class AdminAttributeTemplateController extends AbstractController {
 
   private final AttributeTemplateService attributeTemplateService;
   private final AttributeTemplatePopulator attributeTemplatePopulator;
@@ -50,12 +54,13 @@ public class AttributeTemplateController extends AbstractController {
       content =
           @Content(
               mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = AttributeTemplateDto.class)))
-  public ResponseEntity<AttributeTemplateDto> create(
-      @Valid @RequestBody CreateAttributeTemplateDto createDto) {
+              schema = @Schema(implementation = AttributeTemplateResponse.class)))
+  public ResponseEntity<AttributeTemplateResponse> create(
+      @Valid @RequestBody CreateAttributeTemplateRequest createDto) {
     AttributeTemplate entity = attributeTemplatePopulator.toEntity(createDto);
     AttributeTemplate created = attributeTemplateService.create(entity);
-    return ResponseEntity.status(HttpStatus.CREATED).body(attributeTemplatePopulator.toDto(created));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(attributeTemplatePopulator.toDto(created));
   }
 
   @GetMapping
@@ -68,10 +73,10 @@ public class AttributeTemplateController extends AbstractController {
       content =
           @Content(
               mediaType = MediaType.APPLICATION_JSON_VALUE,
-              array = @ArraySchema(schema = @Schema(implementation = AttributeTemplateDto.class))))
-  public ResponseEntity<List<AttributeTemplateDto>> getAll() {
+              schema = @Schema(implementation = ListAttributeTemplateResponse.class)))
+  public ResponseEntity<ListAttributeTemplateResponse> getAll() {
     List<AttributeTemplate> templates = attributeTemplateService.getAll();
-    return ResponseEntity.ok(attributeTemplatePopulator.toDtoList(templates));
+    return ResponseEntity.ok(attributeTemplatePopulator.toListResponse(templates));
   }
 
   @GetMapping("/{id}")
@@ -84,8 +89,8 @@ public class AttributeTemplateController extends AbstractController {
       content =
           @Content(
               mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = AttributeTemplateDto.class)))
-  public ResponseEntity<AttributeTemplateDto> getById(@PathVariable UUID id) {
+              schema = @Schema(implementation = AttributeTemplateResponse.class)))
+  public ResponseEntity<AttributeTemplateResponse> getById(@PathVariable("id") UUID id) {
     AttributeTemplate template = attributeTemplateService.getById(id);
     return ResponseEntity.ok(attributeTemplatePopulator.toDto(template));
   }
@@ -100,9 +105,9 @@ public class AttributeTemplateController extends AbstractController {
       content =
           @Content(
               mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = AttributeTemplateDto.class)))
-  public ResponseEntity<AttributeTemplateDto> update(
-      @PathVariable UUID id, @Valid @RequestBody UpdateAttributeTemplateDto updateDto) {
+              schema = @Schema(implementation = AttributeTemplateResponse.class)))
+  public ResponseEntity<AttributeTemplateResponse> update(
+      @PathVariable("id") UUID id, @Valid @RequestBody UpdateAttributeTemplateRequest updateDto) {
     AttributeTemplate existing = attributeTemplateService.getById(id);
     attributeTemplatePopulator.update(existing, updateDto);
     AttributeTemplate updated = attributeTemplateService.update(existing);
@@ -113,10 +118,8 @@ public class AttributeTemplateController extends AbstractController {
   @Operation(
       summary = "Delete attribute template",
       description = "Deletes an attribute template by its UUID")
-  @ApiResponse(
-      responseCode = "204",
-      description = "Attribute template deleted successfully")
-  public ResponseEntity<Void> delete(@PathVariable UUID id) {
+  @ApiResponse(responseCode = "204", description = "Attribute template deleted successfully")
+  public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
     attributeTemplateService.delete(id);
     return ResponseEntity.noContent().build();
   }

@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
+import vn.io.oldmoon.shopizer.common.core.exception.DuplicateResourceException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.product.infra.model.product.AttributeTemplate;
 import vn.io.oldmoon.shopizer.product.infra.repository.AttributeTemplateRepository;
@@ -29,12 +29,11 @@ public class AttributeTemplateService {
   @Transactional
   public AttributeTemplate create(AttributeTemplate template) {
     Objects.requireNonNull(template, "AttributeTemplate must not be null");
+    Objects.requireNonNull(template.getCode(), "AttributeTemplate code must not be null");
 
-    if (template.getName() == null || template.getName().isBlank()) {
-      throw new InvalidInputException("Attribute template name must not be blank");
-    }
-    if (template.getCode() == null || template.getCode().isBlank()) {
-      throw new InvalidInputException("Attribute template code must not be blank");
+    if (attributeTemplateRepository.existsByCode(template.getCode())) {
+      throw new DuplicateResourceException(
+          String.format("Attribute template with code '%s' already exists", template.getCode()));
     }
 
     log.info("Creating attribute template with code='{}'", template.getCode());
@@ -75,10 +74,24 @@ public class AttributeTemplateService {
   @Transactional
   public AttributeTemplate update(AttributeTemplate template) {
     Objects.requireNonNull(template, "AttributeTemplate must not be null");
+    Objects.requireNonNull(template.getCode(), "AttributeTemplate code must not be null");
 
-    if (template.getId() == null || !attributeTemplateRepository.existsById(template.getId())) {
-      throw new ResourceNotFoundException(
-          "AttributeTemplate", template.getId() != null ? template.getId().toString() : "null");
+    if (template.getId() == null) {
+      throw new ResourceNotFoundException("AttributeTemplate", "null");
+    }
+
+    AttributeTemplate existing =
+        attributeTemplateRepository
+            .findById(template.getId())
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        "AttributeTemplate", template.getId().toString()));
+
+    boolean codeChanged = !template.getCode().equals(existing.getCode());
+    if (codeChanged && attributeTemplateRepository.existsByCode(template.getCode())) {
+      throw new DuplicateResourceException(
+          String.format("Attribute template with code '%s' already exists", template.getCode()));
     }
 
     log.info("Updating attribute template with id='{}'", template.getId());
