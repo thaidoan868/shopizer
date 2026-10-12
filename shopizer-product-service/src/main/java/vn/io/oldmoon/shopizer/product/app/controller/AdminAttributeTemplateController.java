@@ -1,7 +1,6 @@
 package vn.io.oldmoon.shopizer.product.app.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -91,7 +90,7 @@ public class AdminAttributeTemplateController extends AbstractController {
           @Content(
               mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = AttributeTemplateResponse.class)))
-  public ResponseEntity<AttributeTemplateResponse> getById(@PathVariable UUID id) {
+  public ResponseEntity<AttributeTemplateResponse> getById(@PathVariable("id") UUID id) {
     AttributeTemplate template = attributeTemplateService.getById(id);
     return ResponseEntity.ok(attributeTemplatePopulator.toDto(template));
   }
@@ -108,7 +107,7 @@ public class AdminAttributeTemplateController extends AbstractController {
               mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = AttributeTemplateResponse.class)))
   public ResponseEntity<AttributeTemplateResponse> update(
-      @PathVariable UUID id, @Valid @RequestBody UpdateAttributeTemplateRequest updateDto) {
+      @PathVariable("id") UUID id, @Valid @RequestBody UpdateAttributeTemplateRequest updateDto) {
     AttributeTemplate existing = attributeTemplateService.getById(id);
     attributeTemplatePopulator.update(existing, updateDto);
     AttributeTemplate updated = attributeTemplateService.update(existing);
@@ -120,7 +119,7 @@ public class AdminAttributeTemplateController extends AbstractController {
       summary = "Delete attribute template",
       description = "Deletes an attribute template by its UUID")
   @ApiResponse(responseCode = "204", description = "Attribute template deleted successfully")
-  public ResponseEntity<Void> delete(@PathVariable UUID id) {
+  public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
     attributeTemplateService.delete(id);
     return ResponseEntity.noContent().build();
   }

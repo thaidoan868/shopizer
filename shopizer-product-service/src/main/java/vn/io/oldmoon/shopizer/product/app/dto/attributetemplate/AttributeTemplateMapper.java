@@ -6,6 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import vn.io.oldmoon.shopizer.product.infra.model.product.Attribute;
 import vn.io.oldmoon.shopizer.product.infra.model.product.AttributeTemplate;
 
 @Mapper(
@@ -32,4 +33,12 @@ public interface AttributeTemplateMapper {
   @Mapping(target = "modifiedBy", ignore = true)
   void updateEntityFromDto(
       UpdateAttributeTemplateRequest dto, @MappingTarget AttributeTemplate template);
+
+  Attribute toAttribute(AttributeRequest dto);
+
+  AttributeRequest toAttributeRequest(Attribute attribute);
+
+  List<Attribute> toAttributeList(List<AttributeRequest> dtos);
+
+  List<AttributeRequest> toAttributeRequestList(List<Attribute> attributes);
 }

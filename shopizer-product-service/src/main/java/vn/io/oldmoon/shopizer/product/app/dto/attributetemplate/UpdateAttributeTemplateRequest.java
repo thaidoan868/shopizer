@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.io.oldmoon.shopizer.product.app.dto.product.AttributeDto;
 
 @Data
 @Builder
@@ -26,5 +25,5 @@ public class UpdateAttributeTemplateRequest {
 
   @Valid
   @Schema(description = "List of attributes in the template")
-  private List<AttributeDto> attributes;
+  private List<AttributeRequest> attributes;
 }

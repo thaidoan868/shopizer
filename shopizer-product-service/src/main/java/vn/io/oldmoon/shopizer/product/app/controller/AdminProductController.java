@@ -25,7 +25,7 @@ import vn.io.oldmoon.shopizer.product.infra.model.product.Product;
 
 @RestController
 @PreAuthorize("hasRole('SUPER_ADMIN')")
-@RequestMapping("/api/v1/product-service/products")
+@RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Product Endpoints", description = "Endpoints for managing products")

@@ -91,4 +91,38 @@ class GlobalExceptionHandlerTest {
     assertThat(response.getBody().getPath()).isEqualTo("/api/v1/users/me/avatar");
     assertThat(response.getBody().getTimestamp()).isNotNull();
   }
+
+  @Test
+  @DisplayName("handleMethodArgumentTypeMismatchException should return 400 Bad Request with proper ErrorResponse")
+  void handleMethodArgumentTypeMismatchException_ShouldReturn400() {
+    org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex =
+        new org.springframework.web.method.annotation.MethodArgumentTypeMismatchException(
+            "not-and-uuid",
+            java.util.UUID.class,
+            "id",
+            null,
+            new IllegalArgumentException("Invalid UUID string: not-and-uuid"));
+
+    ResponseEntity<ErrorResponse> response =
+        handler.handleMethodArgumentTypeMismatchException(ex, request);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getError()).isEqualTo(ErrorCode.BAD_REQUEST.getError());
+    assertThat(response.getBody().getMessage()).contains("Failed to convert value of type");
+    assertThat(response.getBody().getPath()).isEqualTo("/api/v1/users/me/avatar");
+    assertThat(response.getBody().getTimestamp()).isNotNull();
+  }
+
+  @Test
+  @DisplayName("handleAuthorizationDeniedException should return 403 Forbidden")
+  void handleAuthorizationDeniedException_ShouldReturn403() {
+    ResponseEntity<ErrorResponse> response = handler.handleAuthorizationDeniedException(request);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getError()).isEqualTo("Forbidden");
+    assertThat(response.getBody().getMessage())
+        .isEqualTo("You do not have the required permissions to perform this action");
+  }
 }
