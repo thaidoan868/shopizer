@@ -2,10 +2,10 @@ package vn.io.oldmoon.shopizer.product.app.dto.product;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import vn.io.oldmoon.shopizer.common.core.utility.SlugUtil;
 import vn.io.oldmoon.shopizer.product.infra.model.product.Product;
 import vn.io.oldmoon.shopizer.product.infra.model.product.ProductStatus;
 
@@ -29,17 +29,7 @@ public class ProductPopulator {
 
     Product product = productMapper.toEntity(dto);
 
-    if (product.getSlug() != null && !product.getSlug().isBlank()) {
-      product.setSlug(dto.getSlug().trim().toLowerCase());
-    }
-
-    if (product.getSlug() == null || product.getSlug().isBlank()) {
-      if (dto.getName() != null && !dto.getName().isBlank()) {
-        String base = dto.getName().trim().toLowerCase().replaceAll("\\s+", "-");
-        String uniqueCode = UUID.randomUUID().toString().substring(0, 8);
-        product.setSlug(base + "-" + uniqueCode);
-      }
-    }
+    product.setSlug(SlugUtil.generateSlug(dto.getSlug(), dto.getName()));
 
     if (product.getStatus() == null) {
       product.setStatus(ProductStatus.ACTIVE);

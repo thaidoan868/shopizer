@@ -30,6 +30,8 @@ only one name
 
 Use Objects.requireNonNull(dto) to prevent functions from returning null values
 
+Don't add unused methods.
+
 ## Future releases
 
 5/9
