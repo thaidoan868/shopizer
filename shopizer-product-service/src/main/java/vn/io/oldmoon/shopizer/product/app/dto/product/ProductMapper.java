@@ -10,15 +10,9 @@ import vn.io.oldmoon.shopizer.product.infra.model.product.Product;
 
 @Mapper(
     componentModel = MappingConstants.ComponentModel.SPRING,
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-    builder = @org.mapstruct.Builder(disableBuilder = true))
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ProductMapper {
 
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "created", ignore = true)
-  @Mapping(target = "createdBy", ignore = true)
-  @Mapping(target = "modified", ignore = true)
-  @Mapping(target = "modifiedBy", ignore = true)
   @Mapping(target = "skus", ignore = true)
   Product toEntity(CreateProductRequest dto);
 

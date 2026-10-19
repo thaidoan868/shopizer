@@ -15,6 +15,8 @@ import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 public class ImageUtil {
   private static final Tika TIKA = new Tika();
 
+  private ImageUtil() {}
+
   private static final Set<String> ALLOWED_IMAGE_TYPES =
       Set.of("image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp");
 
@@ -92,6 +94,61 @@ public class ImageUtil {
           .outputFormat("jpg")
           .toOutputStream(out);
       log.info("Resized image to {}x{} and converted to JPEG format", width, height);
+      return new ByteArrayInputStream(out.toByteArray());
+    }
+  }
+
+  /**
+   * Resizes an image so that its longest edge is at most {@code maxEdge} pixels while preserving
+   * aspect ratio, strips all EXIF metadata (GPS coordinates, device details, etc.) during the
+   * resize pass to protect user privacy and reduce file size, and converts it to JPEG format. Does
+   * not upscale images that are already within the maximum edge limit.
+   *
+   * @param in the input stream of the original image
+   * @param maxEdge the maximum allowed length of the longest edge in pixels
+   * @return an InputStream containing the resized JPEG image with EXIF stripped
+   * @throws IOException if an error occurs during reading or writing the image
+   */
+  public static InputStream resizeToMaxEdge(InputStream in, int maxEdge) throws IOException {
+    if (in == null) {
+      throw new IllegalArgumentException("InputStream must not be null");
+    }
+    if (maxEdge <= 0) {
+      throw new IllegalArgumentException("maxEdge must be greater than 0");
+    }
+
+    try (in) {
+      BufferedImage img = Thumbnails.of(in).scale(1.0).asBufferedImage();
+      if (img == null) {
+        throw new InvalidInputException("Cannot decode image");
+      }
+
+      int width = img.getWidth();
+      int height = img.getHeight();
+
+      int targetWidth = width;
+      int targetHeight = height;
+
+      if (width > maxEdge || height > maxEdge) {
+        if (width >= height) {
+          targetWidth = maxEdge;
+          targetHeight = Math.max(1, (int) Math.round((double) height * maxEdge / width));
+        } else {
+          targetHeight = maxEdge;
+          targetWidth = Math.max(1, (int) Math.round((double) width * maxEdge / height));
+        }
+      }
+
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      Thumbnails.of(img)
+          .size(targetWidth, targetHeight)
+          .outputFormat("jpg")
+          .toOutputStream(out);
+      log.info(
+          "Resized image to {}x{} (max edge {}) with EXIF stripped and converted to JPEG format",
+          targetWidth,
+          targetHeight,
+          maxEdge);
       return new ByteArrayInputStream(out.toByteArray());
     }
   }
