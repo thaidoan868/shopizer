@@ -1,5 +1,6 @@
 package vn.io.oldmoon.shopizer.product.business.service;
 
+import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import java.io.InputStream;
@@ -31,7 +32,6 @@ public class FileService {
    * @param file the file metadata entity to persist
    * @return the persisted File entity
    */
-  @Transactional
   public File save(InputStream payload, File file) {
     Objects.requireNonNull(payload, "Payload must not be null");
     Objects.requireNonNull(file, "File must not be null");
@@ -83,6 +83,29 @@ public class FileService {
         saved.getBucket(),
         saved.getObjectName());
     return saved;
+  }
+
+  /**
+   * Downloads a file stream from MinIO storage.
+   *
+   * @param bucket the bucket name
+   * @param objectName the object name in MinIO
+   * @return the InputStream of the stored object
+   */
+  public InputStream download(String bucket, String objectName) {
+    Objects.requireNonNull(bucket, "Bucket must not be null");
+    Objects.requireNonNull(objectName, "ObjectName must not be null");
+
+    try {
+      GetObjectArgs args = GetObjectArgs.builder().bucket(bucket).object(objectName).build();
+      InputStream stream = minioClient.getObject(args);
+      log.info("Downloaded file from MinIO: bucket={}, objectName={}", bucket, objectName);
+      return stream;
+    } catch (Exception e) {
+      log.error(
+          "Failed to download file from MinIO: bucket={}, objectName={}", bucket, objectName, e);
+      throw new ServiceException("Failed to download file from storage", e);
+    }
   }
 
   /**

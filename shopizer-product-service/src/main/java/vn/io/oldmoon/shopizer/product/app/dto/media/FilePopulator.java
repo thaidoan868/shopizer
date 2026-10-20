@@ -14,7 +14,7 @@ import vn.io.oldmoon.shopizer.product.infra.model.media.File;
 @Slf4j
 public class FilePopulator {
 
-  private final MediaMapper mediaMapper;
+  private final FileMapper fileMapper;
 
   @Value("${minio.access-endpoint}")
   private String mediaEndpoint;
@@ -28,7 +28,7 @@ public class FilePopulator {
   public FileResponse toDto(File file) {
     Objects.requireNonNull(file, "File must not be null");
 
-    FileResponse response = mediaMapper.toDto(file);
+    FileResponse response = fileMapper.toDto(file);
     String encodedBucket = FileUtil.encodeForUrl(file.getBucket());
     String encodedObjectName = FileUtil.encodeForUrl(file.getObjectName());
     response.setUrl(ConverterUtil.toMediaUrl(mediaEndpoint, encodedBucket, encodedObjectName));

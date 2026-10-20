@@ -32,6 +32,19 @@ CREATE INDEX idx_image_assets_medium ON image_assets(medium_id);
 CREATE INDEX idx_image_assets_large ON image_assets(large_id);
 
 
+CREATE TABLE video_assets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    original JSONB,
+    p360 JSONB,
+    p720 JSONB,
+    p1080 JSONB,
+    created TIMESTAMPTZ DEFAULT NOW(),
+    created_by UUID,
+    modified TIMESTAMPTZ DEFAULT NOW(),
+    modified_by UUID
+);
+
+
 CREATE TABLE articles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,

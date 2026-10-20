@@ -9,7 +9,7 @@ import vn.io.oldmoon.shopizer.product.infra.model.media.File;
 @Mapper(
     componentModel = MappingConstants.ComponentModel.SPRING,
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface MediaMapper {
+public interface FileMapper {
 
   @Mapping(target = "url", ignore = true)
   FileResponse toDto(File file);
