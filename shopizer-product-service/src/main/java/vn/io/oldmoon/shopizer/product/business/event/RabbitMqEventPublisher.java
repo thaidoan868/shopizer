@@ -13,7 +13,7 @@ import vn.io.oldmoon.shopizer.product.app.config.RabbitMqConfig;
 public class RabbitMqEventPublisher implements EventPublisher {
 
   private final RabbitTemplate rabbitTemplate;
-
+  
   @Override
   public void publish(Object event, String routingKey) {
     if (event == null) {
@@ -21,11 +21,17 @@ public class RabbitMqEventPublisher implements EventPublisher {
       return;
     }
 
-    rabbitTemplate.convertAndSend(RabbitMqConfig.productEventExchange, routingKey, event);
-    log.info(
-        "Published event [{}] to exchange [{}] with routingKey [{}]",
-        event.getClass().getSimpleName(),
-        RabbitMqConfig.productEventExchange,
-        routingKey);
+    try {
+      rabbitTemplate.convertAndSend(RabbitMqConfig.productEventExchange, routingKey, event);
+      log.info(
+          "Published event [{}] to exchange [{}] with routingKey [{}] after commit",
+          event.getClass().getSimpleName(),
+          RabbitMqConfig.productEventExchange,
+          routingKey);
+    } catch (Exception ex) {
+      log.error(
+          "Failed to publish event [{}] with routingKey [{}] to RabbitMQ", event, routingKey, ex);
+      throw ex;
+    }
   }
 }

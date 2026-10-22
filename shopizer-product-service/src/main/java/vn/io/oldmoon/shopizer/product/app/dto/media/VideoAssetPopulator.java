@@ -1,6 +1,5 @@
 package vn.io.oldmoon.shopizer.product.app.dto.media;
 
-import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +28,11 @@ public class VideoAssetPopulator {
     FileResponse fileResponse =
         video.getFile() != null ? filePopulator.toDto(video.getFile()) : null;
 
-    return VideoResponse.builder().status(video.getStatus()).file(fileResponse).build();
+    return VideoResponse.builder()
+        .status(video.getStatus())
+        .duration(video.getDuration())
+        .file(fileResponse)
+        .build();
   }
 
   /**
@@ -52,20 +55,5 @@ public class VideoAssetPopulator {
 
     log.debug("Mapped VideoAsset to CreateVideoAssetResponse for id={}", videoAsset.getId());
     return response;
-  }
-
-  /**
-   * Converts a list of VideoAsset domain entities into a list of CreateVideoAssetResponse DTOs.
-   *
-   * @param videoAssets the list of VideoAsset entities
-   * @return the list of populated CreateVideoAssetResponse DTOs
-   */
-  public List<CreateVideoAssetResponse> toDtoList(List<VideoAsset> videoAssets) {
-    Objects.requireNonNull(videoAssets, "VideoAsset list must not be null");
-
-    List<CreateVideoAssetResponse> responses = videoAssets.stream().map(this::toDto).toList();
-    log.debug(
-        "Mapped {} VideoAsset entities to CreateVideoAssetResponse list", videoAssets.size());
-    return responses;
   }
 }

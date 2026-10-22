@@ -1,12 +1,10 @@
 package vn.io.oldmoon.shopizer.product.app.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,58 +19,93 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.utility.ImageUtil;
+import vn.io.oldmoon.shopizer.common.core.utility.VideoUtil;
 import vn.io.oldmoon.shopizer.common.web.controller.AbstractController;
 import vn.io.oldmoon.shopizer.product.app.dto.media.CreateImageAssetResponse;
+import vn.io.oldmoon.shopizer.product.app.dto.media.CreateVideoAssetResponse;
 import vn.io.oldmoon.shopizer.product.app.dto.media.ImageAssetPopulator;
+import vn.io.oldmoon.shopizer.product.app.dto.media.VideoAssetPopulator;
 import vn.io.oldmoon.shopizer.product.business.service.ImageAssetService;
+import vn.io.oldmoon.shopizer.product.business.service.VideoAssetService;
 import vn.io.oldmoon.shopizer.product.infra.model.media.ImageAsset;
+import vn.io.oldmoon.shopizer.product.infra.model.media.VideoAsset;
 
 @RestController
 @PreAuthorize("hasRole('SUPER_ADMIN')")
-@RequestMapping("/api/v1/media/images")
+@RequestMapping("/api/v1/media")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Media Endpoints", description = "Endpoints for managing media and image uploads")
+@Tag(
+    name = "Media Endpoints",
+    description = "Endpoints for managing image and video uploads and processing")
 public class AdminMediaController extends AbstractController {
 
   private final ImageAssetService imageAssetService;
   private final ImageAssetPopulator imageAssetPopulator;
+  private final VideoAssetService videoAssetService;
+  private final VideoAssetPopulator videoAssetPopulator;
 
-  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(
-      summary = "Upload multiple images",
+      summary = "Upload image",
       description =
-          "Uploads multiple images, generating thumbnail (200px), medium (800px), and large (1600px) variants with EXIF stripped")
+          "Uploads an image, generating thumbnail (200px), medium (800px), and large (1600px) variants with EXIF stripped")
   @ApiResponse(
       responseCode = "201",
-      description = "Images uploaded successfully",
+      description = "Image uploaded successfully",
       content =
           @Content(
               mediaType = MediaType.APPLICATION_JSON_VALUE,
-              array =
-                  @ArraySchema(schema = @Schema(implementation = CreateImageAssetResponse.class))))
-  public ResponseEntity<List<CreateImageAssetResponse>> uploadImages(
-      @RequestParam(value = "images", required = false) List<MultipartFile> images) {
-    if (images == null || images.isEmpty()) {
-      throw new InvalidInputException("Image files must not be empty");
-    }
+              schema = @Schema(implementation = CreateImageAssetResponse.class)))
+  public ResponseEntity<CreateImageAssetResponse> uploadImage(
+      @RequestParam(value = "image", required = false) MultipartFile image) {
+    ImageUtil.validateBasic(image);
 
-    images.forEach(ImageUtil::validateBasic);
-
-    List<ImageAsset> assets = imageAssetService.uploadImages(images);
-    List<CreateImageAssetResponse> responses = imageAssetPopulator.toDtoList(assets);
-    return ResponseEntity.status(HttpStatus.CREATED).body(responses);
+    ImageAsset asset = imageAssetService.uploadImage(image);
+    CreateImageAssetResponse response = imageAssetPopulator.toDto(asset);
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
-  @DeleteMapping("/{id}")
+  @DeleteMapping("/images/{id}")
   @Operation(
       summary = "Delete image asset",
       description = "Deletes an image asset by soft-deleting its associated file records")
   @ApiResponse(responseCode = "204", description = "Image asset deleted successfully")
-  public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
+  public ResponseEntity<Void> deleteImage(@PathVariable("id") UUID id) {
     imageAssetService.delete(id);
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping(value = "/videos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @Operation(
+      summary = "Upload video",
+      description =
+          "Uploads an original video to MinIO, initializes a VideoAsset record, and queues asynchronous 360p, 720p, and 1080p transcoding tasks")
+  @ApiResponse(
+      responseCode = "201",
+      description = "Video uploaded and queued for processing",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = CreateVideoAssetResponse.class)))
+  public ResponseEntity<CreateVideoAssetResponse> uploadVideo(
+      @RequestParam(value = "video", required = false) MultipartFile video) {
+    VideoUtil.validateBasic(video);
+
+    VideoAsset asset = videoAssetService.uploadVideo(video);
+    CreateVideoAssetResponse response = videoAssetPopulator.toDto(asset);
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
+
+  @DeleteMapping("/videos/{id}")
+  @Operation(
+      summary = "Delete video asset",
+      description =
+          "Deletes a video asset by hard-deleting the asset record and soft-deleting its associated file records")
+  @ApiResponse(responseCode = "204", description = "Video asset deleted successfully")
+  public ResponseEntity<Void> deleteVideo(@PathVariable("id") UUID id) {
+    videoAssetService.delete(id);
     return ResponseEntity.noContent().build();
   }
 }

@@ -72,10 +72,6 @@ public class FileService {
       throw new ServiceException("Failed to upload file to storage", e);
     }
 
-    if (file.getStatus() == null) {
-      file.setStatus(FileStatus.ACTIVE);
-    }
-
     File saved = fileRepository.save(file);
     log.info(
         "Persisted file metadata id={}, bucket={}, objectName={}",

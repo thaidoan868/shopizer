@@ -16,6 +16,9 @@ public class VideoResponse {
   @Schema(example = "AVAILABLE", description = "Processing status of the video variation")
   private VideoStatus status;
 
+  @Schema(example = "125.5", description = "Duration of the video in seconds")
+  private Double duration;
+
   @Schema(description = "File metadata and URL when the video variation is available")
   private FileResponse file;
 }

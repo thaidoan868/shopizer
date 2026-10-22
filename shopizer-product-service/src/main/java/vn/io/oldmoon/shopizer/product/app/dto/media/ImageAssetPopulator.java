@@ -1,6 +1,5 @@
 package vn.io.oldmoon.shopizer.product.app.dto.media;
 
-import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,20 +33,5 @@ public class ImageAssetPopulator {
 
     log.debug("Mapped ImageAsset to CreateImageAssetResponse for id={}", imageAsset.getId());
     return response;
-  }
-
-  /**
-   * Converts a list of ImageAsset domain entities into a list of CreateImageAssetResponse DTOs.
-   *
-   * @param imageAssets the list of ImageAsset entities
-   * @return the list of populated CreateImageAssetResponse DTOs
-   */
-  public List<CreateImageAssetResponse> toDtoList(List<ImageAsset> imageAssets) {
-    Objects.requireNonNull(imageAssets, "ImageAsset list must not be null");
-
-    List<CreateImageAssetResponse> responses = imageAssets.stream().map(this::toDto).toList();
-    log.debug(
-        "Mapped {} ImageAsset entities to CreateImageAssetResponse list", imageAssets.size());
-    return responses;
   }
 }

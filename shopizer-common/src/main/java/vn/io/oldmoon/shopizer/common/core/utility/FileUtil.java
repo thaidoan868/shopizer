@@ -1,8 +1,14 @@
 package vn.io.oldmoon.shopizer.common.core.utility;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Utility class for file operations, filename extraction, and URL encoding.
  */
+@Slf4j
 public final class FileUtil {
 
   private FileUtil() {}
@@ -26,5 +32,20 @@ public final class FileUtil {
    */
   public static String encodeForUrl(String value) {
     return ConverterUtil.encodeForUrl(value);
+  }
+
+  /**
+   * Deletes a temporary file if it exists, logging any I/O error without throwing.
+   *
+   * @param path the path to delete
+   */
+  public static void deleteTempFileQuietly(Path path) {
+    if (path != null) {
+      try {
+        Files.deleteIfExists(path);
+      } catch (IOException e) {
+        log.warn("Failed to delete temporary file: {}", path, e);
+      }
+    }
   }
 }

@@ -74,3 +74,10 @@ AWS
 25/10
 
 ## Needed further research
+
+## Stages
+
+V0.2 MVP
+V1.0 Ready to launch in production. Have core features
+V1.1 Improve performance
+V1.2 Add more features

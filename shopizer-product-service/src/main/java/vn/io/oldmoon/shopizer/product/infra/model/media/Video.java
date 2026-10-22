@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class Video {
 
   private VideoStatus status;
+  private Double duration;
   private File file;
 }
