@@ -33,7 +33,7 @@ public class RabbitMqEventPublisher implements EventPublisher {
             }
           });
     } else {
-      // Immediate fallback if called outside an active transaction
+      // Immediate fallback if called outside an active transactionn
       send(rabbitMqEvent);
     }
   }
