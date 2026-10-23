@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,10 +68,27 @@ public class AdminMediaController extends AbstractController {
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
+  @GetMapping("/images/{id}")
+  @Operation(
+      summary = "Get image asset by ID",
+      description = "Retrieves an image asset and its resolution variations by UUID")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Image asset retrieved successfully",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = CreateImageAssetResponse.class)))
+  public ResponseEntity<CreateImageAssetResponse> getImage(@PathVariable("id") UUID id) {
+    ImageAsset asset = imageAssetService.get(id);
+    CreateImageAssetResponse response = imageAssetPopulator.toDto(asset);
+    return ResponseEntity.ok(response);
+  }
+
   @DeleteMapping("/images/{id}")
   @Operation(
       summary = "Delete image asset",
-      description = "Deletes an image asset by soft-deleting its associated file records")
+      description = "Deletes an image asset and removes its associated files from storage")
   @ApiResponse(responseCode = "204", description = "Image asset deleted successfully")
   public ResponseEntity<Void> deleteImage(@PathVariable("id") UUID id) {
     imageAssetService.delete(id);
@@ -98,11 +116,27 @@ public class AdminMediaController extends AbstractController {
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
+  @GetMapping("/videos/{id}")
+  @Operation(
+      summary = "Get video asset by ID",
+      description = "Retrieves a video asset and its resolution variations by UUID")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Video asset retrieved successfully",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = CreateVideoAssetResponse.class)))
+  public ResponseEntity<CreateVideoAssetResponse> getVideo(@PathVariable("id") UUID id) {
+    VideoAsset asset = videoAssetService.get(id);
+    CreateVideoAssetResponse response = videoAssetPopulator.toDto(asset);
+    return ResponseEntity.ok(response);
+  }
+
   @DeleteMapping("/videos/{id}")
   @Operation(
       summary = "Delete video asset",
-      description =
-          "Deletes a video asset by hard-deleting the asset record and soft-deleting its associated file records")
+      description = "Deletes a video asset and removes its associated files from storage")
   @ApiResponse(responseCode = "204", description = "Video asset deleted successfully")
   public ResponseEntity<Void> deleteVideo(@PathVariable("id") UUID id) {
     videoAssetService.delete(id);

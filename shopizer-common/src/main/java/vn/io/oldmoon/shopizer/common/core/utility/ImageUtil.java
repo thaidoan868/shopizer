@@ -14,15 +14,12 @@ import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 @Slf4j
 public class ImageUtil {
   private static final Tika TIKA = new Tika();
-
-  private ImageUtil() {}
-
   private static final Set<String> ALLOWED_IMAGE_TYPES =
       Set.of("image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp");
-
-  private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+  private static final long MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
   private static final int MAX_WIDTH = 4096;
   private static final int MAX_HEIGHT = 4096;
+  private ImageUtil() {}
 
   public static void validateBasic(MultipartFile file) {
     if (file == null || file.isEmpty()) {
@@ -30,7 +27,7 @@ public class ImageUtil {
     }
     if (file.getSize() > MAX_IMAGE_SIZE) {
       throw new InvalidInputException(
-          "Image exceeds maximum size of 5MB: " + file.getOriginalFilename());
+          "Image exceeds maximum size of 20MB: " + file.getOriginalFilename());
     }
   }
 

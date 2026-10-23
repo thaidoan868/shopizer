@@ -112,7 +112,7 @@ logging:
     vn.io.oldmoon.shopizer: info
   pattern:
     level: "%5p"
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{correlationId}] - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{correlationId}] [%X{messageId}] - %msg%n"
 
 # Keycloak Configuration
 keycloak:

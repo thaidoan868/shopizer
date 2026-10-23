@@ -18,6 +18,7 @@ import vn.io.oldmoon.shopizer.common.web.model.Header;
 public class MdcCorrelationIdFilter extends OncePerRequestFilter {
 
   public static final String MDC_KEY = "correlationId";
+  public static final String MESSAGE_ID_MDC_KEY = "messageId";
 
   /**
    * Forward the correlation id header or create a new one if missing. Add correlationId to

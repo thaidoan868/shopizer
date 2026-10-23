@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import vn.io.oldmoon.shopizer.common.core.event.ApplicationEventListener;
+import vn.io.oldmoon.shopizer.common.core.event.RabbitMqEvent;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.event.RabbitMqEventPublisher;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
@@ -30,6 +31,7 @@ public class KeycloakUserRegisteredEventListener
     log.info("Successfully registered user userId={}", event.userId());
     // I didn't use @Transactional and told Keycloak to assign the customer role directly
     // because, if Keycloak is busy, it could cause database connection pool exhaustion
-    eventPublisher.publish(customerCreatedEvent, RabbitMqConfig.customerCreatedBindingKey);
+    eventPublisher.publish(
+        new RabbitMqEvent(customerCreatedEvent, RabbitMqConfig.customerCreatedBindingKey));
   }
 }

@@ -13,9 +13,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import vn.io.oldmoon.shopizer.common.core.event.EventPublisher;
+import vn.io.oldmoon.shopizer.common.core.event.RabbitMqEvent;
+import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.common.core.exception.ServiceException;
 import vn.io.oldmoon.shopizer.common.core.utility.FileUtil;
 import vn.io.oldmoon.shopizer.common.core.utility.VideoUtil;
@@ -74,6 +77,7 @@ public class VideoAssetService {
     // --- Step 3: Atomic DB Commit & Event Dispatch
     return transactionTemplate.execute(
         status -> {
+          savedOriginal.setStatus(FileStatus.ACTIVE);
           Video notAvailable =
               Video.builder().status(VideoStatus.NOT_AVAILABLE).duration(null).file(null).build();
           VideoAsset videoAsset =
@@ -88,16 +92,19 @@ public class VideoAssetService {
                   .p720(notAvailable)
                   .p1080(notAvailable)
                   .build();
-
+          log.info(
+              "Persisting new VideoAsset with original file: bucket={}, objectName={}",
+              savedOriginal.getBucket(),
+              savedOriginal.getObjectName());
           VideoAsset savedAsset = videoAssetRepository.save(videoAsset);
 
-          savedOriginal.setStatus(FileStatus.ACTIVE);
           fileRepository.save(savedOriginal);
 
           for (VideoQuality quality : VideoQuality.values()) {
             VideoProcessingEvent event =
                 new VideoProcessingEvent(savedAsset.getId(), savedOriginal, quality);
-            eventPublisher.publish(event, RabbitMqConfig.videoProcessingBindingKey);
+            eventPublisher.publish(
+                new RabbitMqEvent(event, RabbitMqConfig.videoProcessingBindingKey));
           }
           return savedAsset;
         });
@@ -148,22 +155,24 @@ public class VideoAssetService {
 
     // --- Phase 2: Remote MinIO Upload with DELETED status (No DB transaction held) ---
     File savedVariationFile;
-    InputStream outputStream = Files.newInputStream(outputTempFile);
-    File variationFileEntity =
-        File.builder()
-            .bucket(mediaBucket)
-            .objectName(variationObjectName)
-            .sizeBytes(outputSize)
-            .contentType(contentType)
-            .visibility(Visibility.PUBLIC)
-            .status(FileStatus.DELETED) // Safe against crashes before DB commit
-            .build();
-    savedVariationFile = fileService.save(outputStream, variationFileEntity);
+    try (InputStream outputStream = Files.newInputStream(outputTempFile)) {
+      File variationFileEntity =
+          File.builder()
+              .bucket(mediaBucket)
+              .objectName(variationObjectName)
+              .sizeBytes(outputSize)
+              .contentType(contentType)
+              .visibility(Visibility.PUBLIC)
+              .status(FileStatus.DELETED) // Safe against crashes before DB commit
+              .build();
+      savedVariationFile = fileService.save(outputStream, variationFileEntity);
+    }
 
     // --- Phase 3: Atomic DB Commit & Status Flip
     transactionTemplate.executeWithoutResult(
         status -> {
           VideoAsset videoAsset = this.get(assetId);
+          savedVariationFile.setStatus(FileStatus.ACTIVE);
 
           Video completedVideo =
               Video.builder()
@@ -173,16 +182,54 @@ public class VideoAssetService {
                   .build();
 
           updateVariationOnAsset(videoAsset, quality, completedVideo);
-
-          savedVariationFile.setStatus(FileStatus.ACTIVE);
+          log.info(
+              "Saving video variation: assetId={}, quality={}, fileId={}",
+              assetId,
+              quality.getLabel(),
+              savedVariationFile.getId());
           fileRepository.save(savedVariationFile);
         });
+  }
 
-    log.info(
-        "Saving video variation: assetId={}, quality={}, fileId={}",
-        assetId,
-        quality.getLabel(),
-        savedVariationFile.getId());
+  /**
+   * Retrieves a VideoAsset by its UUID.
+   *
+   * @param assetId the UUID of the VideoAsset
+   * @return the VideoAsset entity
+   * @throws ResourceNotFoundException if not found
+   */
+  @Transactional(readOnly = true)
+  public VideoAsset get(UUID assetId) {
+    Objects.requireNonNull(assetId, "Asset ID must not be null");
+    return videoAssetRepository
+        .findById(assetId)
+        .orElseThrow(() -> new ResourceNotFoundException("VideoAsset", assetId.toString()));
+  }
+
+  /**
+   * Hard deletes a VideoAsset and deletes all associated File records.
+   *
+   * @param id the UUID of the VideoAsset
+   */
+  @Transactional
+  public void delete(UUID id) {
+    Objects.requireNonNull(id, "ID must not be null");
+
+    VideoAsset videoAsset = this.get(id);
+
+    deleteVideoFile(videoAsset.getOriginal());
+    deleteVideoFile(videoAsset.getP360());
+    deleteVideoFile(videoAsset.getP720());
+    deleteVideoFile(videoAsset.getP1080());
+
+    videoAssetRepository.delete(videoAsset);
+    log.info("Hard deleting VideoAsset id={} and its associated files", id);
+  }
+
+  private void deleteVideoFile(Video video) {
+    if (video != null && video.getFile() != null && video.getFile().getId() != null) {
+      fileService.delete(video.getFile().getId());
+    }
   }
 
   /**
@@ -202,18 +249,19 @@ public class VideoAssetService {
     ProcessBuilder processBuilder =
         new ProcessBuilder(
             "ffmpeg",
-            "-y",
+            "-y", // Overwrite output without asking
             "-i",
             inputPath.toAbsolutePath().toString(),
-            "-nostats",
             "-vf",
             "scale=-2:" + quality.getHeight(),
             "-c:v",
             "libx264",
+            "-pix_fmt",
+            "yuv420p", // Broad browser/device compatibility
             "-b:v",
             quality.getVideoBitrate(),
             "-preset",
-            "fast",
+            "medium",
             "-c:a",
             "aac",
             "-b:a",
@@ -245,8 +293,7 @@ public class VideoAssetService {
         outputBuilder);
   }
 
-  public void updateVariationOnAsset(
-      VideoAsset videoAsset, VideoQuality quality, Video variation) {
+  public void updateVariationOnAsset(VideoAsset videoAsset, VideoQuality quality, Video variation) {
     Objects.requireNonNull(videoAsset, "Video asset must not be null");
     Objects.requireNonNull(videoAsset.getId(), "Video asset ID must not be null");
     Objects.requireNonNull(quality, "Video quality must not be null");

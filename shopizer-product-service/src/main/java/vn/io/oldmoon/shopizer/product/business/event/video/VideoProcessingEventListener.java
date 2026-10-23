@@ -55,6 +55,10 @@ public class VideoProcessingEventListener
       try (InputStream sourceStream =
           fileService.download(sourceFile.getBucket(), sourceFile.getObjectName())) {
         Files.copy(sourceStream, inputTempFile, StandardCopyOption.REPLACE_EXISTING);
+        log.debug(
+            "Downloaded source video to temporary file: Path: {} (size: {} bytes)",
+            inputTempFile,
+            Files.size(inputTempFile));
       }
 
       videoAssetService.transcodeWithFfmpeg(inputTempFile, outputTempFile, quality);

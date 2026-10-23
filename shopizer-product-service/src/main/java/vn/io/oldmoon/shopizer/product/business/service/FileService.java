@@ -3,6 +3,7 @@ package vn.io.oldmoon.shopizer.product.business.service;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.UUID;
@@ -14,7 +15,6 @@ import vn.io.oldmoon.shopizer.common.core.exception.InvalidInputException;
 import vn.io.oldmoon.shopizer.common.core.exception.ResourceNotFoundException;
 import vn.io.oldmoon.shopizer.common.core.exception.ServiceException;
 import vn.io.oldmoon.shopizer.product.infra.model.media.File;
-import vn.io.oldmoon.shopizer.product.infra.model.media.FileStatus;
 import vn.io.oldmoon.shopizer.product.infra.repository.FileRepository;
 
 @Service
@@ -74,7 +74,7 @@ public class FileService {
 
     File saved = fileRepository.save(file);
     log.info(
-        "Persisted file metadata id={}, bucket={}, objectName={}",
+        "Saved file metadata id={}, bucket={}, objectName={}",
         saved.getId(),
         saved.getBucket(),
         saved.getObjectName());
@@ -95,7 +95,10 @@ public class FileService {
     try {
       GetObjectArgs args = GetObjectArgs.builder().bucket(bucket).object(objectName).build();
       InputStream stream = minioClient.getObject(args);
-      log.info("Downloaded file from MinIO: bucket={}, objectName={}", bucket, objectName);
+      log.debug(
+          "Created a connection to download file from MinIO: bucket={}, objectName={}",
+          bucket,
+          objectName);
       return stream;
     } catch (Exception e) {
       log.error(
@@ -105,9 +108,10 @@ public class FileService {
   }
 
   /**
-   * Soft deletes a file metadata record by updating its status to DELETED.
+   * Hard deletes a file metadata record from the database and removes the object from MinIO
+   * storage.
    *
-   * @param id the UUID of the file to soft delete
+   * @param id the UUID of the file to delete
    */
   @Transactional
   public void delete(UUID id) {
@@ -118,10 +122,26 @@ public class FileService {
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("File", id.toString()));
 
-    file.setStatus(FileStatus.DELETED);
-    fileRepository.save(file);
+    try {
+      RemoveObjectArgs args =
+          RemoveObjectArgs.builder().bucket(file.getBucket()).object(file.getObjectName()).build();
+      minioClient.removeObject(args);
+      log.info(
+          "File deleted from MinIO: bucket={}, objectName={}",
+          file.getBucket(),
+          file.getObjectName());
+    } catch (Exception e) {
+      log.error(
+          "Failed to delete file from MinIO: bucket={}, objectName={}",
+          file.getBucket(),
+          file.getObjectName(),
+          e);
+      throw new ServiceException("Failed to delete file from storage", e);
+    }
+
+    fileRepository.delete(file);
     log.info(
-        "Soft deleted file metadata id={}, bucket={}, objectName={}",
+        "Hard deleted file metadata id={}, bucket={}, objectName={}",
         file.getId(),
         file.getBucket(),
         file.getObjectName());

@@ -46,15 +46,6 @@ public class ImageAssetService {
   /**
    * Uploads an image using a 3-phase execution model:
    *
-   * <ol>
-   *   <li>Phase 1: Validates and resizes all variants in memory (fails fast before storage or DB
-   *       writes).
-   *   <li>Phase 2: Uploads all files to MinIO marked initially as {@link FileStatus#DELETED}
-   *       outside DB transactions.
-   *   <li>Phase 3: Atomically commits the {@link ImageAsset} entity and flips all {@link File}
-   *       records to {@link FileStatus#ACTIVE}.
-   * </ol>
-   *
    * @param file the uploaded image file
    * @return the persisted ImageAsset entity
    */
@@ -117,7 +108,22 @@ public class ImageAssetService {
   }
 
   /**
-   * Hard deletes an ImageAsset and soft deletes all four associated File records.
+   * Retrieves an ImageAsset by its UUID.
+   *
+   * @param assetId the UUID of the ImageAsset
+   * @return the ImageAsset entity
+   * @throws ResourceNotFoundException if not found
+   */
+  @Transactional(readOnly = true)
+  public ImageAsset get(UUID assetId) {
+    Objects.requireNonNull(assetId, "Asset ID must not be null");
+    return imageAssetRepository
+        .findById(assetId)
+        .orElseThrow(() -> new ResourceNotFoundException("ImageAsset", assetId.toString()));
+  }
+
+  /**
+   * Hard deletes an ImageAsset and deletes all four associated File records.
    *
    * @param id the UUID of the ImageAsset
    */
@@ -131,21 +137,28 @@ public class ImageAssetService {
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("ImageAsset", id.toString()));
 
-    if (imageAsset.getOriginal() != null) {
-      fileService.delete(imageAsset.getOriginal().getId());
-    }
-    if (imageAsset.getThumbnail() != null) {
-      fileService.delete(imageAsset.getThumbnail().getId());
-    }
-    if (imageAsset.getMedium() != null) {
-      fileService.delete(imageAsset.getMedium().getId());
-    }
-    if (imageAsset.getLarge() != null) {
-      fileService.delete(imageAsset.getLarge().getId());
-    }
+    UUID originalId = imageAsset.getOriginal() != null ? imageAsset.getOriginal().getId() : null;
+    UUID thumbnailId =
+        imageAsset.getThumbnail() != null ? imageAsset.getThumbnail().getId() : null;
+    UUID mediumId = imageAsset.getMedium() != null ? imageAsset.getMedium().getId() : null;
+    UUID largeId = imageAsset.getLarge() != null ? imageAsset.getLarge().getId() : null;
 
     imageAssetRepository.delete(imageAsset);
-    log.info("Hard deleted ImageAsset id={} and soft-deleted its associated files", id);
+
+    if (originalId != null) {
+      fileService.delete(originalId);
+    }
+    if (thumbnailId != null) {
+      fileService.delete(thumbnailId);
+    }
+    if (mediumId != null) {
+      fileService.delete(mediumId);
+    }
+    if (largeId != null) {
+      fileService.delete(largeId);
+    }
+
+    log.info("Hard deleted ImageAsset id={} and its associated files", id);
   }
 
   private File uploadOriginal(
@@ -167,16 +180,6 @@ public class ImageAssetService {
     }
   }
 
-  private byte[] resizeVariation(MultipartFile file, int maxEdge, String originalFilename) {
-    try (InputStream in = file.getInputStream();
-        InputStream resizedStream = ImageUtil.resizeToMaxEdge(in, maxEdge)) {
-      return resizedStream.readAllBytes();
-    } catch (IOException e) {
-      log.error("Failed to process image variation (maxEdge={}): {}", maxEdge, originalFilename, e);
-      throw new InvalidInputException("Failed to process image: " + e.getMessage());
-    }
-  }
-
   private File saveVariation(String objectName, byte[] bytes) {
     File variationEntity =
         File.builder()
@@ -188,5 +191,14 @@ public class ImageAssetService {
             .status(FileStatus.DELETED) // Saved as DELETED until Phase 3 commit
             .build();
     return fileService.save(new ByteArrayInputStream(bytes), variationEntity);
+  }
+  private byte[] resizeVariation(MultipartFile file, int maxEdge, String originalFilename) {
+    try (InputStream in = file.getInputStream();
+         InputStream resizedStream = ImageUtil.resizeToMaxEdge(in, maxEdge)) {
+      return resizedStream.readAllBytes();
+    } catch (IOException e) {
+      log.error("Failed to process image variation (maxEdge={}): {}", maxEdge, originalFilename, e);
+      throw new InvalidInputException("Failed to process image: " + e.getMessage());
+    }
   }
 }

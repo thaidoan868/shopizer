@@ -2,6 +2,7 @@ package vn.io.oldmoon.shopizer.product.app.config;
 
 import java.util.concurrent.Executor;
 import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -88,6 +89,8 @@ public class RabbitMqConfig {
   public SimpleRabbitListenerContainerFactory videoRabbitListenerContainerFactory(
       ConnectionFactory connectionFactory,
       RetryOperationsInterceptor retryInterceptor,
+      @Qualifier("rabbitMdcCorrelationIdInterceptor")
+          MethodInterceptor rabbitMdcCorrelationIdInterceptor,
       @Qualifier("videoProcessingExecutor") Executor videoProcessingExecutor) {
     SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
     factory.setConnectionFactory(connectionFactory);
@@ -97,7 +100,7 @@ public class RabbitMqConfig {
     factory.setMaxConcurrentConsumers(4);
     factory.setPrefetchCount(1);
     factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
-    factory.setAdviceChain(new Advice[] {retryInterceptor});
+    factory.setAdviceChain(new Advice[] {rabbitMdcCorrelationIdInterceptor, retryInterceptor});
     return factory;
   }
 }

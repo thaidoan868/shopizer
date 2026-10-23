@@ -1,9 +1,13 @@
 package vn.io.oldmoon.shopizer.common.core.utility;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 
@@ -41,5 +45,18 @@ class FileUtilTest {
   @DisplayName("encodeForUrl should return input when null or empty")
   void encodeForUrl_WhenNullOrEmpty_ShouldReturnSame(String input) {
     assertThat(FileUtil.encodeForUrl(input)).isEqualTo(input);
+  }
+
+  @Test
+  @DisplayName("deleteTempFileQuietly should delete existing file and ignore null or missing path")
+  void deleteTempFileQuietly_ShouldDeleteFileAndIgnoreNull(@TempDir Path tempDir) throws Exception {
+    assertThatCode(() -> FileUtil.deleteTempFileQuietly(null)).doesNotThrowAnyException();
+
+    Path tempFile = tempDir.resolve("temp.txt");
+    Files.writeString(tempFile, "hello");
+    assertThat(Files.exists(tempFile)).isTrue();
+
+    FileUtil.deleteTempFileQuietly(tempFile);
+    assertThat(Files.exists(tempFile)).isFalse();
   }
 }

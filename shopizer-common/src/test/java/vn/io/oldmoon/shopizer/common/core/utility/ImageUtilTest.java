@@ -49,15 +49,15 @@ class ImageUtilTest {
     }
 
     @Test
-    @DisplayName("should throw InvalidInputException when file exceeds 5MB")
-    void validateBasic_WhenFileExceeds5Mb_ShouldThrowException() {
-      byte[] largeContent = new byte[5 * 1024 * 1024 + 1];
+    @DisplayName("should throw InvalidInputException when file exceeds 20MB")
+    void validateBasic_WhenFileExceeds20Mb_ShouldThrowException() {
+      byte[] largeContent = new byte[20 * 1024 * 1024 + 1];
       MockMultipartFile largeFile =
           new MockMultipartFile("file", "large.png", "image/png", largeContent);
 
       assertThatThrownBy(() -> ImageUtil.validateBasic(largeFile))
           .isInstanceOf(InvalidInputException.class)
-          .hasMessageContaining("Image exceeds maximum size of 5MB");
+          .hasMessageContaining("Image exceeds maximum size of 20MB");
     }
 
     @Test
