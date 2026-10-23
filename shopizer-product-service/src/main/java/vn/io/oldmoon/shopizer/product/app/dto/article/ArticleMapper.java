@@ -9,15 +9,9 @@ import vn.io.oldmoon.shopizer.product.infra.model.media.Article;
 
 @Mapper(
     componentModel = MappingConstants.ComponentModel.SPRING,
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-    builder = @org.mapstruct.Builder(disableBuilder = true))
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ArticleMapper {
 
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "created", ignore = true)
-  @Mapping(target = "createdBy", ignore = true)
-  @Mapping(target = "modified", ignore = true)
-  @Mapping(target = "modifiedBy", ignore = true)
   Article toEntity(CreateArticleRequest dto);
 
   ArticleResponse toDto(Article article);

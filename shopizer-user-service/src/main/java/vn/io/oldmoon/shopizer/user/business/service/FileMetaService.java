@@ -26,11 +26,13 @@ public class FileMetaService {
   /**
    * Uploads stream payload to MinIO and persists file metadata to the database.
    *
+   * <p>Intentionally not annotated with {@code @Transactional} to avoid holding a database
+   * connection during MinIO network uploads.
+   *
    * @param payload the file content stream
    * @param fileMeta the file metadata entity
    * @return the persisted File entity
    */
-  @Transactional
   public FileMeta save(InputStream payload, FileMeta fileMeta) {
     Objects.requireNonNull(payload, "Payload cannot be null");
     Objects.requireNonNull(fileMeta, "File metadata cannot be null");

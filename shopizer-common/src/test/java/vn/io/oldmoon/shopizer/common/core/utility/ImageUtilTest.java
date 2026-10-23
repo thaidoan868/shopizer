@@ -49,15 +49,15 @@ class ImageUtilTest {
     }
 
     @Test
-    @DisplayName("should throw InvalidInputException when file exceeds 5MB")
-    void validateBasic_WhenFileExceeds5Mb_ShouldThrowException() {
-      byte[] largeContent = new byte[5 * 1024 * 1024 + 1];
+    @DisplayName("should throw InvalidInputException when file exceeds 20MB")
+    void validateBasic_WhenFileExceeds20Mb_ShouldThrowException() {
+      byte[] largeContent = new byte[20 * 1024 * 1024 + 1];
       MockMultipartFile largeFile =
           new MockMultipartFile("file", "large.png", "image/png", largeContent);
 
       assertThatThrownBy(() -> ImageUtil.validateBasic(largeFile))
           .isInstanceOf(InvalidInputException.class)
-          .hasMessageContaining("Image exceeds maximum size of 5MB");
+          .hasMessageContaining("Image exceeds maximum size of 20MB");
     }
 
     @Test
@@ -135,6 +135,105 @@ class ImageUtilTest {
         assertThat(resizedImage.getWidth()).isEqualTo(50);
         assertThat(resizedImage.getHeight()).isEqualTo(50);
       }
+    }
+  }
+
+  @Nested
+  @DisplayName("resizeToMaxEdge(InputStream in, int maxEdge)")
+  class ResizeToMaxEdgeTest {
+
+    @Test
+    @DisplayName("should not upscale and preserve dimensions when both width and height are less than 800px")
+    void resizeToMaxEdge_WhenBothWidthAndHeightLessThan800_ShouldNotUpscaleAndPreserveDimensions()
+        throws Exception {
+      // 400x300 image (both width and height < 800px)
+      byte[] inputBytes = createValidImageBytes(400, 300, "png");
+      InputStream in = new ByteArrayInputStream(inputBytes);
+
+      try (InputStream resultStream = ImageUtil.resizeToMaxEdge(in, 800)) {
+        assertThat(resultStream).isNotNull();
+        byte[] outputBytes = resultStream.readAllBytes();
+        assertThat(outputBytes).isNotEmpty();
+
+        BufferedImage resultImage = ImageIO.read(new ByteArrayInputStream(outputBytes));
+        assertThat(resultImage).isNotNull();
+        assertThat(resultImage.getWidth()).isEqualTo(400);
+        assertThat(resultImage.getHeight()).isEqualTo(300);
+      }
+    }
+
+    @Test
+    @DisplayName("should preserve square dimensions when less than 800px")
+    void resizeToMaxEdge_WhenSquareLessThan800_ShouldPreserveDimensions() throws Exception {
+      byte[] inputBytes = createValidImageBytes(500, 500, "png");
+      InputStream in = new ByteArrayInputStream(inputBytes);
+
+      try (InputStream resultStream = ImageUtil.resizeToMaxEdge(in, 800)) {
+        assertThat(resultStream).isNotNull();
+        byte[] outputBytes = resultStream.readAllBytes();
+        BufferedImage resultImage = ImageIO.read(new ByteArrayInputStream(outputBytes));
+        assertThat(resultImage).isNotNull();
+        assertThat(resultImage.getWidth()).isEqualTo(500);
+        assertThat(resultImage.getHeight()).isEqualTo(500);
+      }
+    }
+
+    @Test
+    @DisplayName("should scale down width to 800px preserving aspect ratio when width > 800")
+    void resizeToMaxEdge_WhenWidthGreaterThan800_ShouldScaleDownTo800PreservingAspectRatio()
+        throws Exception {
+      // 1600x1200 image -> scaled to 800x600
+      byte[] inputBytes = createValidImageBytes(1600, 1200, "png");
+      InputStream in = new ByteArrayInputStream(inputBytes);
+
+      try (InputStream resultStream = ImageUtil.resizeToMaxEdge(in, 800)) {
+        assertThat(resultStream).isNotNull();
+        byte[] outputBytes = resultStream.readAllBytes();
+        BufferedImage resultImage = ImageIO.read(new ByteArrayInputStream(outputBytes));
+        assertThat(resultImage).isNotNull();
+        assertThat(resultImage.getWidth()).isEqualTo(800);
+        assertThat(resultImage.getHeight()).isEqualTo(600);
+      }
+    }
+
+    @Test
+    @DisplayName("should scale down height to 800px preserving aspect ratio when height > 800")
+    void resizeToMaxEdge_WhenHeightGreaterThan800_ShouldScaleDownTo800PreservingAspectRatio()
+        throws Exception {
+      // 600x1200 image -> scaled to 400x800
+      byte[] inputBytes = createValidImageBytes(600, 1200, "png");
+      InputStream in = new ByteArrayInputStream(inputBytes);
+
+      try (InputStream resultStream = ImageUtil.resizeToMaxEdge(in, 800)) {
+        assertThat(resultStream).isNotNull();
+        byte[] outputBytes = resultStream.readAllBytes();
+        BufferedImage resultImage = ImageIO.read(new ByteArrayInputStream(outputBytes));
+        assertThat(resultImage).isNotNull();
+        assertThat(resultImage.getWidth()).isEqualTo(400);
+        assertThat(resultImage.getHeight()).isEqualTo(800);
+      }
+    }
+
+    @Test
+    @DisplayName("should throw IllegalArgumentException when InputStream is null")
+    void resizeToMaxEdge_WhenInputStreamIsNull_ShouldThrowException() {
+      assertThatThrownBy(() -> ImageUtil.resizeToMaxEdge(null, 800))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage("InputStream must not be null");
+    }
+
+    @Test
+    @DisplayName("should throw IllegalArgumentException when maxEdge is zero or negative")
+    void resizeToMaxEdge_WhenMaxEdgeIsInvalid_ShouldThrowException() throws Exception {
+      byte[] inputBytes = createValidImageBytes(200, 200, "png");
+
+      assertThatThrownBy(() -> ImageUtil.resizeToMaxEdge(new ByteArrayInputStream(inputBytes), 0))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage("maxEdge must be greater than 0");
+
+      assertThatThrownBy(() -> ImageUtil.resizeToMaxEdge(new ByteArrayInputStream(inputBytes), -10))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage("maxEdge must be greater than 0");
     }
   }
 }

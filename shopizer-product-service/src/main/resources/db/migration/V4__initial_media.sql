@@ -15,6 +15,36 @@ CREATE TABLE files (
 CREATE INDEX idx_files_bucket_object_name ON files (bucket, object_name);
 
 
+CREATE TABLE image_assets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    original_id UUID NOT NULL REFERENCES files(id) ON DELETE CASCADE,
+    thumbnail_id UUID NOT NULL REFERENCES files(id) ON DELETE CASCADE,
+    medium_id UUID NOT NULL REFERENCES files(id) ON DELETE CASCADE,
+    large_id UUID NOT NULL REFERENCES files(id) ON DELETE CASCADE,
+    created TIMESTAMPTZ DEFAULT NOW(),
+    created_by UUID,
+    modified TIMESTAMPTZ DEFAULT NOW(),
+    modified_by UUID
+);
+CREATE INDEX idx_image_assets_original ON image_assets(original_id);
+CREATE INDEX idx_image_assets_thumbnail ON image_assets(thumbnail_id);
+CREATE INDEX idx_image_assets_medium ON image_assets(medium_id);
+CREATE INDEX idx_image_assets_large ON image_assets(large_id);
+
+
+CREATE TABLE video_assets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    original JSONB,
+    p360 JSONB,
+    p720 JSONB,
+    p1080 JSONB,
+    created TIMESTAMPTZ DEFAULT NOW(),
+    created_by UUID,
+    modified TIMESTAMPTZ DEFAULT NOW(),
+    modified_by UUID
+);
+
+
 CREATE TABLE articles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,

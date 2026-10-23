@@ -1,7 +1,5 @@
 package vn.io.oldmoon.shopizer.user.app.dto.user;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,16 +45,16 @@ public class UserPopulator {
   public AvatarDto toAvatarDto(AvatarMeta avatar) {
     Objects.requireNonNull(avatar);
 
-    String encodedBucket = encodeForUrl(avatar.bucket());
+    String encodedBucket = ConverterUtil.encodeForUrl(avatar.bucket());
 
     AvatarDto avatarDto =
         new AvatarDto(
             ConverterUtil.toMediaUrl(
-                mediaEndpoint, encodedBucket, encodeForUrl(avatar.originalObjectName())),
+                mediaEndpoint, encodedBucket, ConverterUtil.encodeForUrl(avatar.originalObjectName())),
             ConverterUtil.toMediaUrl(
-                mediaEndpoint, encodedBucket, encodeForUrl(avatar.mediumObjectName())),
+                mediaEndpoint, encodedBucket, ConverterUtil.encodeForUrl(avatar.mediumObjectName())),
             ConverterUtil.toMediaUrl(
-                mediaEndpoint, encodedBucket, encodeForUrl(avatar.thumbnailObjectName())));
+                mediaEndpoint, encodedBucket, ConverterUtil.encodeForUrl(avatar.thumbnailObjectName())));
 
     log.info(
         "Converted AvatarMeta to AvatarDto for bucket={}, originalObjectName={}",
@@ -64,12 +62,5 @@ public class UserPopulator {
         avatar.originalObjectName());
 
     return avatarDto;
-  }
-
-  private String encodeForUrl(String value) {
-    if (value == null) {
-      return null;
-    }
-    return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
   }
 }

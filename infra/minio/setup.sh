@@ -30,3 +30,6 @@ mc admin accesskey create local --access-key "shopizer-access-key" --secret-key 
 
 mc mb local/avatar-public
 mc anonymous set download local/avatar-public
+
+mc mb local/media-public
+mc anonymous set download local/media-public

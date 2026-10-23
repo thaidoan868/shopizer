@@ -4,7 +4,9 @@ public interface EventPublisher {
   /**
    * Publishes an event to the message broker.
    *
-   * @param event The event data to send.
+   * @param rabbitMqEvent The event wrapper containing the payload and routing key.
    */
-  void publish(Object event, String routingKey);
+  void publish(RabbitMqEvent rabbitMqEvent);
 }
+
+

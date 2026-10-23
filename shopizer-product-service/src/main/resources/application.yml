@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: product-service
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 200MB
   rabbitmq:
     host: localhost
     port: 5672
@@ -74,9 +79,10 @@ logging:
   level:
     root: INFO
     vn.io.oldmoon.shopizer: TRACE
+    org.hibernate.resource.transaction: TRACE
   pattern:
     level: "%5p"
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{correlationId}] - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{correlationId}] [%X{messageId}] - %msg%n"
 
 
 sentry:
@@ -86,3 +92,13 @@ sentry:
   logging:
     minimum-breadcrumb-level: info
     minimum-event-level: error
+
+# Object Storage (MinIO)
+minio:
+  bucket:
+    media-public: "media-public"
+  endpoint: http://localhost:9000
+  access-endpoint: http://localhost:9000
+  access-key: "shopizer-access-key"
+  secret-key: "shopizer-secret-key"
+  secure: false

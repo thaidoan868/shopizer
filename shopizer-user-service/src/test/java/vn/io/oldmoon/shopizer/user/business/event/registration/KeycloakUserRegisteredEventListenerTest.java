@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import vn.io.oldmoon.shopizer.common.core.event.RabbitMqEvent;
 import vn.io.oldmoon.shopizer.user.app.config.RabbitMqConfig;
 import vn.io.oldmoon.shopizer.user.business.event.RabbitMqEventPublisher;
 import vn.io.oldmoon.shopizer.user.business.service.profile.CustomerProfileService;
@@ -51,15 +52,16 @@ class KeycloakUserRegisteredEventListenerTest {
     verify(keycloakUserRegisteredEventParser).toUserEntity(event);
     verify(customerProfileService).create(user);
 
-    // Capture published event & routing key
-    ArgumentCaptor<CustomerCreatedEvent> eventCaptor =
-        ArgumentCaptor.forClass(CustomerCreatedEvent.class);
-    ArgumentCaptor<String> routingKeyCaptor = ArgumentCaptor.forClass(String.class);
+    // Capture published RabbitMqEvent
+    ArgumentCaptor<RabbitMqEvent> eventCaptor = ArgumentCaptor.forClass(RabbitMqEvent.class);
 
-    verify(eventPublisher).publish(eventCaptor.capture(), routingKeyCaptor.capture());
+    verify(eventPublisher).publish(eventCaptor.capture());
 
-    assertThat(eventCaptor.getValue()).isNotNull();
-    assertThat(eventCaptor.getValue().keycloakUserId()).isEqualTo(keycloakUserId.toString());
-    assertThat(routingKeyCaptor.getValue()).isEqualTo(RabbitMqConfig.customerCreatedBindingKey);
+    RabbitMqEvent capturedEvent = eventCaptor.getValue();
+    assertThat(capturedEvent).isNotNull();
+    assertThat(capturedEvent.event()).isInstanceOf(CustomerCreatedEvent.class);
+    CustomerCreatedEvent customerCreatedEvent = (CustomerCreatedEvent) capturedEvent.event();
+    assertThat(customerCreatedEvent.keycloakUserId()).isEqualTo(keycloakUserId.toString());
+    assertThat(capturedEvent.routingKey()).isEqualTo(RabbitMqConfig.customerCreatedBindingKey);
   }
 }

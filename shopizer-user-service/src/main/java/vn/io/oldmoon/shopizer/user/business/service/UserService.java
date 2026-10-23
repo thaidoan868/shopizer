@@ -22,7 +22,6 @@ import vn.io.oldmoon.shopizer.user.infra.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class UserService {
   private final UserRepository userRepository;
@@ -36,6 +35,7 @@ public class UserService {
    *
    * @throws ResourceNotFoundException if user not found
    */
+  @Transactional(readOnly = true)
   public User get(UUID keycloakUserId) {
     User user =
         userRepository
@@ -88,7 +88,6 @@ public class UserService {
     return userRepository.save(user);
   }
 
-  @Transactional
   public User updateAvatar(UUID keycloakUserId, MultipartFile file) {
     Objects.requireNonNull(keycloakUserId);
     Objects.requireNonNull(file);
@@ -101,7 +100,7 @@ public class UserService {
     String thumbnailObjectName = "avatar-thumbnail-" + keycloakUserId + "-" + uniqueId + ".jpg";
 
     String contentType = "image/jpeg";
-    FileMeta originalFileMetaMeta =
+    FileMeta originalFileMeta =
         FileMeta.builder()
             .bucket(avatarBucket)
             .objectName(originalObjectName)
@@ -109,7 +108,7 @@ public class UserService {
             .visibility(Visibility.PUBLIC)
             .build();
 
-    FileMeta mediumFileMetaMeta =
+    FileMeta mediumFileMeta =
         FileMeta.builder()
             .bucket(avatarBucket)
             .objectName(mediumObjectName)
@@ -117,22 +116,24 @@ public class UserService {
             .visibility(Visibility.PUBLIC)
             .build();
 
-    FileMeta thumbnailFileMetaMeta =
+    FileMeta thumbnailFileMeta =
         FileMeta.builder()
             .bucket(avatarBucket)
             .objectName(thumbnailObjectName)
             .contentType(contentType)
             .visibility(Visibility.PUBLIC)
             .build();
-    try {
-      InputStream mediumImagePayload =
-          ImageUtil.resizeImageToStream(file.getInputStream(), 300, 300);
-      InputStream thumbnailImagePayload =
-          ImageUtil.resizeImageToStream(file.getInputStream(), 150, 150);
+    try (InputStream originalPayload = file.getInputStream();
+        InputStream mediumSourceStream = file.getInputStream();
+        InputStream mediumImagePayload =
+            ImageUtil.resizeImageToStream(mediumSourceStream, 300, 300);
+        InputStream thumbnailSourceStream = file.getInputStream();
+        InputStream thumbnailImagePayload =
+            ImageUtil.resizeImageToStream(thumbnailSourceStream, 150, 150)) {
 
-      fileMetaService.save(file.getInputStream(), originalFileMetaMeta);
-      fileMetaService.save(mediumImagePayload, mediumFileMetaMeta);
-      fileMetaService.save(thumbnailImagePayload, thumbnailFileMetaMeta);
+      fileMetaService.save(originalPayload, originalFileMeta);
+      fileMetaService.save(mediumImagePayload, mediumFileMeta);
+      fileMetaService.save(thumbnailImagePayload, thumbnailFileMeta);
 
     } catch (IOException e) {
       log.error("Failed to resize the avatar image for keycloakUserId={}", keycloakUserId, e);
